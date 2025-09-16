@@ -20,6 +20,8 @@ def env_bool(name: str, default: bool = False) -> bool:
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-insecure-key")  # ⚠️ remplace en prod
 DEBUG = env_bool("DJANGO_DEBUG", True)
+USE_HTTPS = env_bool("DJANGO_USE_HTTPS", not DEBUG)
+
 ALLOWED_HOSTS = [h for h in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if h] if not DEBUG else []
 
 # ────────────────────────────────
@@ -178,46 +180,35 @@ SOCIALACCOUNT_PROVIDERS = {
         "AUTH_PARAMS": {"access_type": "online"},
     }
 }
-USE_HTTPS=True
 
 # ────────────────────────────────
 # DATABASE
 # ────────────────────────────────
+import dj_database_url
 
-# Support DATABASE_URL if provided (Heroku/Render). Falls back to
-# SQLite in DEBUG or manual PG* env vars in production.
 DATABASES = {}
-DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
-if DATABASE_URL:
-    try:
-        import dj_database_url  # type: ignore
-        DATABASES["default"] = dj_database_url.parse(DATABASE_URL, conn_max_age=600)
-        # Enforce SSL when HTTPS is enabled
-        if USE_HTTPS:
-            DATABASES["default"].setdefault("OPTIONS", {}).update({"sslmode": "require"})
-    except Exception as e:
-        print("[settings] Failed to parse DATABASE_URL:", e, file=sys.stderr)
-        # soft-fallback below
+DB_URL = os.getenv("DATABASE_URL") or os.getenv("POSTGRESQL_ADDON_URI")
 
-if not DATABASES.get("default"):
-    if DEBUG:
-        DATABASES = {
-            "default": {
-                "ENGINE": "django.db.backends.sqlite3",
-                "NAME": BASE_DIR / "db.sqlite3",
-            }
-        }
-    else:
-        DATABASES = {
-            "default": {
-                "ENGINE": "django.db.backends.postgresql",
-                "NAME": os.getenv("PGDATABASE"),
-                "USER": os.getenv("PGUSER"),
-                "PASSWORD": os.getenv("PGPASSWORD"),
-                "HOST": os.getenv("PGHOST", "localhost"),
-                "PORT": os.getenv("PGPORT", "5432"),
-            }
-        }
+if DB_URL:
+    DATABASES["default"] = dj_database_url.parse(DB_URL, conn_max_age=600)
+    if USE_HTTPS:
+        DATABASES["default"].setdefault("OPTIONS", {}).update({"sslmode": "require"})
+elif DEBUG:
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+else:
+    # Fallback sur les variables unitaires Clever Cloud
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRESQL_ADDON_DB"),
+        "USER": os.getenv("POSTGRESQL_ADDON_USER"),
+        "PASSWORD": os.getenv("POSTGRESQL_ADDON_PASSWORD"),
+        "HOST": os.getenv("POSTGRESQL_ADDON_HOST", "localhost"),
+        "PORT": os.getenv("POSTGRESQL_ADDON_PORT", "5432"),
+        "OPTIONS": {"sslmode": "require"} if USE_HTTPS else {},
+    }
 
 # ────────────────────────────────
 # SECURITY (prod)

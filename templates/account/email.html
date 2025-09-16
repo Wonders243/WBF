@@ -1,0 +1,127 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+{% load widget_tweaks %}
+
+
+{% block title %}{% trans "Gestion des emails —  BAMU WELLBEING Foundation" %}{% endblock %}
+{% block auth_width %}max-w-3xl{% endblock %}
+
+{% block auth_heading %}
+  <h1 id="page-title" class="text-3xl sm:text-4xl font-extrabold tracking-tight text-blue-700 dark:text-blue-300 text-center">
+    {% trans "Mes adresses email" %}
+  </h1>
+  <p class="mt-2 text-sm text-slate-600 dark:text-slate-300/80 text-center">
+    {% trans "Ajouter, vérifier, choisir l’adresse principale." %}
+  </p>
+{% endblock %}
+
+{% block account_content %}
+
+  {# —————————— Ajouter une adresse —————————— #}
+  <section class="rounded-2xl border border-slate-200/70 dark:border-white/10 bg-white/80 dark:bg-white/10 p-6 shadow">
+    <form method="post" action="{% url 'account_email' %}" class="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3">
+      {% csrf_token %}
+      <div>
+        <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">
+          {% trans "Nouvelle adresse email" %}
+        </label>
+        {{ form.email|add_class:"w-full rounded-lg border border-slate-300 bg-white/80 px-3 py-2.5 shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 dark:bg-white/10 dark:border-white/10 dark:focus:ring-blue-500/20"|attr:"placeholder:exemple@domaine.fr" }}
+        {% if form.email.errors %}
+          <p class="mt-1 text-sm text-red-600">{{ form.email.errors|striptags }}</p>
+        {% endif %}
+      </div>
+
+      <div class="sm:self-end">
+        <button type="submit" name="action_add" value="1"
+                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 font-semibold text-white shadow hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2h6Z"/></svg>
+          <span>{% trans "Ajouter" %}</span>
+        </button>
+      </div>
+    </form>
+  </section>
+
+  {# —————————— Liste & actions —————————— #}
+  <section class="mt-6 rounded-2xl border border-slate-200/70 dark:border-white/10 bg-white/80 dark:bg-white/10 p-6 shadow">
+    {% if emailaddresses %}
+      <form method="post" action="{% url 'account_email' %}" id="emails-form">
+        {% csrf_token %}
+
+        <ul role="list" class="space-y-3">
+          {% for emailaddress in emailaddresses %}
+            <li>
+              <input class="sr-only peer" type="radio" name="email" value="{{ emailaddress.email }}"
+                     id="email-{{ forloop.counter }}" {% if emailaddress.primary %}checked{% endif %}>
+
+              <label for="email-{{ forloop.counter }}"
+                     class="block rounded-xl border border-slate-200 dark:border-white/10 bg-white/70 dark:bg-white/5 px-4 py-3 shadow-sm cursor-pointer
+                            peer-checked:border-blue-500 peer-checked:ring-2 peer-checked:ring-blue-500/30 transition">
+                <div class="flex items-center justify-between gap-3">
+                  <div class="flex items-center gap-3">
+                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-blue-600/10 text-blue-700 dark:text-blue-300">
+                      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M20 8v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8l8 5 8-5Z"/><path d="M18 6H6a2 2 0 0 0-2 2l8 5 8-5a2 2 0 0 0-2-2Z"/>
+                      </svg>
+                    </span>
+                    <div>
+                      <div class="font-medium text-slate-900 dark:text-slate-100">{{ emailaddress.email }}</div>
+                      <div class="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs">
+                        {% if emailaddress.primary %}
+                          <span class="inline-flex items-center rounded-md bg-blue-600/10 px-2 py-1 font-medium text-blue-700 dark:text-blue-300">
+                            {% trans "principale" %}
+                          </span>
+                        {% endif %}
+                        {% if emailaddress.verified %}
+                          <span class="inline-flex items-center rounded-md bg-green-600/10 px-2 py-1 font-medium text-green-700 dark:text-green-300">
+                            {% trans "confirmée" %}
+                          </span>
+                        {% else %}
+                          <span class="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-1 font-medium text-amber-700 dark:text-amber-300">
+                            {% trans "non confirmée" %}
+                          </span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+
+                  <span class="hidden sm:inline text-xs text-slate-500 dark:text-slate-400">
+                    {% trans "Sélectionnez une adresse puis choisissez une action ci-dessous." %}
+                  </span>
+                </div>
+              </label>
+            </li>
+          {% endfor %}
+        </ul>
+
+        <div class="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <button type="submit" name="action_primary" value="1"
+                  class="inline-flex justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60 dark:bg-white/10 dark:text-slate-100 dark:border-white/10">
+            {% trans "Définir comme principale" %}
+          </button>
+          <button type="submit" name="action_send" value="1"
+                  class="inline-flex justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60 dark:bg-white/10 dark:text-slate-100 dark:border-white/10">
+            {% trans "Renvoyer la vérification" %}
+          </button>
+          <button type="submit" name="action_remove" value="1"
+                  class="inline-flex justify-center rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600/60">
+            {% trans "Supprimer" %}
+          </button>
+        </div>
+
+        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+          {% trans "Astuce : vous devez avoir au moins une adresse confirmée et en définir une comme principale." %}
+        </p>
+      </form>
+    {% else %}
+      <p class="text-sm text-slate-600 dark:text-slate-300/90">
+        {% trans "Aucune adresse enregistrée pour le moment." %}
+      </p>
+    {% endif %}
+  </section>
+
+  <div class="mt-6 text-center">
+    <a href="{% url 'core:accueil' %}" class="text-sm font-medium text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200">
+      ← {% trans "Retour à l’accueil public" %}
+    </a>
+  </div>
+{% endblock %}

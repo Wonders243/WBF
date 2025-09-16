@@ -1,0 +1,207 @@
+{% extends "staff/base_staff.html" %}
+{% block staff_title %}Staff — Bénévole : {{ volunteer.display_name }}{% endblock %}
+
+{% block staff_content %}
+<section class="space-y-6">
+
+  <!-- Header -->
+  <header class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-extrabold text-blue-700 dark:text-blue-300">
+        {{ volunteer.display_name }}
+      </h1>
+      <p class="text-slate-600 dark:text-slate-300">
+        {{ volunteer.email|default:volunteer.user.email|default:"—" }}
+        · {{ volunteer.phone|default:"—" }}
+      </p>
+
+      {# Badge statut équipe #}
+      <div class="mt-2">
+        {% if volunteer.user.team_member_id %}
+          <span class="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 px-3 py-1 text-xs font-semibold">
+            Déjà dans l’équipe
+          </span>
+        {% elif pending_invite %}
+          <span class="inline-flex items-center rounded-full bg-amber-100 text-amber-800 px-3 py-1 text-xs font-semibold">
+            Invitation envoyée — expire le {{ pending_invite.expires_at|date:"d/m/Y H:i" }}
+          </span>
+        {% else %}
+          <span class="inline-flex items-center rounded-full bg-slate-100 text-slate-700 px-3 py-1 text-xs font-semibold">
+            Non membre d’équipe
+          </span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-3">
+      <div class="bg-slate-50 dark:bg-slate-800/60 rounded-lg p-3 text-center ring-1 ring-slate-200 dark:ring-white/10">
+        <div class="text-xs text-slate-500 dark:text-slate-400">Heures</div>
+        <div class="text-xl font-bold text-slate-900 dark:text-slate-100">{{ stats.hours|default:0 }}</div>
+      </div>
+      <div class="bg-slate-50 dark:bg-slate-800/60 rounded-lg p-3 text-center ring-1 ring-slate-200 dark:ring-white/10">
+        <div class="text-xs text-slate-500 dark:text-slate-400">Missions</div>
+        <div class="text-xl font-bold text-slate-900 dark:text-slate-100">{{ stats.missions|default:0 }}</div>
+      </div>
+      <div class="bg-slate-50 dark:bg-slate-800/60 rounded-lg p-3 text-center ring-1 ring-slate-200 dark:ring-white/10">
+        <div class="text-xs text-slate-500 dark:text-slate-400">Événements</div>
+        <div class="text-xl font-bold text-slate-900 dark:text-slate-100">{{ stats.events|default:0 }}</div>
+      </div>
+    </div>
+
+    {# Actions header : Inviter / Renvoyer #}
+    <div class="flex flex-wrap items-center gap-2">
+      {% if volunteer.user.team_member_id %}
+        <a href="{% url 'staff:team_list' %}" class="px-3 py-2 rounded-lg ring-1 ring-slate-200 hover:bg-slate-50 dark:ring-white/10 dark:hover:bg-white/5">
+          Voir l’équipe
+        </a>
+
+      {% elif pending_invite %}
+        <form method="post"
+              action="{% url 'staff:volunteer_team_invite' volunteer_id=volunteer.id %}"
+              class="inline js-auth-managed"
+              data-auth-message="Clé requise pour renvoyer l’invitation."
+              data-superuser="{{ user.is_superuser|yesno:'true,false' }}">
+          {% csrf_token %}
+          <button class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+            Renvoyer l’invitation
+          </button>
+        </form>
+        <form method="post"
+              action="{% url 'staff:team_invite_revoke' invite_id=pending_invite.id %}"
+              class="inline js-auth-managed"
+              data-auth-message="Clé requise pour annuler l’invitation."
+              data-superuser="{{ user.is_superuser|yesno:'true,false' }}">
+          {% csrf_token %}
+          <button class="px-3 py-2 rounded-lg bg-rose-600 text-white hover:bg-rose-700">
+            Annuler l’invitation
+          </button>
+        </form>
+        
+
+      {% else %}
+        {% if can_invite %}
+          <form method="post"
+                action="{% url 'staff:volunteer_team_invite' volunteer_id=volunteer.id %}"
+                class="inline js-auth-managed"
+                data-auth-message="Clé requise pour inviter ce bénévole."
+                data-superuser="{{ user.is_superuser|yesno:'true,false' }}">
+            {% csrf_token %}
+            <button class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+              Inviter au staff
+            </button>
+          </form>
+        {% else %}
+          <button class="px-3 py-2 rounded-lg bg-slate-200 text-slate-600 cursor-not-allowed" title="Ajoute un e-mail au profil pour envoyer l’invitation.">
+            Inviter au staff
+          </button>
+        {% endif %}
+      {% endif %}
+    </div>
+  </header>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Inscriptions -->
+    <section class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+      <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-3">Inscriptions</h2>
+      <ul class="divide-y divide-slate-200 dark:divide-white/10">
+        {% for s in signups %}
+          <li class="py-3 flex items-center justify-between">
+            <div>
+              <p class="font-medium text-slate-900 dark:text-slate-100">{{ s.mission_title }}</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">{{ s.status|title }} · {{ s.created_at }}</p>
+            </div>
+            <div class="flex gap-2">
+              {% if s.status == 'pending' %}
+                <form method="post" action="{% url 'staff:mission_accept' s.id %}">{% csrf_token %}
+                  <button class="px-2 py-1 rounded bg-emerald-600 text-white text-xs hover:bg-emerald-700">Accepter</button>
+                </form>
+                <form method="post" action="{% url 'staff:mission_decline' s.id %}">{% csrf_token %}
+                  <button class="px-2 py-1 rounded bg-rose-600 text-white text-xs hover:bg-rose-700">Refuser</button>
+                </form>
+              {% elif s.status == 'invited' %}
+                <form method="post" action="{% url 'staff:mission_cancel_invite' s.id %}">{% csrf_token %}
+                  <button class="px-2 py-1 rounded bg-amber-600 text-white text-xs hover:bg-amber-700">Annuler l’invitation</button>
+                </form>
+              {% else %}
+                <span class="text-xs text-slate-500 dark:text-slate-400">—</span>
+              {% endif %}
+            </div>
+          </li>
+        {% empty %}
+          <li class="py-6 text-center text-slate-500 dark:text-slate-400">Aucune inscription.</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <!-- Sidebar -->
+    <aside class="space-y-6">
+      <section class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+        <h3 class="font-semibold text-slate-900 dark:text-slate-100 mb-2">Compétences</h3>
+        {% if skills %}
+          <ul class="text-sm space-y-1">
+            {% for vs in skills %}
+              <li class="text-slate-800 dark:text-slate-200">{{ vs.skill.name }} — <span class="text-slate-500 dark:text-slate-400">{{ vs.get_level_display }}</span></li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-sm text-slate-500 dark:text-slate-400">Aucune.</p>
+        {% endif %}
+      </section>
+
+      <section class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+        <h3 class="font-semibold text-slate-900 dark:text-slate-100 mb-2">Disponibilités</h3>
+        {% if availability %}
+          <ul class="text-sm space-y-1">
+            {% for a in availability %}
+              <li class="text-slate-800 dark:text-slate-200">{{ a.get_day_display }} — {{ a.get_slot_display }}</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-sm text-slate-500 dark:text-slate-400">Non renseigné.</p>
+        {% endif %}
+      </section>
+    </aside>
+  </div>
+
+  <!-- Heures & pièces -->
+  <section class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+    <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-3">Heures & pièces</h2>
+    <ul class="divide-y divide-slate-200 dark:divide-white/10">
+      {% for h in hours %}
+        <li class="py-3">
+          <div class="font-medium text-slate-900 dark:text-slate-100">
+            {{ h.date|date:"d/m/Y" }} • {{ h.hours }} h
+          </div>
+          <div class="text-sm text-slate-600 dark:text-slate-300">{{ h.note }}</div>
+          {% if h.mission_title %}
+            <div class="text-sm text-slate-700 dark:text-slate-200">
+              Mission : <span class="font-medium">{{ h.mission_title }}</span>
+            </div>
+          {% endif %}
+          {% if h.event_title %}
+            <div class="text-sm text-slate-700 dark:text-slate-200">
+              Événement : <span class="font-medium">{{ h.event_title }}</span>
+            </div>
+          {% endif %}
+          {% if h.proofs %}
+            <div class="mt-2 text-sm">
+              <div class="text-slate-800 dark:text-slate-200 font-semibold">Pièces :</div>
+              <ul class="mt-1 space-y-1">
+                {% for p in h.proofs %}
+                  <li>
+                    <a href="{{ p.url }}" target="_blank" class="text-blue-600 dark:text-blue-300 underline">{{ p.name }}</a>
+                    <span class="text-slate-500 dark:text-slate-400">({{ p.size }} o)</span>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        </li>
+      {% empty %}
+        <li class="py-6 text-center text-slate-500 dark:text-slate-400">Aucune déclaration.</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+</section>
+{% endblock %}

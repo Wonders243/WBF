@@ -1,0 +1,543 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Mon profil bénévole - BAMU WELLBEING Foundation{% endblock %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto text-slate-800 dark:text-slate-100">
+  <header class="mb-6">
+    <div class="flex items-center justify-between gap-3 flex-wrap">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-extrabold text-blue-700 dark:text-blue-300">Mon profil bénévole</h1>
+        <p class="text-gray-600 dark:text-slate-300">Mettez à jour vos informations, disponibilités, compétences et documents.</p>
+      </div>
+      <nav class="mt-2 md:mt-0">
+        <ul class="flex flex-wrap gap-2 text-sm">
+          <li><a href="#profile" class="px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800">Profil</a></li>
+          <li><a href="#availability" class="px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800">Disponibilités</a></li>
+          <li><a href="#skills" class="px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800">Compétences</a></li>
+          <li><a href="#documents" class="px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800">Documents</a></li>
+          <li><a href="#security" class="px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800">Securite</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Profil: résumé + formulaire -->
+  <div id="profile" class="grid md:grid-cols-3 gap-6 mb-8">
+    <!-- Résumé -->
+    <aside class="md:col-span-1 bg-white dark:bg-slate-900 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 p-6">
+      <div class="flex items-center gap-4">
+        <img id="avatarPreview" src="{% if volunteer.avatar %}{{ volunteer.avatar.url }}{% else %}{% static 'img/avatar-placeholder.png' %}{% endif %}"
+             alt="Avatar" class="w-20 h-20 rounded-full object-cover ring-2 ring-blue-100 dark:ring-blue-900/50">
+        <div>
+          <p class="font-semibold">{{ volunteer.name|default:user.get_full_name|default:user.username }}</p>
+          <p class="text-sm text-gray-600 dark:text-slate-300">{{ request.user.email|default:volunteer.email }}</p>
+        {% if volunteer.city %}
+        <span class="inline-flex items-center gap-2 mt-1 text-xs px-2 py-1 rounded-full
+                    bg-white/60 text-slate-700 border border-slate-200
+                    dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700">
+          📍 {{ volunteer.city.name }}{% if volunteer.city.province %} · {{ volunteer.city.province }}{% endif %}
+        </span>
+      {% endif %}
+    </div>
+        
+
+      </div>
+      <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
+        <div class="p-3 rounded-lg bg-blue-50 text-blue-800 border border-blue-100 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900/40">
+          <dt class="font-medium">Disponibilités</dt>
+          <dd class="text-xl font-bold">{{ availabilities|length }}</dd>
+        </div>
+        <div class="p-3 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/40">
+          <dt class="font-medium">Compétences</dt>
+          <dd class="text-xl font-bold">{{ skills|length }}</dd>
+        </div>
+      </dl>
+    </aside>
+
+    {% if phone_verif %}
+<div class="mt-4 bg-white dark:bg-slate-900 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 p-4">
+  <h3 class="font-semibold">Vérification du téléphone</h3>
+  <p class="text-sm text-gray-600 dark:text-slate-400">
+    Un code a été envoyé par SMS au <strong>{{ phone_verif.phone }}</strong>. Il expire le {{ phone_verif.expires_at|date:"d/m/Y H:i" }}.
+  </p>
+  <form method="post" class="mt-3 flex items-end gap-2">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="phone_verify">
+    <input type="hidden" name="pv_id" value="{{ phone_verif.id }}">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 dark:text-slate-200">Code SMS</label>
+      <input name="code" inputmode="numeric" pattern="[0-9]*" maxlength="6"
+             class="w-32 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2"
+             placeholder="123456" required>
+    </div>
+    <button class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700">Valider</button>
+    <button name="action" value="phone_resend" formmethod="post"
+            class="px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700">
+      Renvoyer le code
+    </button>
+  </form>
+</div>
+{% endif %}
+
+
+    <!-- Formulaire profil -->
+    <form id="profileForm" method="post" enctype="multipart/form-data"
+      class="md:col-span-2 bg-white dark:bg-slate-900 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 p-6 space-y-6"
+      novalidate>
+  {% csrf_token %}
+  <input type="hidden" name="action" value="profile">
+  {# Honeypot anti-bot #}
+  <div aria-hidden="true" class="hidden">
+    <label>Ne pas remplir</label>
+    <input type="text" name="hp_profile" tabindex="-1" autocomplete="off">
+  </div>
+
+  <h2 class="text-lg font-semibold -mt-1">Informations personnelles</h2>
+
+  {% if form.non_field_errors %}
+    <div class="p-3 rounded-lg bg-red-50 text-red-800 border border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900/40">
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 dark:text-slate-200">Nom</label>
+      {{ form.name }}
+      <p class="text-xs text-gray-500 dark:text-slate-400">Le nom du compte ne peut pas être modifié.</p>
+      {% if form.name.errors %}<p class="text-sm text-red-600 dark:text-red-300 mt-1">{{ form.name.errors.0 }}</p>{% endif %}
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 dark:text-slate-200">Email</label>
+      {{ form.email }}
+      {% if form.email.errors %}<p class="text-sm text-red-600 dark:text-red-300 mt-1">{{ form.email.errors.0 }}</p>{% endif %}
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 dark:text-slate-200">Téléphone</label>
+      {{ form.phone }}
+      <p class="text-xs text-gray-500 dark:text-slate-400">Utilisez le format international (ex. +337..., +243...).</p>
+      {% if form.phone.errors %}<p class="text-sm text-red-600 dark:text-red-300 mt-1">{{ form.phone.errors.0 }}</p>{% endif %}
+    </div>
+    
+<div>
+  <label class="block text-sm font-medium text-gray-700 dark:text-slate-200">Ville (RDC)</label>
+  {{ form.city }}
+  <p class="text-xs text-gray-500 dark:text-slate-400">Sélectionnez votre ville pour recevoir des invitations locales.</p>
+  {% if form.city.errors %}<p class="text-sm text-red-600 dark:text-red-300 mt-1">{{ form.city.errors.0 }}</p>{% endif %}
+</div>
+
+
+
+    <div class="sm:col-span-2">
+      <label class="block text-sm font-medium text-gray-700 dark:text-slate-200">Motivation</label>
+      {{ form.motivation }}
+      {% if form.motivation.errors %}<p class="text-sm text-red-600 dark:text-red-300 mt-1">{{ form.motivation.errors.0 }}</p>{% endif %}
+      <p id="motivationCounter" class="mt-1 text-xs text-gray-500 dark:text-slate-400"></p>
+    </div>
+
+    <div class="sm:col-span-2">
+      <label class="block text-sm font-medium text-gray-700 dark:text-slate-200">Photo de profil</label>
+      {% if volunteer.avatar %}
+        <label class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-slate-300 mb-2">
+          {{ form.remove_avatar }} {{ form.remove_avatar.label }}
+        </label>
+      {% endif %}
+      {{ form.avatar }}
+      {% if form.avatar.errors %}<p class="text-sm text-red-600 dark:text-red-300 mt-1">{{ form.avatar.errors.0 }}</p>{% endif %}
+      <p class="mt-1 text-xs text-gray-500 dark:text-slate-400">Formats: JPG, PNG, WEBP. Max 5 Mo.</p>
+    </div>
+
+    <div class="sm:col-span-2">
+      <label class="block text-sm font-medium text-gray-700 dark:text-slate-200">Mot de passe (ré-authentification)</label>
+      {{ form.confirm_password }}
+      {% if form.confirm_password.errors %}<p class="text-sm text-red-600 dark:text-red-300 mt-1">{{ form.confirm_password.errors.0 }}</p>{% endif %}
+      <p class="mt-1 text-xs text-gray-500 dark:text-slate-400">Par sécurité, vous devez confirmer votre mot de passe pour enregistrer.</p>
+    </div>
+  </div>
+
+  <div class="flex items-center justify-between">
+    <a href="{% url 'benevoles:profile_benevole' %}" class="text-gray-600 dark:text-slate-300 hover:underline">Annuler</a>
+
+    <button id="saveProfileBtn"
+            type="submit" name="action" value="profile"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 text-white font-medium
+                   hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+                   dark:focus:ring-offset-slate-900 disabled:opacity-60 disabled:cursor-not-allowed"
+            aria-busy="false" aria-disabled="true" disabled>
+      <svg class="hidden animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" fill="currentColor"></path>
+      </svg>
+      <span>Enregistrer le profil</span>
+    </button>
+  </div>
+</form>
+
+  </div>
+
+
+  <!-- Disponibilités -->
+  <section id="availability" class="bg-white dark:bg-slate-900 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 p-6 space-y-4 mb-8">
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-semibold">Disponibilités</h2>
+    </div>
+
+    {% if availabilities %}
+      <ul class="grid sm:grid-cols-2 gap-2">
+        {% for a in availabilities %}
+          <li class="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 bg-white/70 dark:bg-slate-950/30">
+            <span class="font-medium">{{ a.get_day_display }}</span>
+            <span class="text-gray-600 dark:text-slate-300">{{ a.get_slot_display }}</span>
+            <form method="post" class="ml-3" onsubmit="return confirm('Supprimer cette disponibilité ?');">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="delete_availability">
+              <input type="hidden" name="id" value="{{ a.pk }}">
+              <button class="text-red-600 hover:underline text-sm">Supprimer</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-gray-500 dark:text-slate-400 text-sm">Aucune disponibilité renseignée.</p>
+    {% endif %}
+
+    <hr class="my-2 border-slate-200 dark:border-slate-800">
+    <h3 class="font-medium">Ajouter une disponibilité</h3>
+    <form method="post" class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="add_availability">
+      <div>
+        <label class="block text-sm text-gray-700 dark:text-slate-300">Jour</label>
+        {{ av_form.day }}
+        {% if av_form.errors.day %}<p class="text-xs text-red-600 dark:text-red-300">{{ av_form.errors.day.0 }}</p>{% endif %}
+      </div>
+      <div>
+        <label class="block text-sm text-gray-700 dark:text-slate-300">Créneau</label>
+        {{ av_form.slot }}
+        {% if av_form.errors.slot %}<p class="text-xs text-red-600 dark:text-red-300">{{ av_form.errors.slot.0 }}</p>{% endif %}
+      </div>
+      <div class="text-right">
+        <button class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-slate-900">Ajouter</button>
+      </div>
+      {% if av_form.non_field_errors %}
+        <div class="sm:col-span-3 p-3 rounded-lg bg-red-50 text-red-800 border border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900/40">{{ av_form.non_field_errors }}</div>
+      {% endif %}
+    </form>
+    
+    </section>
+
+  <!-- Compétences -->
+  <section id="skills" class="bg-white dark:bg-slate-900 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 p-6 space-y-4 mb-8">
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-semibold">Compétences</h2>
+    </div>
+
+    {% if skills %}
+      <div class="pt-2">
+        <ul class="space-y-2">
+          {% for s in skills %}
+            <li class="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-800 px-3 py-2">
+              <div class="min-w-0">
+                <span class="font-medium">{{ s.skill.name }}</span>
+                {% if s.level %} <span class="text-xs text-slate-500 ml-2">— {{ s.get_level_display }}</span>{% endif %}
+              </div>
+              <form method="post" onsubmit="return confirm('Supprimer cette compétence ?');">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete_skill">
+                <input type="hidden" name="id" value="{{ s.pk }}">
+                <button class="text-red-600 hover:underline text-sm">Supprimer</button>
+              </form>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+  {% else %}
+      <p class="text-gray-500 dark:text-slate-400 text-sm">Ajoutez vos compétences pour de meilleures affectations.</p>
+    {% endif %}
+
+    <hr class="my-2 border-slate-200 dark:border-slate-800">
+    <h3 class="font-medium">Ajouter une compétence</h3>
+    <form method="post" class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="add_skill">
+
+      <div class="sm:col-span-1">
+        <label class="block text-sm text-gray-700 dark:text-slate-300">Compétence existante</label>
+        {{ skill_form.skill }}
+        {% if skill_form.errors.skill %}<p class="text-xs text-red-600 dark:text-red-300">{{ skill_form.errors.skill.0 }}</p>{% endif %}
+      </div>
+      <div class="sm:col-span-1">
+        <label class="block text-sm text-gray-700 dark:text-slate-300">Nouvelle compétence</label>
+        {{ skill_form.new_skill_name }}
+      </div>
+      <div class="sm:col-span-1">
+        <label class="block text-sm text-gray-700 dark:text-slate-300">Niveau</label>
+        {{ skill_form.level }}
+        {% if skill_form.errors.level %}<p class="text-xs text-red-600 dark:text-red-300">{{ skill_form.errors.level.0 }}</p>{% endif %}
+      </div>
+
+      <div class="sm:col-span-3">
+        <label class="block text-sm text-gray-700 dark:text-slate-300">Preuve (facultatif)</label>
+        {{ skill_form.proof }}
+      </div>
+
+      {% if skill_form.non_field_errors %}
+        <div class="sm:col-span-3 p-3 rounded-lg bg-red-50 text-red-800 border border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900/40">
+          {{ skill_form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      <div class="sm:col-span-3 text-right">
+        <button class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-slate-900">
+          Ajouter
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Documents -->
+  <section id="documents" class="bg-white dark:bg-slate-900 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 p-6 space-y-4">
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-semibold">Documents</h2>
+      <a href="{% url 'benevoles:UserDocuments_list' %}" class="text-blue-600 dark:text-blue-300 hover:underline">Gérer tout</a>
+    </div>
+
+    <form method="post" action="{% url 'benevoles:UserDocuments_upload' %}" enctype="multipart/form-data" class="space-y-3">
+      {% csrf_token %}
+      <input type="file" name="files" multiple accept=".pdf,image/*"
+             class="block w-full text-sm text-gray-900 dark:text-slate-100 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 dark:file:bg-slate-800 dark:file:text-slate-100 hover:file:bg-blue-100 dark:hover:file:bg-slate-700/80">
+      <p class="text-xs text-gray-500 dark:text-slate-400">Formats: PDF, JPG, PNG, WEBP · max 5 Mo.</p>
+      <button class="inline-flex items-center px-4 py-2 rounded-lg bg-amber-400 text-gray-900 hover:bg-amber-300 dark:bg-amber-500 dark:hover:bg-amber-400">
+        Téléverser
+      </button>
+    </form>
+
+    {% with protected="verified verifie approuve approved valide verification under_review pending en_verification en_attente_verification" %}
+    {% if documents %}
+      <ul class="divide-y divide-slate-200 dark:divide-slate-800">
+        {% for d in documents %}
+          {% with stat=d.status|default_if_none:"" %}
+          <li class="py-3 flex items-center justify-between">
+            <span class="truncate mr-3">
+              {{ d.name|default:d.file.name }}
+              {% if stat %}
+                <span class="ml-2 text-xs px-2 py-0.5 rounded-full
+                  {% if stat|lower in protected %}bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-900/40{% else %}bg-gray-50 text-gray-700 border border-gray-200 dark:bg-slate-800/70 dark:text-slate-200 dark:border-slate-700{% endif %}">
+                  {{ stat }}
+                </span>
+              {% endif %}
+            </span>
+
+            {% if stat and stat|lower in protected %}
+              <span class="text-sm text-gray-400 dark:text-slate-400">Suppression interdite</span>
+            {% else %}
+              <form method="post" action="{% url 'benevoles:documents_delete' d.pk %}" onsubmit="return confirm('Supprimer ce document ?');">
+                {% csrf_token %}
+                <button class="text-red-600 hover:underline text-sm">Supprimer</button>
+              </form>
+            {% endif %}
+          </li>
+          {% endwith %}
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-gray-500 dark:text-slate-400 text-sm">Aucun document.</p>
+    {% endif %}
+    {% endwith %}
+  </section>
+</section>
+
+<!-- Emails -->
+<section id="emails"
+         class="bg-white dark:bg-slate-900 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-800
+                p-6 space-y-4 mt-8 text-slate-800 dark:text-slate-100">
+  <div class="flex items-center justify-between">
+    <h2 class="text-lg font-semibold">Adresses email</h2>
+  </div>
+
+  <p class="text-sm text-gray-600 dark:text-slate-300">
+    Email principal: <span class="font-semibold">{{ primary_email|default:user.email }}</span>
+  </p>
+
+  <form method="post" class="flex gap-2 items-end">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="email_add" />
+    <div class="flex-1">
+      <label for="id_new_email" class="block text-sm font-medium text-gray-700 dark:text-slate-200">Ajouter un email</label>
+      <input id="id_new_email" name="new_email" type="email" autocomplete="email"
+             class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+             placeholder="exemple@domaine.fr" required />
+    </div>
+    <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Ajouter</button>
+  </form>
+
+  <div class="mt-2">
+    {% if email_addresses %}
+      <ul class="divide-y divide-slate-200 dark:divide-slate-800">
+        {% for ea in email_addresses %}
+          <li class="py-3 flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <p class="truncate font-medium">{{ ea.email }}</p>
+              <p class="text-xs mt-1">
+                {% if ea.primary %}
+                  <span class="inline-block mr-2 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-900/40">Principal</span>
+                {% endif %}
+                {% if ea.verified %}
+                  <span class="inline-block mr-2 px-2 py-0.5 rounded-full bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-900/40">Vérifié</span>
+                {% else %}
+                  <span class="inline-block mr-2 px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">Non vérifié</span>
+                {% endif %}
+              </p>
+            </div>
+            <div class="flex items-center gap-2 text-sm">
+              {% if not ea.primary %}
+                <form method="post" onsubmit="return confirm('Définir cet email comme principal ?');">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="email_set_primary" />
+                  <input type="hidden" name="id" value="{{ ea.id }}" />
+                  <input type="hidden" name="confirm" value="1" />
+                  <button class="px-3 py-1.5 rounded-lg bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900/40"
+                          {% if not ea.verified %}disabled title="Vérifiez d'abord l'adresse" class="opacity-50 cursor-not-allowed"{% endif %}>
+                    Définir principal
+                  </button>
+                </form>
+              {% endif %}
+
+              {% if not ea.verified %}
+                <form method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="email_resend" />
+                  <input type="hidden" name="id" value="{{ ea.id }}" />
+                  <button class="px-3 py-1.5 rounded-lg bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900/40">Renvoyer vérification</button>
+                </form>
+              {% endif %}
+
+              <form method="post" onsubmit="return ({{ ea.primary|yesno:'true,false' }} ? confirm('Supprimer l\'email principal ? Un autre email sera défini comme principal si possible.') : confirm('Supprimer cet email ?'));">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="email_delete" />
+                <input type="hidden" name="id" value="{{ ea.id }}" />
+                <input type="hidden" name="confirm" value="1" />
+                <button class="text-red-600 hover:underline">Supprimer</button>
+              </form>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-sm text-gray-500 dark:text-slate-400">Aucune adresse enregistrée.</p>
+    {% endif %}
+  </div>
+</section>
+
+<section id="security"
+         class="bg-white dark:bg-slate-900 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-800
+                p-6 space-y-4 mt-8 text-slate-800 dark:text-slate-100">
+  <div class="flex items-center justify-between">
+    <h2 class="text-lg font-semibold">Sécurité</h2>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <a href="{% url 'account_change_password' %}"
+       class="text-center px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700
+              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 transition">
+      Changer mon mot de passe
+    </a>
+
+    <a href="{% url 'account_email' %}"
+       class="text-center px-4 py-2 rounded-lg
+              bg-slate-100 dark:bg-slate-800
+              text-slate-800 dark:text-slate-100
+              border border-slate-200 dark:border-slate-700
+              hover:bg-slate-200 dark:hover:bg-slate-700
+              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 transition">
+      Gérer mes emails (vérifications)
+    </a>
+  </div>
+
+  <p class="text-xs text-gray-500 dark:text-slate-400">
+    Pour votre sécurité, confirmez tout changement d'adresse email depuis votre boîte de réception.
+  </p>
+</section>
+
+
+<script>
+  // Aperçu de l'avatar
+  (function(){
+    var input = document.getElementById('{{ form.avatar.id_for_label }}');
+    var preview = document.getElementById('avatarPreview');
+    if (input && preview) {
+      input.addEventListener('change', function(e){
+        var f = e.target.files && e.target.files[0];
+        if (!f) return;
+        if (f.size > 5 * 1024 * 1024) {
+          alert('Le fichier dépasse 5 Mo.');
+          e.target.value = '';
+          return;
+        }
+        var url = URL.createObjectURL(f);
+        preview.src = url;
+      });
+    }
+  })();
+  // Navigation douce aux ancres
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener('click', function(e){
+      var id = a.getAttribute('href').slice(1);
+      var el = document.getElementById(id);
+      if (el) { e.preventDefault(); el.scrollIntoView({behavior:'smooth', block:'start'}); }
+    });
+  });
+
+  // Compteur de caractères pour la motivation
+  (function(){
+    var el = document.getElementById('{{ form.motivation.id_for_label }}');
+    var counter = document.getElementById('motivationCounter');
+    if (!el || !counter) return;
+    function update(){
+      var len = (el.value || '').length;
+      counter.textContent = len + ' caractères';
+    }
+    el.addEventListener('input', update);
+    update();
+  })();
+</script>
+
+<script>
+(function() {
+  const form = document.getElementById('profileForm');
+  const btn  = document.getElementById('saveProfileBtn');
+  if (!form || !btn) return;
+
+  const watched = Array.from(form.elements).filter(el =>
+    ['{{ form.email.name }}','{{ form.phone.name }}','{{ form.motivation.name }}','{{ form.remove_avatar.name }}','{{ form.confirm_password.name }}', '{{ form.city.name }}',  ].includes(el.name)
+  );
+  function snapshot(){
+    const d={}; watched.forEach(el=>{
+      d[el.name] = (el.type==='checkbox'||el.type==='radio') ? el.checked : el.value;
+    }); return JSON.stringify(d);
+  }
+  const initial = snapshot();
+
+  function update(){
+    const dirty = snapshot() !== initial;
+    btn.disabled = !dirty;
+    btn.setAttribute('aria-disabled', String(!dirty));
+  }
+  watched.forEach(el => el.addEventListener('input', update));
+  watched.forEach(el => el.addEventListener('change', update));
+  update();
+
+  form.addEventListener('submit', function(e){
+    if (btn.disabled) { e.preventDefault(); return; }
+    const svg = btn.querySelector('svg'); const span = btn.querySelector('span');
+    if (svg && span) { svg.classList.remove('hidden'); btn.setAttribute('aria-busy','true'); span.textContent = 'Enregistrement…'; }
+    btn.disabled = true; btn.setAttribute('aria-disabled','true');
+  });
+})();
+</script>
+
+{% endblock %}

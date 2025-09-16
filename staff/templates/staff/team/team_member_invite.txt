@@ -1,0 +1,22 @@
+{# Plain-text fallback #}
+Bonjour {{ volunteer.display_name|default:member.display_name|default:"" }},
+
+Vous êtes invité(e) à rejoindre l’espace équipe.
+Merci de compléter votre fiche membre afin d’activer votre accès.
+
+→ Lien de complétion : 
+{{ url }}
+
+Ce lien est valable jusqu’au {{ expires_at|date:"d F Y à H:i" }}.
+
+Que va-t-il se passer ?
+- Vous vérifiez vos informations (nom, email, téléphone, etc.).
+- Certaines données synchronisées avec votre compte peuvent être verrouillées pour éviter les incohérences.
+- Une fois validé, votre accès à l’espace équipe sera activé.
+
+Si le bouton ou le lien ne fonctionne pas, copiez/collez l’adresse ci-dessus dans votre navigateur.
+Si vous n’êtes pas à l’origine de cette demande, vous pouvez ignorer cet email.
+
+Identifiant d’invitation : {{ invite.token }}
+
+Merci !

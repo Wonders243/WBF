@@ -1,0 +1,61 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Vérification envoyée —  BAMU WELLBEING Foundation" %}{% endblock %}
+{% block auth_width %}max-w-lg{% endblock %}
+
+{% block auth_heading %}
+  <h1 id="page-title" class="text-3xl sm:text-4xl font-extrabold tracking-tight text-blue-700 dark:text-blue-300 text-center">
+    {% trans "Vérification envoyée" %}
+  </h1>
+  <p class="mt-2 text-sm text-slate-600 dark:text-slate-300/80 text-center">
+    {% trans "Nous vous avons envoyé un email de confirmation." %}
+  </p>
+{% endblock %}
+
+{% block account_content %}
+  <section class="rounded-2xl border border-slate-200/70 dark:border-white/10 bg-white/80 dark:bg-white/10 p-6 shadow">
+    <div class="flex items-start gap-4">
+      <div class="shrink-0 rounded-full p-2 bg-blue-600 text-white">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M20 8v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8l8 5 8-5Z"/><path d="M18 6H6a2 2 0 0 0-2 2l8 5 8-5a2 2 0 0 0-2-2Z"/>
+        </svg>
+      </div>
+
+      <div class="grow">
+        <p class="text-sm text-slate-700 dark:text-slate-200">
+          {% blocktrans %}Un lien de confirmation a été envoyé{% endblocktrans %}
+          {% if email %}
+            <strong>{{ email }}</strong>.
+          {% else %}
+            {% trans "à votre adresse email." %}
+          {% endif %}
+          {% trans "Cliquez sur ce lien pour activer votre compte." %}
+        </p>
+
+        <ul class="mt-4 space-y-1.5 text-sm text-slate-600 dark:text-slate-300/90">
+          <li>• {% trans "Vérifiez votre dossier courrier indésirable (spam)." %}</li>
+          <li>• {% trans "Patientez quelques minutes si l’email n’apparaît pas immédiatement." %}</li>
+          <li>• {% trans "Assurez-vous que l’adresse email est correcte." %}</li>
+        </ul>
+
+        <div class="mt-5 flex flex-col sm:flex-row gap-2">
+          <a href="{% url 'account_email' %}"
+             class="inline-flex justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60">
+            {% trans "Renvoyer le lien / Gérer mes emails" %}
+          </a>
+          <a href="{% url 'account_login' %}"
+             class="inline-flex justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60 dark:bg-white/10 dark:text-slate-100 dark:border-white/10">
+            {% trans "Se connecter" %}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="mt-6 text-center">
+    <a href="{% url 'core:accueil' %}" class="text-sm font-medium text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200">
+      ← {% trans "Retour à l’accueil public" %}
+    </a>
+  </div>
+{% endblock %}

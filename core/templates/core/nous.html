@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% load static widget_tweaks %}
+
+{% block title %}À propos — BAMU WELLBEING Foundation{% endblock %}
+
+{% block content %}
+
+  {# ───────── À PROPOS ───────── #}
+  <section id="about" class="relative overflow-hidden bg-white dark:bg-slate-900 py-16">
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
+      <div class="h-full w-full bg-gradient-to-br from-blue-50 via-white to-transparent dark:from-slate-800 dark:via-slate-900 dark:to-slate-900"></div>
+    </div>
+
+    <div class="container mx-auto max-w-7xl px-4">
+      <h1 class="text-4xl font-extrabold text-blue-700 dark:text-blue-300 drop-shadow-sm mb-6">
+        À propos de Bamu Wellbeing Foundation
+      </h1>
+      <p class="text-lg text-slate-700 dark:text-slate-300 mb-4">
+        La Bamu Wellbeing Foundation a été créée pour répondre aux besoins croissants en matière de santé mentale et d'inclusion sociale. Notre équipe est composée d'experts reconnus, engagés à améliorer le bien-être des personnes vulnérables.
+      </p>
+      <p class="text-lg text-slate-700 dark:text-slate-300">
+        Transparence, expertise et impact mesurable sont au cœur de notre action pour bâtir une confiance durable avec nos donateurs et partenaires.
+      </p>
+      <div class="mt-8">
+        <a href="{% url 'core:accueil' %}"
+           class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-white font-semibold shadow hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60 dark:bg-blue-500 dark:hover:bg-blue-400">
+          ← Retour à l’accueil
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {# ───────── ÉQUIPE ───────── #}
+  <section id="team" class="bg-slate-50 dark:bg-slate-950 py-16">
+    <div class="container mx-auto max-w-7xl px-4">
+      <h2 class="text-3xl font-bold text-blue-700 dark:text-blue-300 mb-8">Notre équipe</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {% for member in team %}
+          <article class="group relative rounded-2xl bg-white dark:bg-slate-900 shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden transition hover:shadow-xl">
+            {% if member.image %}
+              <img src="{{ member.image.url }}" alt="{{ member.name }}"
+                   class="h-56 w-full object-cover transition duration-300 group-hover:scale-[1.01]">
+            {% else %}
+              <img src="{% static 'img/placeholder-16x9.png' %}" alt="{{ member.name }}"
+                   class="h-56 w-full object-cover">
+            {% endif %}
+            <div class="p-6 space-y-2">
+              <h3 class="text-xl font-semibold text-blue-700 dark:text-blue-300">{{ member.role }}</h3>
+              <p class="text-slate-700 dark:text-slate-300">
+                <span class="font-semibold">{{ member.name }}</span> — {{ member.bio }}
+              </p>
+            </div>
+          </article>
+        {% empty %}
+          <p class="text-slate-500 dark:text-slate-400">L’équipe sera publiée prochainement.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  {# ───────── PARTENAIRES ───────── #}
+  <section id="partners" class="bg-white dark:bg-slate-900 py-16">
+    <div class="container mx-auto max-w-7xl px-4">
+      <h2 class="text-3xl font-bold text-blue-700 dark:text-blue-300 mb-8">Nos partenaires</h2>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 items-center">
+        {% for partenaire in partners %}
+          <div class="flex justify-center items-center h-32 rounded-2xl bg-slate-50 dark:bg-slate-800/40 ring-1 ring-black/5 dark:ring-white/10 shadow-sm transition hover:shadow-lg">
+            {% if partenaire.logo %}
+              <img src="{{ partenaire.logo.url }}" alt="{{ partenaire.name }}"
+                   class="max-h-20 object-contain grayscale opacity-80 transition duration-300 group-hover:grayscale-0 hover:grayscale-0 hover:opacity-100">
+            {% else %}
+              <span class="text-slate-700 dark:text-slate-200 font-medium">{{ partenaire.name }}</span>
+            {% endif %}
+          </div>
+        {% empty %}
+          <p class="text-slate-500 dark:text-slate-400">Les logos de nos partenaires arrivent bientôt.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  {# ───────── TÉMOIGNAGES + CONTACT ───────── #}
+  <section id="testimonials-contact" class="bg-slate-50 dark:bg-slate-950 py-16">
+    <div class="container mx-auto max-w-7xl px-4">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        {# Témoignages #}
+        <aside class="lg:col-span-1 rounded-2xl bg-white dark:bg-slate-900 shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+          <h2 class="text-3xl font-bold text-blue-700 dark:text-blue-300 mb-6 text-center">Témoignages</h2>
+
+          <div id="testi-carousel"
+               class="relative overflow-hidden h-80"
+               role="region" aria-roledescription="carousel" aria-label="Témoignages">
+            {% if testimonials %}
+              {% for t in testimonials %}
+                <div class="t-slide absolute inset-0 opacity-0 transition-opacity duration-500 flex flex-col items-center justify-center text-center px-6"
+                     role="group" aria-roledescription="slide" aria-label="{{ forloop.counter }} / {{ testimonials|length }}">
+                  {% if t.image %}
+                    <img src="{{ t.image.url }}" alt="{{ t.author }}" class="mb-4 h-20 w-20 rounded-full object-cover ring-2 ring-blue-200 dark:ring-blue-800">
+                  {% else %}
+                    <img src="{% static 'img/anonyme.png' %}" alt="{{ t.author }}" class="mb-4 h-20 w-20 rounded-full object-cover ring-2 ring-blue-200 dark:ring-blue-800">
+                  {% endif %}
+                  <p class="text-slate-700 dark:text-slate-300 mb-3 italic">“{{ t.content }}”</p>
+                  <p class="font-semibold text-blue-700 dark:text-blue-300">— {{ t.author }}</p>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="flex items-center justify-center h-full text-slate-500 dark:text-slate-400">
+                Aucun témoignage pour le moment.
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="mt-4 flex items-center justify-between">
+            <button id="testi-prev" class="p-2 rounded-full bg-white dark:bg-slate-800 shadow ring-1 ring-black/10 dark:ring-white/10 hover:bg-slate-50 dark:hover:bg-slate-700" aria-label="Précédent">‹</button>
+            <button id="testi-next" class="p-2 rounded-full bg-white dark:bg-slate-800 shadow ring-1 ring-black/10 dark:ring-white/10 hover:bg-slate-50 dark:hover:bg-slate-700" aria-label="Suivant">›</button>
+          </div>
+        </aside>
+
+        {# Contact #}
+        <section class="lg:col-span-2 rounded-2xl bg-white dark:bg-slate-900 shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+          <h2 class="text-3xl font-bold text-blue-700 dark:text-blue-300 mb-6 text-center">Contactez-nous</h2>
+
+          <form action="{% url 'core:contact' %}" method="post" class="space-y-6" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+              <div class="p-3 rounded-lg bg-red-50 text-red-800 border border-red-200 dark:bg-red-900/20 dark:text-red-200 dark:border-red-900/40">
+                {{ form.non_field_errors|striptags }}
+              </div>
+            {% endif %}
+
+            <div>
+              <label for="{{ form.name.id_for_label }}" class="block font-medium text-slate-700 dark:text-slate-200">Nom</label>
+              {{ form.name|add_class:"mt-1 w-full rounded-xl border border-slate-300 bg-white/90 px-3 py-2.5 shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 dark:bg-slate-900/40 dark:border-white/10 dark:focus:ring-blue-500/20" }}
+              {% if form.name.errors %}<p class="text-sm text-red-600 mt-1">{{ form.name.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div>
+              <label for="{{ form.email.id_for_label }}" class="block font-medium text-slate-700 dark:text-slate-200">Email</label>
+              {{ form.email|add_class:"mt-1 w-full rounded-xl border border-slate-300 bg-white/90 px-3 py-2.5 shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 dark:bg-slate-900/40 dark:border-white/10 dark:focus:ring-blue-500/20" }}
+              {% if form.email.errors %}<p class="text-sm text-red-600 mt-1">{{ form.email.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div>
+              <label for="{{ form.subject.id_for_label }}" class="block font-medium text-slate-700 dark:text-slate-200">Sujet</label>
+              {{ form.subject|add_class:"mt-1 w-full rounded-xl border border-slate-300 bg-white/90 px-3 py-2.5 shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 dark:bg-slate-900/40 dark:border-white/10 dark:focus:ring-blue-500/20" }}
+              {% if form.subject.errors %}<p class="text-sm text-red-600 mt-1">{{ form.subject.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div>
+              <label for="{{ form.message.id_for_label }}" class="block font-medium text-slate-700 dark:text-slate-200">Message</label>
+              {{ form.message|add_class:"mt-1 w-full min-h-32 rounded-xl border border-slate-300 bg-white/90 px-3 py-2.5 shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 dark:bg-slate-900/40 dark:border-white/10 dark:focus:ring-blue-500/20" }}
+              {% if form.message.errors %}<p class="text-sm text-red-600 mt-1">{{ form.message.errors.0 }}</p>{% endif %}
+            </div>
+
+            <button type="submit"
+              class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-white font-semibold shadow hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60 dark:bg-blue-500 dark:hover:bg-blue-400">
+              Envoyer
+            </button>
+          </form>
+        </section>
+
+      </div>
+    </div>
+  </section>
+
+  {# ───── JS : carrousel témoignages (accessible) ───── #}
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const root = document.getElementById('testi-carousel');
+      const slides = root ? Array.from(root.querySelectorAll('.t-slide')) : [];
+      const prev = document.getElementById('testi-prev');
+      const next = document.getElementById('testi-next');
+      const total = slides.length;
+      let current = 0, timer = null, paused = false;
+
+      function show(i){
+        slides.forEach((s, idx) => {
+          s.style.opacity = (idx === i) ? '1' : '0';
+          s.setAttribute('aria-hidden', String(idx !== i));
+        });
+        current = i;
+      }
+      function goNext(){ show((current + 1) % total); }
+      function goPrev(){ show((current - 1 + total) % total); }
+
+      const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+      function start(){
+        if (prefersReduced || total <= 1) return;
+        stop();
+        timer = setInterval(goNext, 7000);
+      }
+      function stop(){
+        if (timer) { clearInterval(timer); timer = null; }
+      }
+
+      if (total > 0) show(0);
+      if (total > 1) {
+        next?.addEventListener('click', () => { goNext(); start(); });
+        prev?.addEventListener('click', () => { goPrev(); start(); });
+
+        // clavier
+        [prev, next].forEach(btn => btn?.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowRight') { goNext(); start(); }
+          if (e.key === 'ArrowLeft')  { goPrev(); start(); }
+          if (e.key === 'Home')       { show(0); start(); }
+          if (e.key === 'End')        { show(total-1); start(); }
+        }));
+
+        // pause au survol + onglet caché
+        root?.addEventListener('mouseenter', () => { paused = true; stop(); });
+        root?.addEventListener('mouseleave', () => { paused = false; start(); });
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) stop();
+          else if (!paused) start();
+        });
+
+        start();
+      } else {
+        next?.classList.add('hidden');
+        prev?.classList.add('hidden');
+      }
+    });
+  </script>
+{% endblock %}

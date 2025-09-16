@@ -1,0 +1,60 @@
+{% extends "account/base.html" %}
+{% load i18n static widget_tweaks %}
+
+{% block title %}{% trans "Finaliser l’inscription" %}{% endblock %}
+{% block auth_width %}w-full max-w-xl lg:max-w-xl px-4{% endblock %}
+
+{% block auth_heading %}
+  <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-blue-700 dark:text-blue-300 text-center">
+    {% trans "Compléter votre inscription" %}
+  </h1>
+  <p class="mt-1 text-sm text-slate-600 dark:text-slate-300/80 text-center">
+    {% trans "Vous êtes sur le point d’utiliser votre compte Google pour créer un profil. Vérifiez vos informations." %}
+  </p>
+{% endblock %}
+
+{% block account_content %}
+  <form method="post" class="space-y-4" novalidate>
+    {% csrf_token %}
+
+    <div>
+      <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{% trans "Adresse email" %}</label>
+      {{ form.email|add_class:"w-full rounded-xl border border-slate-300 bg-slate-100/80 px-3 py-2.5 shadow-sm outline-none dark:bg-white/10 dark:border-white/10"|attr:"readonly:readonly" }}
+      {% if form.email.errors %}<p class="mt-1 text-sm text-red-600">{{ form.email.errors|striptags }}</p>{% endif %}
+    </div>
+
+    <div>
+      <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{% trans "Nom d’utilisateur" %}</label>
+      {{ form.username|add_class:"w-full rounded-xl border border-slate-300 bg-white/80 px-3 py-2.5 shadow-sm outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100 dark:bg-white/10 dark:border-white/10 dark:focus:ring-blue-500/20"|attr:"autocomplete:username" }}
+      {% if form.username.errors %}<p class="mt-1 text-sm text-red-600">{{ form.username.errors|striptags }}</p>{% endif %}
+    </div>
+
+    {% if form.first_name %}
+    <div>
+      <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{% trans "Prénom" %}</label>
+      {{ form.first_name|add_class:"w-full rounded-xl border border-slate-300 bg-white/80 px-3 py-2.5 shadow-sm outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100 dark:bg-white/10 dark:border-white/10 dark:focus:ring-blue-500/20" }}
+      {% if form.first_name.errors %}<p class="mt-1 text-sm text-red-600">{{ form.first_name.errors|striptags }}</p>{% endif %}
+    </div>
+    {% endif %}
+
+    {% if form.last_name %}
+    <div>
+      <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-200">{% trans "Nom" %}</label>
+      {{ form.last_name|add_class:"w-full rounded-xl border border-slate-300 bg-white/80 px-3 py-2.5 shadow-sm outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100 dark:bg-white/10 dark:border-white/10 dark:focus:ring-blue-500/20" }}
+      {% if form.last_name.errors %}<p class="mt-1 text-sm text-red-600">{{ form.last_name.errors|striptags }}</p>{% endif %}
+    </div>
+    {% endif %}
+
+    <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 font-semibold text-white shadow hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60">
+      {% trans "Valider" %}
+    </button>
+  </form>
+
+  <p class="mt-4 text-center text-xs sm:text-sm text-slate-600 dark:text-slate-300/90">
+    {% trans "Déjà un compte ?" %}
+    <a href="{% url 'account_login' %}" class="text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200">
+      {% trans "Se connecter" %}
+    </a>
+  </p>
+{% endblock %}
+

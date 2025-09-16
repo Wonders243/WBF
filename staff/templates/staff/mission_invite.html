@@ -1,0 +1,210 @@
+{% extends "staff/base_staff.html" %}
+{% load static %}
+{% load static dict_extras %}
+
+{% block title %}Inviter des bénévoles — {{ mission.title }}{% endblock %}
+
+{% block staff_content %}
+<section class="max-w-7xl mx-auto space-y-6">
+  <header class="flex items-start justify-between gap-4">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-extrabold text-blue-700 dark:text-blue-300">Inviter des bénévoles</h1>
+      <p class="text-gray-600 dark:text-slate-400">
+        Mission : <span class="font-medium text-slate-900 dark:text-slate-100">{{ mission.title }}</span>
+        {% if mission.event %} — <span class="text-slate-700 dark:text-slate-300">Événement : {{ mission.event.title }}</span>{% endif %}
+      </p>
+    </div>
+    <div class="flex gap-2">
+      <a href="{% url 'staff:mission_detail' mission.id %}"
+         class="px-3 py-2 rounded-lg ring-1 ring-slate-200 hover:bg-gray-50
+                dark:ring-white/10 dark:hover:bg-white/5">
+        Retour mission
+      </a>
+    </div>
+  </header>
+
+  <!-- Filtres -->
+  <form method="get"
+        class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4
+               grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+    <input type="search" name="q" value="{{ filter_form.q.value|default_if_none:'' }}" placeholder="Nom, email, téléphone…"
+           class="px-3 py-2 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500
+                  dark:bg-slate-950 dark:border-white/10 dark:text-slate-100 dark:placeholder-slate-400 dark:focus:ring-blue-500/20 lg:col-span-2">
+
+    <input type="text" name="skill" value="{{ filter_form.skill.value|default_if_none:'' }}" placeholder="Compétence (ex: Python, Permis B)"
+           class="px-3 py-2 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500
+                  dark:bg-slate-950 dark:border-white/10 dark:text-slate-100 dark:placeholder-slate-400 dark:focus:ring-blue-500/20 lg:col-span-1">
+
+    <select name="day"
+            class="px-3 py-2 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500
+                   dark:bg-slate-950 dark:border-white/10 dark:text-slate-100 dark:focus:ring-blue-500/20">
+      {% for v,l in filter_form.day.field.choices %}
+        <option value="{{ v }}" {% if filter_form.day.value == v %}selected{% endif %}>{{ l }}</option>
+      {% endfor %}
+    </select>
+
+    <select name="slot"
+            class="px-3 py-2 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500
+                   dark:bg-slate-950 dark:border-white/10 dark:text-slate-100 dark:focus:ring-blue-500/20">
+      {% for v,l in filter_form.slot.field.choices %}
+        <option value="{{ v }}" {% if filter_form.slot.value == v %}selected{% endif %}>{{ l }}</option>
+      {% endfor %}
+    </select>
+
+    <label class="inline-flex items-center gap-2 lg:col-span-2">
+      <input type="checkbox" name="only_available" value="on" {% if filter_form.only_available.value or filter_form.only_available.value is None %}checked{% endif %}>
+      <span class="text-sm text-gray-700 dark:text-slate-200">Masquer ceux déjà invités/en attente/acceptés</span>
+    </label>
+
+    <div class="lg:col-span-6 flex gap-2">
+      <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Filtrer</button>
+      {% if request.GET %}
+        <a href="{{ request.path }}"
+           class="px-4 py-2 rounded-lg ring-1 ring-slate-200 hover:bg-gray-50
+                  dark:ring-white/10 dark:hover:bg-white/5">Réinitialiser</a>
+      {% endif %}
+    </div>
+  </form>
+
+  <!-- Liste des bénévoles -->
+  <form method="post" 
+      class="auth_key js-auth-managed bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden"
+      data-superuser="{{ request.user.is_superuser|yesno:'true,false' }}">
+    {% csrf_token %}
+    {{ bulk_form.volunteer_ids }} {# hidden inputs #}
+
+    <div class="p-3 border-b border-slate-200 dark:border-white/10 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <input id="check-all" type="checkbox" class="h-4 w-4">
+        <label for="check-all" class="text-sm text-gray-700 dark:text-slate-200">Tout sélectionner (page)</label>
+      </div>
+      <div class="text-sm text-gray-600 dark:text-slate-400">
+        Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }} — {{ page_obj.paginator.count }} bénévoles
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-50 dark:bg-slate-800/60">
+          <tr class="text-left">
+            <th class="px-4 py-2 text-slate-700 dark:text-slate-200"></th>
+            <th class="px-4 py-2 text-slate-700 dark:text-slate-200">Bénévole</th>
+            <th class="px-4 py-2 text-slate-700 dark:text-slate-200">Contact</th>
+            <th class="px-4 py-2 text-slate-700 dark:text-slate-200">Compétences</th>
+            <th class="px-4 py-2 text-slate-700 dark:text-slate-200">Disponibilités</th>
+            <th class="px-4 py-2 text-slate-700 dark:text-slate-200">Statut sur cette mission</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+          {% for v in page_obj.object_list %}
+            <tr class="bg-white dark:bg-slate-900">
+              <td class="px-4 py-2 align-top">
+                <input type="checkbox" name="volunteer_ids" value="{{ v.id }}" class="row-check h-4 w-4">
+              </td>
+              <td class="px-4 py-2 align-top">
+                <div class="font-medium text-slate-900 dark:text-slate-100">{{ v.display_name|default:v.user.get_username }}</div>
+                <div class="text-xs text-gray-500 dark:text-slate-400">@{{ v.user.username }}</div>
+              </td>
+              <td class="px-4 py-2 align-top text-slate-800 dark:text-slate-200">
+                <div>{{ v.email|default:v.user.email }}</div>
+                {% if v.phone %}<div class="text-xs text-gray-500 dark:text-slate-400">{{ v.phone }}</div>{% endif %}
+              </td>
+              <td class="px-4 py-2 align-top">
+                <div class="text-gray-700 dark:text-slate-200">
+                  {{ skills_by_vol|get_item:v.id|default:"—" }}
+                </div>
+              </td>
+              <td class="px-4 py-2 align-top">
+                <div class="text-gray-700 dark:text-slate-200">
+                  {{ avail_by_vol|get_item:v.id|default:"—" }}
+                </div>
+              </td>
+              <td class="px-4 py-2 align-top">
+                {% with st=status_map|get_item:v.id %}
+                  {% if st %}
+                    <span class="text-xs px-2 py-1 rounded border
+                      {% if st == 'invited' %}bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-900/40
+                      {% elif st == 'pending' %}bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-900/40
+                      {% elif st == 'accepted' %}bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-900/40
+                      {% elif st == 'declined' %}bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-900/40
+                      {% else %}bg-gray-50 text-gray-700 border-gray-200 dark:bg-slate-800/60 dark:text-slate-200 dark:border-white/10{% endif %}">
+                      {{ st|title }}
+                    </span>
+                  {% else %}
+                    <span class="text-xs px-2 py-1 rounded bg-gray-50 text-gray-700 border border-gray-200
+                                 dark:bg-slate-800/60 dark:text-slate-200 dark:border-white/10">Aucun</span>
+                  {% endif %}
+                {% endwith %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6" class="px-4 py-8 text-center text-gray-500 dark:text-slate-400">Aucun bénévole ne correspond aux filtres.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="p-4 border-t border-slate-200 dark:border-white/10 space-y-3">
+      <label class="block text-sm text-gray-700 dark:text-slate-200 mb-1">Message (optionnel)</label>
+      <textarea name="note" rows="3"
+                class="w-full px-3 py-2 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500
+                       dark:bg-slate-950 dark:border-white/10 dark:text-slate-100 dark:placeholder-slate-400 dark:focus:ring-blue-500/20"
+                placeholder="Ex : Bonjour, nous avons besoin d’aide samedi de 9h à 12h pour l’accueil."></textarea>
+
+      <div class="flex items-center justify-between">
+        <div class="text-sm text-gray-600 dark:text-slate-400">
+          <span id="sel-count">0</span> sélectionné(s) sur cette page
+        </div>
+        
+        <button type="submit"
+                class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+          Envoyer les invitations
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Pagination -->
+  <div class="flex items-center justify-between">
+    <div></div>
+    <div class="flex gap-2">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.skill %}&skill={{ request.GET.skill|urlencode }}{% endif %}{% if request.GET.day %}&day={{ request.GET.day|urlencode }}{% endif %}{% if request.GET.slot %}&slot={{ request.GET.slot|urlencode }}{% endif %}{% if request.GET.only_available %}&only_available=on{% endif %}"
+           class="px-3 py-2 rounded ring-1 ring-slate-200 hover:bg-gray-50 dark:ring-white/10 dark:hover:bg-white/5">Précédent</a>
+      {% else %}
+        <span class="px-3 py-2 rounded ring-1 ring-slate-200 text-gray-400 dark:text-slate-500 dark:ring-white/10">Précédent</span>
+      {% endif %}
+
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q|urlencode }}{% endif %}{% if request.GET.skill %}&skill={{ request.GET.skill|urlencode }}{% endif %}{% if request.GET.day %}&day={{ request.GET.day|urlencode }}{% endif %}{% if request.GET.slot %}&slot={{ request.GET.slot|urlencode }}{% endif %}{% if request.GET.only_available %}&only_available=on{% endif %}"
+           class="px-3 py-2 rounded ring-1 ring-slate-200 hover:bg-gray-50 dark:ring-white/10 dark:hover:bg:white/5">Suivant</a>
+      {% else %}
+        <span class="px-3 py-2 rounded ring-1 ring-slate-200 text-gray-400 dark:text-slate-500 dark:ring-white/10">Suivant</span>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<script>
+  // helpers : select all + compteur
+  (function () {
+    const checkAll = document.getElementById('check-all');
+    const rows = Array.from(document.querySelectorAll('.row-check'));
+    const count = document.getElementById('sel-count');
+
+    function update() {
+      count.textContent = rows.filter(x => x.checked).length;
+    }
+    if (checkAll) {
+      checkAll.addEventListener('change', e => {
+        rows.forEach(x => x.checked = e.target.checked);
+        update();
+      });
+    }
+    rows.forEach(x => x.addEventListener('change', update));
+    update();
+  })();
+</script>
+{% endblock %}

@@ -1,0 +1,86 @@
+{# templates/staff/partners/partner_list.html #}
+{% extends "staff/base_staff.html" %}
+{% block staff_title %}Staff — Partenaires{% endblock %}
+
+{% block staff_content %}
+<header class="mb-4 flex items-center justify-between">
+  <h1 class="text-2xl font-extrabold text-blue-700 dark:text-blue-300">Partenaires</h1>
+  <a href="{% url 'staff:partner_create' %}" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Ajouter</a>
+</header>
+
+<form method="get"
+      class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4 mb-4 grid grid-cols-1 md:grid-cols-5 gap-3">
+  <input type="search" name="q" value="{{ request.GET.q|default_if_none:'' }}" placeholder="Nom, description…"
+         class="px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-950">
+  <select name="category" class="px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-950">
+    <option value="">Catégorie</option>
+    <option value="ngo" {% if request.GET.category == 'ngo' %}selected{% endif %}>Association / ONG</option>
+    <option value="public" {% if request.GET.category == 'public' %}selected{% endif %}>Institution publique</option>
+    <option value="company" {% if request.GET.category == 'company' %}selected{% endif %}>Entreprise</option>
+    <option value="media" {% if request.GET.category == 'media' %}selected{% endif %}>Média</option>
+    <option value="univ" {% if request.GET.category == 'univ' %}selected{% endif %}>Université</option>
+    <option value="other" {% if request.GET.category == 'other' %}selected{% endif %}>Autre</option>
+  </select>
+  <select name="tier" class="px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-950">
+    <option value="">Niveau</option>
+    <option value="platinum" {% if request.GET.tier == 'platinum' %}selected{% endif %}>Platine</option>
+    <option value="gold" {% if request.GET.tier == 'gold' %}selected{% endif %}>Or</option>
+    <option value="silver" {% if request.GET.tier == 'silver' %}selected{% endif %}>Argent</option>
+    <option value="bronze" {% if request.GET.tier == 'bronze' %}selected{% endif %}>Bronze</option>
+    <option value="standard" {% if request.GET.tier == 'standard' %}selected{% endif %}>Standard</option>
+  </select>
+  <select name="active" class="px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-950">
+    <option value="">Actif — Tous</option>
+    <option value="yes" {% if request.GET.active == 'yes' %}selected{% endif %}>Actifs</option>
+    <option value="no"  {% if request.GET.active == 'no' %}selected{% endif %}>Inactifs</option>
+  </select>
+  <label class="inline-flex items-center gap-2">
+    <input type="checkbox" name="has_website" value="yes" {% if request.GET.has_website == 'yes' %}checked{% endif %}>
+    <span class="text-sm">Avec site web</span>
+  </label>
+  <div class="md:col-span-5">
+    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Filtrer</button>
+    {% if request.GET %}<a href="{{ request.path }}" class="ml-2 text-sm text-slate-600 dark:text-slate-400 hover:underline">Réinitialiser</a>{% endif %}
+  </div>
+</form>
+
+<section class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 dark:bg-slate-800/60">
+      <tr class="text-left">
+        <th class="p-3">Nom</th>
+        <th class="p-3">Catégorie</th>
+        <th class="p-3">Niveau</th>
+        <th class="p-3">Site</th>
+        <th class="p-3">Actif</th>
+        <th class="p-3 text-right">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+      {% for p in page_obj.object_list %}
+      <tr>
+        <td class="p-3 font-medium">{{ p.name }}</td>
+        <td class="p-3">{{ p.get_category_display }}</td>
+        <td class="p-3">{{ p.get_tier_display|default:"—" }}</td>
+        <td class="p-3">{% if p.website %}<a href="{{ p.website }}" target="_blank" class="text-blue-600 dark:text-blue-300 hover:underline">Ouvrir</a>{% else %}—{% endif %}</td>
+        <td class="p-3">
+          {% if p.is_active %}
+            <span class="px-2 py-0.5 rounded text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-900/40">Actif</span>
+          {% else %}
+            <span class="px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800/60 dark:text-slate-200 dark:border-white/10">Inactif</span>
+          {% endif %}
+        </td>
+        <td class="p-3 text-right space-x-2">
+          <a href="{% url 'staff:partner_detail' p.slug %}" class="text-blue-600 dark:text-blue-300 hover:underline">Détails</a>
+          <a href="{% url 'staff:partner_update' p.slug %}" class="text-slate-600 dark:text-slate-300 hover:underline">Éditer</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="p-6 text-center text-slate-500 dark:text-slate-400">Aucun partenaire.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+{% include "staff/partials/_pagination.html" with page_obj=page_obj qs=qs_params %}
+{% endblock %}

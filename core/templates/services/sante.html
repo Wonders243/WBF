@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Santé — BAMU WELLBEING Foundation{% endblock %}
+
+{% block content %}
+<article class="max-w-7xl mx-auto text-slate-800 dark:text-slate-100">
+
+  {# ───────── HERO ───────── #}
+  {% static 'img/placeholder-16x9.jpg' as placeholder %}
+  <section class="relative overflow-hidden rounded-2xl mb-8">
+    <div class="relative w-full h-[28vh] sm:h-[32vh] lg:h-[36vh] bg-slate-200 dark:bg-slate-800">
+      <img src="{{ hero_url|default:placeholder }}" alt="Programme Santé"
+           class="absolute inset-0 w-full h-full object-cover">
+      <div class="absolute inset-0 bg-gradient-to-tr from-black/70 via-black/20 to-transparent"></div>
+
+      <div class="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <p class="text-blue-200 text-sm tracking-wide uppercase">Programme Santé</p>
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white drop-shadow">
+              Promotion de la santé & orientation vers les soins
+            </h1>
+          </div>
+          <div class="flex items-center gap-2">
+            <a href="{% url 'benevoles:missions_browse' %}"
+               class="inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700">
+              Devenir bénévole
+            </a>
+            <a href="{% url 'core:contact' %}"
+               class="inline-flex items-center rounded-xl border border-white/40 px-4 py-2 font-semibold text-white/95 hover:bg-white/10">
+              Demander une orientation
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {# ───────── BANDEAU URGENCE ───────── #}
+  <div class="mb-8 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 p-4">
+    <p class="font-semibold text-red-700 dark:text-red-300">
+      Urgence médicale ? Appelez les services d’urgence locaux ou rendez-vous au centre de santé le plus proche.
+    </p>
+    <p class="text-sm text-red-800/80 dark:text-red-200/80 mt-1">
+      Nous n’assurons pas la prise en charge d’urgence. Cette page concerne la promotion de la santé et l’orientation vers les services.
+    </p>
+  </div>
+
+  {# ───────── PRINCIPES ───────── #}
+  <section class="grid gap-6 md:grid-cols-3 mb-8">
+    <div class="rounded-2xl border p-6">
+      <h3 class="font-bold">Respect & non-discrimination</h3>
+      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Accueil de tous publics, information claire et bienveillante.</p>
+    </div>
+    <div class="rounded-2xl border p-6">
+      <h3 class="font-bold">Prévention</h3>
+      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Réduction des risques, hygiène, vaccination, santé maternelle & infantile.</p>
+    </div>
+    <div class="rounded-2xl border p-6">
+      <h3 class="font-bold">Orientation</h3>
+      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Référencement vers des structures de santé adaptées.</p>
+    </div>
+  </section>
+
+  {# ───────── KPI (si story présent) ───────── #}
+  {% if story %}
+  <section class="grid md:grid-cols-3 gap-6 mb-8">
+    <div class="md:col-span-2 rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800 p-6">
+      {% if story.quote %}
+        <blockquote class="text-lg italic opacity-90">“{{ story.quote }}”</blockquote>
+      {% endif %}
+    </div>
+    <aside class="rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800 p-6">
+      <h3 class="font-semibold">Impact (aperçu)</h3>
+      <dl class="mt-3 grid grid-cols-2 gap-3 text-sm">
+        <div class="p-3 rounded-lg bg-indigo-50 text-indigo-900 dark:bg-indigo-900/20 dark:text-indigo-100 ring-1 ring-indigo-200/70 dark:ring-indigo-900/30">
+          <dt>Bénéficiaires</dt>
+          <dd class="text-2xl font-extrabold">{{ kpi.children_supported|default:0 }}</dd>
+        </div>
+        <div class="p-3 rounded-lg bg-emerald-50 text-emerald-900 dark:bg-emerald-900/20 dark:text-emerald-100 ring-1 ring-emerald-200/70 dark:ring-emerald-900/30">
+          <dt>Villes</dt>
+          <dd class="text-2xl font-extrabold">{{ kpi.cities|default:0 }}</dd>
+        </div>
+      </dl>
+      {% if kpi.city_names %}
+        <p class="mt-3 text-xs text-slate-500">Exemples : {{ kpi.city_names }}</p>
+      {% endif %}
+    </aside>
+  </section>
+  {% endif %}
+
+  {# ───────── SERVICES SANTÉ ───────── #}
+  <section class="mb-8">
+    <h2 class="text-2xl font-extrabold">Ce que nous faisons</h2>
+    <div class="mt-4 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div class="rounded-2xl border p-6"><h3 class="font-semibold">Information & prévention</h3><p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Hygiène, nutrition, santé sexuelle et reproductive (information générale).</p></div>
+      <div class="rounded-2xl border p-6"><h3 class="font-semibold">Sensibilisation communautaire</h3><p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Ateliers, campagnes locales, réduction des risques.</p></div>
+      <div class="rounded-2xl border p-6"><h3 class="font-semibold">Orientation vers les soins</h3><p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Référencement vers centres de santé et partenaires.</p></div>
+      <div class="rounded-2xl border p-6"><h3 class="font-semibold">Santé maternelle & infantile</h3><p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Conseils généraux et orientation vers des services adaptés.</p></div>
+      <div class="rounded-2xl border p-6"><h3 class="font-semibold">Vaccination (orientation)</h3><p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Information et aiguillage vers les structures compétentes.</p></div>
+      <div class="rounded-2xl border p-6"><h3 class="font-semibold">Appui aux vulnérabilités</h3><p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Lien avec les dispositifs sociaux et associatifs.</p></div>
+    </div>
+  </section>
+
+  {# ───────── DÉMARCHE ───────── #}
+  <section class="mb-8">
+    <h2 class="text-2xl font-extrabold">Notre approche</h2>
+    <div class="mt-4 grid md:grid-cols-4 gap-4">
+      <div class="rounded-xl border p-4"><p class="text-sm font-semibold">1. Accueil</p><p class="text-sm mt-1 text-slate-600 dark:text-slate-300">Écoute & compréhension des besoins.</p></div>
+      <div class="rounded-xl border p-4"><p class="text-sm font-semibold">2. Information</p><p class="text-sm mt-1 text-slate-600 dark:text-slate-300">Conseils généraux de prévention.</p></div>
+      <div class="rounded-xl border p-4"><p class="text-sm font-semibold">3. Orientation</p><p class="text-sm mt-1 text-slate-600 dark:text-slate-300">Référencement vers les structures adéquates.</p></div>
+      <div class="rounded-xl border p-4"><p class="text-sm font-semibold">4. Suivi</p><p class="text-sm mt-1 text-slate-600 dark:text-slate-300">Retour & ajustements si nécessaire.</p></div>
+    </div>
+  </section>
+
+  {# ───────── CTA CONTACT ───────── #}
+  <section class="mb-8 rounded-2xl border p-6 flex items-center justify-between flex-wrap gap-4">
+    <div>
+      <h3 class="font-semibold">Vous souhaitez une orientation ?</h3>
+      <p class="text-sm text-slate-600 dark:text-slate-300">Contactez-nous en précisant « Santé ».</p>
+    </div>
+    <a href="{% url 'core:contact' %}" class="inline-flex items-center rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700">
+      Ouvrir le formulaire de contact
+    </a>
+  </section>
+
+  {# ───────── GALERIE (optionnelle) ───────── #}
+  {% if story and gallery %}
+  <section class="mb-10">
+    <h2 class="text-2xl font-extrabold">En images</h2>
+    <div class="mt-4 grid sm:grid-cols-3 gap-3">
+      {% for img in gallery %}
+        <figure class="rounded-xl overflow-hidden ring-1 ring-slate-200 dark:ring-slate-800">
+          <img src="{{ img.url }}" alt="" class="w-full h-56 object-cover">
+          {% if img.caption %}
+            <figcaption class="p-2 text-xs text-slate-600 dark:text-slate-300">{{ img.caption }}</figcaption>
+          {% endif %}
+        </figure>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {# ───────── FAQ ───────── #}
+  <section class="mb-8">
+    <h2 class="text-2xl font-extrabold">FAQ</h2>
+    <div class="mt-4 space-y-4">
+      <details class="rounded-xl border p-4">
+        <summary class="font-semibold cursor-pointer">Fournissez-vous des soins médicaux ?</summary>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Nous menons des actions d’information, de prévention et d’orientation. Pour les soins, nous référons vers les structures de santé partenaires.</p>
+      </details>
+      <details class="rounded-xl border p-4">
+        <summary class="font-semibold cursor-pointer">Que faire en cas d’urgence ?</summary>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Appelez immédiatement les services d’urgence locaux ou rendez-vous au centre de santé le plus proche.</p>
+      </details>
+    </div>
+  </section>
+
+  {# ───────── SEO JSON-LD ───────── #}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "NGO",
+    "name": "BAMU WELLBEING Foundation",
+    "areaServed": ["Kinshasa","Kindu/Maniema"],
+    "knowsAbout": ["Public health","Health promotion","Prevention","Care navigation"],
+    "isAccessibleForFree": true,
+    "url": "{{ request.build_absolute_uri }}"
+  }
+  </script>
+
+</article>
+{% endblock %}

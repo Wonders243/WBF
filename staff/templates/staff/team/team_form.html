@@ -1,0 +1,187 @@
+﻿{# templates/staff/team/team_form.html #}
+{% extends "staff/base_staff.html" %}
+{% block staff_title %}Staff — {% if member %}Modifier{% else %}Ajouter{% endif %} un membre{% endblock %}
+
+{% block staff_content %}
+<section class="max-w-4xl space-y-4">
+  <header class="flex items-center justify-between">
+    <h1 class="text-2xl font-extrabold text-blue-700 dark:text-blue-300">
+      {% if member %}Modifier{% else %}Ajouter{% endif %} un membre
+    </h1>
+    <a href="{% url 'staff:team_list' %}"
+       class="px-3 py-2 rounded-lg ring-1 ring-slate-200 hover:bg-slate-50 dark:ring-white/10 dark:hover:bg-white/5 text-sm">
+      ← Retour
+    </a>
+  </header>
+
+  <form method="post" enctype="multipart/form-data"
+        class="auth-key-form js-auth-managed bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6 space-y-6"
+        data-auth-message="Clé requise pour créer ou modifier un membre."
+        data-superuser="{{ request.user.is_superuser|yesno:'true,false' }}">
+    {% csrf_token %}
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      {# ───────── Utilisateur lié ───────── #}
+      <label class="block md:col-span-2">
+        <span class="text-sm">Utilisateur lié (optionnel)</span>
+        {{ form.user }}
+        {% if member and member.user %}
+          <p class="mt-1 text-xs text-slate-500">
+            Actuellement lié à : <strong>{{ member.user.get_username }}</strong>
+            {% if member.user.get_full_name %} — {{ member.user.get_full_name }}{% endif %}
+            {% if member.user.email %} — {{ member.user.email }}{% endif %}
+          </p>
+        {% endif %}
+      </label>
+
+      <label class="block">
+        <span class="text-sm">Nom</span>
+        {{ form.name }}
+      </label>
+      <label class="block">
+        <span class="text-sm">Rôle</span>
+        {{ form.role }}
+      </label>
+      <label class="block">
+        <span class="text-sm">Département</span>
+        {{ form.department }}
+      </label>
+      <label class="block">
+        <span class="text-sm">Séniorité</span>
+        {{ form.seniority }}
+      </label>
+
+      <label class="block md:col-span-2">
+        <span class="text-sm">Bio</span>
+        {{ form.bio }}
+      </label>
+
+      <label class="block">
+        <span class="text-sm">Photo</span>
+        {{ form.image }}
+      </label>
+      <div>
+        {% if member and member.image %}
+          <img src="{{ member.image.url }}" class="h-28 rounded-lg ring-1 ring-black/5 dark:ring-white/10" alt="">
+        {% endif %}
+      </div>
+
+      <label class="block">
+        <span class="text-sm">Email</span>
+        {{ form.email }}
+      </label>
+      <label class="block">
+        <span class="text-sm">Téléphone</span>
+        {{ form.phone }}
+      </label>
+      <label class="block">
+        <span class="text-sm">Site</span>
+        {{ form.website }}
+      </label>
+      <label class="block">
+        <span class="text-sm">LinkedIn</span>
+        {{ form.linkedin }}
+      </label>
+      <label class="block">
+        <span class="text-sm">Twitter</span>
+        {{ form.twitter }}
+      </label>
+      <label class="block">
+        <span class="text-sm">GitHub</span>
+        {{ form.github }}
+      </label>
+
+      <label class="block">
+        <span class="text-sm">Pronoms</span>
+        {{ form.pronouns }}
+      </label>
+      <label class="block">
+        <span class="text-sm">Localisation</span>
+        {{ form.location }}
+      </label>
+      <label class="block">
+        <span class="text-sm">Langues</span>
+        {{ form.languages }}
+      </label>
+      <label class="block md:col-span-2">
+        <span class="text-sm">Expertise (mots-clés)</span>
+        {{ form.expertise }}
+      </label>
+
+      <label class="inline-flex items-center gap-2">
+        {{ form.is_active }} <span>Actif</span>
+      </label>
+      <label class="block">
+        <span class="text-sm">Ordre</span>
+        {{ form.sort_order }}
+      </label>
+      <label class="block">
+        <span class="text-sm">Date d’arrivée</span>
+        {{ form.joined_on }}
+      </label>
+      <label class="block">
+        <span class="text-sm">Date de départ</span>
+        {{ form.left_on }}
+      </label>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+        {% if member %}Enregistrer{% else %}Créer{% endif %}
+      </button>
+      <a href="{% url 'staff:team_list' %}"
+         class="px-4 py-2 rounded-lg ring-1 ring-slate-200 hover:bg-slate-50 dark:ring-white/10 dark:hover:bg-white/5">Annuler</a>
+    </div>
+  </form>
+</section>
+<script>
+  (function() {
+    const sel = document.getElementById("id_user");
+    const nameInput = document.getElementById("id_name");
+    const emailInput = document.getElementById("id_email");
+
+    function lock(el) {
+      if (!el) return;
+      el.readOnly = true;
+      el.setAttribute("aria-readonly", "true");
+      el.classList.add("bg-slate-50","dark:bg-slate-800","cursor-not-allowed");
+      el.title = "Synchronisé avec le compte utilisateur";
+    }
+    function unlock(el) {
+      if (!el) return;
+      el.readOnly = false;
+      el.removeAttribute("aria-readonly");
+      el.classList.remove("bg-slate-50","dark:bg-slate-800","cursor-not-allowed");
+      el.removeAttribute("title");
+    }
+    async function onUserChange() {
+      const id = sel && sel.value;
+      if (!id) { unlock(nameInput); unlock(emailInput); return; }
+      try {
+        const url = "{% url 'staff:user_json' 0 %}".replace("/0/", `/${id}/`);
+        const res = await fetch(url, {headers: {"X-Requested-With":"XMLHttpRequest"}});
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const u = await res.json();
+        if (nameInput) {
+          nameInput.value = u.full_name || u.username || "";
+          lock(nameInput);
+        }
+        if (emailInput) {
+          emailInput.value = u.email || "";
+          lock(emailInput);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    if (sel) {
+      sel.addEventListener("change", onUserChange);
+      // Si la page charge avec un utilisateur déjà lié, applique le verrou immédiatement
+      if (sel.value) onUserChange();
+    }
+  })();
+</script>
+
+{% endblock %}

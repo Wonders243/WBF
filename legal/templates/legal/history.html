@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Historique — {{ doc.title }}{% endblock %}
+{% block content %}
+<main class="max-w-3xl mx-auto px-4 py-10 prose prose-slate dark:prose-invert">
+  <h1>Historique — {{ doc.title }}</h1>
+  <ul>
+    {% for v in versions %}
+      <li>
+        <strong>{{ v.version }}</strong> — {{ v.get_status_display }} — eff. {{ v.effective_date|default:"—"|date:"j F Y" }}
+        {% if request.user.is_staff %}
+          — <a class="underline" href="{% url 'legal:preview' doc.key v.version doc.locale %}">Aperçu</a>
+        {% endif %}
+      </li>
+    {% empty %}
+      <li>Aucune version.</li>
+    {% endfor %}
+  </ul>
+</main>
+{% endblock %}
+

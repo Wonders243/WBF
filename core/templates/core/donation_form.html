@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% load static i18n widget_tweaks %}
+{% block title %}Don — BAMU WELLBEING Foundation{% endblock %}
+
+{% block content %}
+
+{# Détection auto du thème système si darkMode:'class' #}
+<script>
+(function () {
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  const root = document.documentElement;
+  function apply(){ root.classList.toggle('dark', mq.matches); }
+  apply();
+  mq.addEventListener ? mq.addEventListener('change', apply) : mq.addListener(apply);
+})();
+</script>
+
+<section class="mx-auto max-w-3xl px-4">
+  <header class="mb-8">
+    <h1 class="text-3xl font-extrabold text-blue-700 dark:text-blue-300">{% trans "Faire un don" %}</h1>
+    <p class="text-gray-600 dark:text-slate-300 mt-2">Soutenez nos actions. Merci !</p>
+  </header>
+
+  <form method="post" action=""
+        class="bg-white dark:bg-slate-900 p-6 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 space-y-6"
+        novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="p-3 rounded-lg bg-red-50 text-red-800 border border-red-200 dark:bg-red-900/20 dark:text-red-200 dark:border-red-900/40">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <!-- Montant / Devise -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1" for="{{ form.amount.id_for_label }}">
+        {% trans "Montant" %}
+      </label>
+      {% render_field form.amount class+="w-full rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-blue-500 focus:border-blue-500" inputmode="decimal" %}
+      {% if form.amount.errors %}
+        <p class="text-sm text-red-600 mt-1">{{ form.amount.errors.0 }}</p>
+      {% endif %}
+
+      <!-- Boutons rapides -->
+      <div class="flex flex-wrap gap-2 mt-2" id="quick-amounts">
+        {% if quick_amounts %}
+          {% for val in quick_amounts %}
+            <button type="button"
+                    class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-100 ring-1 ring-inset ring-slate-200 dark:ring-white/10"
+                    data-quick-amount="{{ val }}">
+              {{ val }}
+            </button>
+          {% endfor %}
+        {% else %}
+          {% for val in '10,20,50,100'|cut:',' %}
+            <button type="button"
+                    class="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-100 ring-1 ring-inset ring-slate-200 dark:ring-white/10"
+                    data-quick-amount="{{ val }}">
+              {{ val }}
+            </button>
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      <div class="mt-3">
+        <label class="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Devise</label>
+        <select name="currency" class="w-full rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:ring-blue-500 focus:border-blue-500">
+          <option value="USD">USD</option>
+          <option value="CDF" disabled>CDF (RDC — bientôt)</option>
+        </select>
+        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Pour l’instant, seuls les paiements par carte (USD) sont actifs en RDC.</p>
+      </div>
+    </div>
+
+    <!-- Méthode de paiement -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1">Méthode de paiement</label>
+      <select name="method" class="w-full rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:ring-blue-500 focus:border-blue-500">
+        <option value="card">Carte bancaire (Visa/Mastercard)</option>
+        <option value="mm_drc" disabled>Mobile Money RDC (Kinshasa — M‑Pesa, Airtel, Orange) — bientôt</option>
+      </select>
+      <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Les portefeuilles mobiles RDC arrivent. Merci pour votre patience.</p>
+    </div>
+
+    <!-- Nom -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1" for="{{ form.donor_name.id_for_label }}">
+        {% trans "Nom (optionnel)" %}
+      </label>
+      {% render_field form.donor_name class+="w-full rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-blue-500 focus:border-blue-500" autocomplete="name" %}
+      {% if form.donor_name.errors %}
+        <p class="text-sm text-red-600 mt-1">{{ form.donor_name.errors.0 }}</p>
+      {% endif %}
+    </div>
+
+    <!-- Message -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 dark:text-slate-200 mb-1" for="{{ form.message.id_for_label }}">
+        {% trans "Message (optionnel)" %}
+      </label>
+      {% render_field form.message class+="w-full rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-blue-500 focus:border-blue-500" rows="4" %}
+      {% if form.message.errors %}
+        <p class="text-sm text-red-600 mt-1">{{ form.message.errors.0 }}</p>
+      {% endif %}
+    </div>
+
+    <div class="flex items-center justify-between">
+      <p class="text-xs text-gray-500 dark:text-slate-400">Paiement sécurisé via CinetPay (M‑Pesa, Mobile Money, carte...).</p>
+      {# Bouton paiement (clair/sombre) #}
+      {% if PAYMENT_MAINTENANCE %}
+        <button
+          class="w-full inline-flex items-center justify-center gap-2 rounded-lg
+                border border-slate-300 bg-slate-200 text-slate-700
+                px-4 py-2 text-sm cursor-not-allowed select-none
+                dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300/90"
+          disabled aria-disabled="true">
+          {% trans "Paiement indisponible (maintenance)" %}
+        </button>
+      {% else %}
+        <button type="submit"
+          class="w-full inline-flex items-center justify-center gap-2 rounded-lg
+                bg-blue-600 text-white px-4 py-2 text-sm font-semibold
+                shadow hover:bg-blue-700 focus-visible:outline-none
+                focus-visible:ring-2 focus-visible:ring-blue-600/60
+                dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus-visible:ring-blue-400/60">
+          {% trans "Payer" %}
+        </button>
+      {% endif %}
+
+    </div>
+  </form>
+</section>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var amountInput = document.getElementById("{{ form.amount.id_for_label }}");
+    if (!amountInput) return;
+
+    var buttons = document.querySelectorAll("#quick-amounts [data-quick-amount]");
+    buttons.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var val = btn.getAttribute("data-quick-amount");
+        amountInput.value = val;
+        amountInput.focus();
+      });
+    });
+  });
+</script>
+
+{% endblock %}

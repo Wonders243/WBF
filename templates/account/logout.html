@@ -1,0 +1,30 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+
+{% block title %}Déconnexion — BAMU WELLBEING Foundation{% endblock %}
+
+{% block auth_heading %}
+  <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-blue-700 dark:text-blue-300 text-center">
+    {% trans "Déconnexion" %}
+  </h1>
+  <p class="mt-1 text-sm text-slate-600 dark:text-slate-300/80 text-center">
+    {% trans "Voulez-vous vraiment vous déconnecter ?" %}
+  </p>
+{% endblock %}
+
+{% block account_content %}
+  <form method="post" action="{% url 'account_logout' %}" class="space-y-4">
+    {% csrf_token %}
+    <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 font-semibold text-white shadow hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600/60">
+      {% trans "Se déconnecter" %}
+    </button>
+  </form>
+
+  <div class="mt-3 text-center">
+    <a href="{% url 'core:accueil' %}"
+       class="text-sm font-medium text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200">
+      → {% trans "Annuler et revenir à l’accueil" %}
+    </a>
+  </div>
+{% endblock %}
+

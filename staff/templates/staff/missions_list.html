@@ -1,0 +1,100 @@
+{% extends "staff/base_staff.html" %}
+{% block staff_title %}Staff — Missions{% endblock %}
+
+{% block staff_content %}
+<header class="mb-4 flex items-center justify-between">
+  <h1 class="text-2xl font-extrabold text-blue-700 dark:text-blue-300">Missions</h1>
+  <a href="{% url 'staff:mission_create' %}"
+     class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+    Créer une mission
+  </a>
+</header>
+
+<form method="get" action=""
+      class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4 mb-4
+             grid grid-cols-1 md:grid-cols-4 gap-3">
+  <input type="search" name="q" value="{{ request.GET.q|default_if_none:'' }}" placeholder="Rechercher (titre, événement, lieu…)"
+         class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder-slate-400
+                focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+  <select name="status"
+          class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100
+                 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+    <option value="">Tous statuts</option>
+    <option value="published" {% if request.GET.status == 'published' %}selected{% endif %}>Publié</option>
+    <option value="draft"     {% if request.GET.status == 'draft' %}selected{% endif %}>Brouillon</option>
+    <option value="archived"  {% if request.GET.status == 'archived' %}selected{% endif %}>Archivé</option>
+  </select>
+  <input type="date" name="from" value="{{ request.GET.from }}"
+         class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100
+                focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+  <input type="date" name="to"   value="{{ request.GET.to }}"
+         class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100
+                focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+  <div class="md:col-span-4">
+    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Filtrer</button>
+    {% if request.GET %}
+      <a href="{{ request.path }}"
+         class="ml-2 text-sm px-3 py-2 rounded-lg ring-1 ring-slate-200 hover:bg-gray-50
+                dark:ring-white/10 dark:text-slate-300 dark:hover:bg-white/5">
+        Réinitialiser
+      </a>
+    {% endif %}
+  </div>
+</form>
+
+<section class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 dark:bg-slate-800/60">
+      <tr class="text-left">
+        <th class="p-3 text-slate-700 dark:text-slate-200">Titre</th>
+        <th class="p-3 text-slate-700 dark:text-slate-200">Événement</th>
+        <th class="p-3 text-slate-700 dark:text-slate-200">Date</th>
+        <th class="p-3 text-slate-700 dark:text-slate-200">Capacité</th>
+        <th class="p-3 text-slate-700 dark:text-slate-200">Statut</th>
+        <th class="p-3 text-right text-slate-700 dark:text-slate-200">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+      {% for m in page_obj.object_list %}
+      <tr class="bg-white dark:bg-slate-900">
+        <td class="p-3 font-medium text-slate-900 dark:text-slate-100">{{ m.title }}</td>
+        <td class="p-3 text-slate-800 dark:text-slate-200">{{ m.event_title|default:"—" }}</td>
+        <td class="p-3 text-slate-800 dark:text-slate-200">{{ m.date|default:"—" }}</td>
+        <td class="p-3 text-slate-800 dark:text-slate-200">{{ m.capacity|default:"—" }}</td>
+        <td class="p-3">
+          <span class="px-2 py-1 rounded text-xs border
+            {% if m.status == 'published' %}
+              bg-emerald-50 text-emerald-700 border-emerald-200
+              dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-900/40
+            {% elif m.status == 'draft' %}
+              bg-gray-50 text-gray-700 border-gray-200
+              dark:bg-slate-800/60 dark:text-slate-200 dark:border-white/10
+            {% else %}
+              bg-amber-50 text-amber-700 border-amber-200
+              dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-900/40
+            {% endif %}">
+            {{ m.status|title }}
+          </span>
+        </td>
+        <td class="p-3 text-right space-x-2">
+          <a href="{% url 'staff:mission_detail' pk=m.id %}"
+             class="text-blue-600 dark:text-blue-300 hover:underline">Détails</a>
+          <a href="{% url 'staff:mission_update' pk=m.id %}"
+             class="text-gray-600 dark:text-slate-300 hover:underline">Éditer</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" class="p-6 text-center text-gray-500 dark:text-slate-400">Aucune mission.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+{% include "staff/partials/_pagination.html" with page_obj=page_obj %}
+{% endblock %}

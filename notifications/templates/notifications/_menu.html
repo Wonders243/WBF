@@ -1,0 +1,239 @@
+{% comment %}
+Notifications — version premium, robuste
+- Panel non interactif quand fermé (hidden + pointer-events-none)
+- Ext click partout, scroll, resize, ESC => close
+- Animations fluides
+- AJAX "Tout lu" avec fallback
+{% endcomment %}
+
+{% if request.user.is_authenticated %}
+<div class="relative inline-flex self-center" id="notifMenuRoot">
+  <!-- Bouton cloche -->
+  <button id="notifMenuBtn" type="button"
+          class="relative inline-flex h-10 w-10 items-center justify-center rounded-full
+                 bg-gradient-to-b from-white/85 to-white/60 dark:from-slate-900/70 dark:to-slate-900/50
+                 backdrop-blur supports-[backdrop-filter]:bg-white/50
+                 text-blue-700 dark:text-blue-200
+                 ring-1 ring-slate-200/70 dark:ring-slate-700/60
+                 hover:from-white/95 hover:to-white/80 dark:hover:from-slate-900/80 dark:hover:to-slate-900/70
+                 transition duration-150 ease-out active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+          aria-haspopup="menu" aria-expanded="false" aria-controls="notifMenuPanel" title="Notifications">
+    <svg class="w-6 h-6 block" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-2.995-2.824L7 15h6a3 3 0 01-3 3z"/>
+    </svg>
+
+    {% if unread_count %}
+      <span class="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-600/70 motion-safe:animate-ping" aria-hidden="true"></span>
+      <span id="notifMenuBadge"
+            class="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1.5 inline-flex items-center justify-center
+                   rounded-full bg-red-600 text-white text-[10px] font-bold ring-2 ring-white dark:ring-slate-900 shadow">
+        {% if unread_count > 99 %}99+{% else %}{{ unread_count }}{% endif %}
+      </span>
+    {% endif %}
+    <span class="sr-only">Voir les notifications</span>
+  </button>
+
+  <!-- Wrapper pour l’animation -->
+  <div id="notifMenuWrapper"
+       class="absolute right-0 mt-2 w-[24rem] origin-top-right z-50 pointer-events-none hidden"
+       data-state="closed" aria-hidden="true">
+    <div id="notifMenuAnim"
+         class="rounded-2xl opacity-0 translate-y-1 transition duration-200 ease-out
+                shadow-2xl ring-1 ring-black/5 dark:ring-0
+                bg-white
+                dark:p-[1px] dark:bg-gradient-to-br dark:from-slate-800/70 dark:via-slate-900/40 dark:to-slate-800/70">
+      <!-- Panneau -->
+      <div id="notifMenuPanel"
+           class="rounded-2xl pointer-events-auto
+                  border border-slate-200 dark:border-slate-700/60
+                  bg-white dark:bg-slate-900/85"
+           role="menu" tabindex="-1">
+        <header class="px-3 py-2 flex items-center justify-between">
+          <p class="text-sm font-semibold">Notifications</p>
+          <form action="{% url 'notifications:read_all' %}" method="post" id="notifMarkAllForm">
+            {% csrf_token %}
+            <button id="notifMarkAll" type="submit"
+                    class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md
+                           bg-slate-100 hover:bg-slate-200
+                           dark:bg-slate-800/70 dark:hover:bg-slate-700 transition">
+              <svg class="w-3.5 h-3.5 block" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path d="M16.707 5.293a1 1 0 00-1.414 0L9 11.586 6.707 9.293A1 1 0 105.293 10.707l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z"/>
+              </svg>
+              Tout lu
+            </button>
+          </form>
+        </header>
+
+        <ul id="notifItems"
+            class="max-h-80 overflow-y-auto divide-y
+                   divide-slate-200 dark:divide-slate-700/60">
+          {% for n in items %}
+            <li class="group">
+              <a href="{% url 'notifications:open' n.pk %}" role="menuitem"
+                 class="flex gap-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
+                <span class="mt-1.5 h-2.5 w-2.5 rounded-full shrink-0 ring-2 ring-white dark:ring-slate-900
+                             {% if not n.is_read %}bg-blue-500{% else %}bg-slate-300 dark:bg-slate-600{% endif %}"></span>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-start justify-between gap-2">
+                    <p class="text-sm font-semibold truncate">{{ n.title|default:"Notification" }}</p>
+                    {% if not n.is_read %}
+                      <span class="text-[10px] px-1.5 py-0.5 rounded-full
+                                   bg-blue-50 text-blue-700
+                                   dark:bg-blue-900/30 dark:text-blue-200 shrink-0">Nouveau</span>
+                    {% endif %}
+                  </div>
+                  {% if n.message %}
+                    <p class="text-xs text-slate-600 dark:text-slate-400 break-words line-clamp-3">{{ n.message }}</p>
+                  {% endif %}
+                  <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                    {{ n.created_at|date:"d/m/Y H:i" }}
+                  </p>
+                </div>
+              </a>
+            </li>
+          {% empty %}
+            <li class="p-6">
+              <div class="flex items-center gap-3 text-slate-500 dark:text-slate-400">
+                <svg class="w-5 h-5 block" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                  <path stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                </svg>
+                <span class="text-sm">Aucune notification pour le moment.</span>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+
+        <footer class="px-3 py-2">
+          <a href="{% url 'notifications:list' %}"
+             class="block text-center text-sm underline text-blue-600 dark:text-blue-400 hover:opacity-90">
+            Voir tout
+          </a>
+        </footer>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Scrollbar douce pour le panneau (fallback safe) */
+#notifItems::-webkit-scrollbar{width:.5rem;height:.5rem}
+#notifItems::-webkit-scrollbar-thumb{border-radius:9999px;background:rgba(100,116,139,.35)}
+#notifItems:hover::-webkit-scrollbar-thumb{background:rgba(100,116,139,.55)}
+</style>
+
+<script>
+(function () {
+  const root   = document.getElementById('notifMenuRoot');
+  if (!root) return;
+  const btn    = document.getElementById('notifMenuBtn');
+  const wrap   = document.getElementById('notifMenuWrapper');
+  const anim   = document.getElementById('notifMenuAnim');
+  const panel  = document.getElementById('notifMenuPanel');
+  const markAllForm = document.getElementById('notifMarkAllForm');
+  const badge  = document.getElementById('notifMenuBadge');
+
+  function reallyHide() {
+    // état fermé et non cliquable/visible
+    wrap.classList.add('hidden','pointer-events-none');
+    wrap.setAttribute('aria-hidden','true');
+  }
+  function prepShow() {
+    // prêt à s'animer/recevoir des événements
+    wrap.classList.remove('hidden','pointer-events-none');
+    wrap.setAttribute('aria-hidden','false');
+  }
+
+  function openPanel() {
+    if (wrap.dataset.state === 'open') return;
+    wrap.dataset.state = 'open';
+    prepShow();
+    // kick animation
+    requestAnimationFrame(() => {
+      anim.classList.remove('opacity-0','translate-y-1');
+      anim.classList.add('opacity-100','translate-y-0');
+      btn.setAttribute('aria-expanded','true');
+      // focus premier item si présent
+      const first = panel.querySelector('[role="menuitem"]');
+      if (first) first.focus({preventScroll:true});
+    });
+  }
+
+  function closePanel() {
+    if (wrap.dataset.state === 'closed') return;
+    wrap.dataset.state = 'closed';
+    anim.classList.add('opacity-0','translate-y-1');
+    anim.classList.remove('opacity-100','translate-y-0');
+    btn.setAttribute('aria-expanded','false');
+    // après la transition, rendre vraiment invisible et non interactif
+    const onEnd = (e) => {
+      if (e.propertyName !== 'opacity') return;
+      anim.removeEventListener('transitionend', onEnd);
+      reallyHide();
+    };
+    anim.addEventListener('transitionend', onEnd);
+    // sécurité si pas d’événement transitionend (navigateurs exotiques)
+    setTimeout(reallyHide, 250);
+  }
+
+  function togglePanel() {
+    (wrap.dataset.state === 'open') ? closePanel() : openPanel();
+  }
+
+  // Ouvrir/fermer via bouton
+  btn.addEventListener('click', (e) => { e.stopPropagation(); togglePanel(); });
+
+  // Fermer sur clic extérieur (capture = on attrape TOUT)
+  const closeOnOutside = (e) => { if (!root.contains(e.target)) closePanel(); };
+  document.addEventListener('click', closeOnOutside, true);
+
+  // Fermer sur ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePanel();
+    // nav ↑/↓ optionnelle
+    if (wrap.dataset.state === 'open' && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+      const items = Array.from(panel.querySelectorAll('[role="menuitem"]'));
+      if (!items.length) return;
+      const idx = items.indexOf(document.activeElement);
+      const next = e.key === 'ArrowDown'
+        ? items[(idx + 1) % items.length]
+        : items[(idx - 1 + items.length) % items.length];
+      next?.focus({preventScroll:true});
+      e.preventDefault();
+    }
+  });
+
+  // Fermer sur scroll/resize/orientationchange (comportement demandé “peu importe le clic extérieur” + robustesse)
+  ['scroll','resize','orientationchange'].forEach(evt => {
+    window.addEventListener(evt, closePanel, { passive: true });
+  });
+
+  // "Tout lu" via POST (AJAX + fallback)
+  if (markAllForm) {
+    markAllForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const res = await fetch(markAllForm.getAttribute('action'), {
+          method: 'POST',
+          headers: { 'X-CSRFToken': markAllForm.querySelector('[name=csrfmiddlewaretoken]').value }
+        });
+        if (res.ok) {
+          // UI update (badge + pastilles)
+          badge?.remove();
+          panel.querySelectorAll('span.bg-blue-500').forEach(dot => {
+            dot.classList.remove('bg-blue-500');
+            dot.classList.add('bg-slate-300','dark:bg-slate-600');
+          });
+        } else {
+          markAllForm.submit();
+        }
+      } catch {
+        markAllForm.submit();
+      }
+    });
+  }
+
+  // état initial “vraiment fermé”
+  reallyHide();
+})();
+</script>
+{% endif %}

@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% load static doc_extras %}
+{% block title %}Candidatur — {{ app.id }}{% endblock %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto space-y-6">
+
+  <!-- En-tête -->
+  <header class="flex items-start justify-between gap-4">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100">
+        Candidature bénévole #{{ app.id }}
+      </h1>
+      <p class="text-sm text-slate-500 dark:text-slate-400">
+        Soumise le {{ app.submitted_at|date:"d/m/Y H:i" }}
+        {% if app.reviewed_at %} — Dernière mise à jour le {{ app.reviewed_at|date:"d/m/Y H:i" }}{% endif %}
+      </p>
+      <div class="mt-2">
+        {% if app.status == 'pending' %}
+          <span class="inline-flex items-center rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200 px-3 py-1 text-xs font-medium">En attente de vérification</span>
+        {% elif app.status == 'needs_changes' %}
+          <span class="inline-flex items-center rounded-full bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-200 px-3 py-1 text-xs font-medium">Corrections demandées</span>
+        {% elif app.status == 'approved' %}
+          <span class="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200 px-3 py-1 text-xs font-medium">Approuvée</span>
+        {% else %}
+          <span class="inline-flex items-center rounded-full bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 px-3 py-1 text-xs font-medium">Refusée</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+      {% if allow_add %}
+      <a href="#add-docs" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Ajouter des documents</a>
+      {% endif %}
+      <button type="button" onclick="window.print()"
+              class="px-3 py-2 rounded-lg bg-slate-100 text-slate-800 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700">
+        Imprimer / PDF
+      </button>
+    </div>
+  </header>
+
+  <!-- Grille 2 colonnes -->
+  <div class="grid lg:grid-cols-2 gap-6 items-start">
+
+    <!-- Colonne GAUCHE : Modifications / Notes -->
+    <div class="space-y-6 print:hidden">
+
+      {% if app.status == 'needs_changes' %}
+      <div class="rounded-2xl border border-rose-300/50 bg-rose-50 dark:bg-rose-950/30 dark:border-rose-900/50 p-4">
+        <h2 class="font-semibold text-rose-800 dark:text-rose-200">Corrections demandées</h2>
+        {% if app.review_note %}
+          <p class="mt-1 text-sm text-rose-700 dark:text-rose-300">
+            <span class="font-medium">Note du staff :</span> {{ app.review_note }}
+          </p>
+        {% endif %}
+        <ul class="mt-2 list-disc list-inside text-sm text-rose-700 dark:text-rose-200">
+          {% for d in docs %}
+            {% if d.status == 'rejected' %}
+              <li><span class="font-medium">{{ d.get_doc_type_display }}</span>{% if d.reviewer_note %} — {{ d.reviewer_note }}{% endif %}</li>
+            {% endif %}
+          {% empty %}
+            <li>Aucun document explicitement refusé.</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <!-- Modifier mes infos (édition légère) -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+        <h2 class="text-lg font-bold mb-3">Modifier mes informations</h2>
+        <form method="post" class="space-y-4">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="update_infos">
+          {{ edit_form.non_field_errors }}
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="text-sm font-medium" for="{{ edit_form.phone.id_for_label }}">Téléphone</label>
+              {{ edit_form.phone }} {{ edit_form.phone.errors }}
+            </div>
+            <div>
+              <label class="text-sm font-medium" for="{{ edit_form.birth_date.id_for_label }}">Date de naissance</label>
+              {{ edit_form.birth_date }} {{ edit_form.birth_date.errors }}
+            </div>
+            <div class="md:col-span-2">
+              <label class="text-sm font-medium" for="{{ edit_form.address_line1.id_for_label }}">Adresse (ligne 1)</label>
+              {{ edit_form.address_line1 }} {{ edit_form.address_line1.errors }}
+            </div>
+            <div class="md:col-span-2">
+              <label class="text-sm font-medium" for="{{ edit_form.address_line2.id_for_label }}">Complément</label>
+              {{ edit_form.address_line2 }} {{ edit_form.address_line2.errors }}
+            </div>
+            <div>
+              <label class="text-sm font-medium" for="{{ edit_form.postal_code.id_for_label }}">Code postal</label>
+              {{ edit_form.postal_code }} {{ edit_form.postal_code.errors }}
+            </div>
+            <div>
+              <label class="text-sm font-medium" for="{{ edit_form.city.id_for_label }}">Ville</label>
+              {{ edit_form.city }} {{ edit_form.city.errors }}
+            </div>
+            <div>
+              <label class="text-sm font-medium" for="{{ edit_form.state.id_for_label }}">Région/État</label>
+              {{ edit_form.state }} {{ edit_form.state.errors }}
+            </div>
+            <div>
+              <label class="text-sm font-medium" for="{{ edit_form.country.id_for_label }}">Pays</label>
+              {{ edit_form.country }} {{ edit_form.country.errors }}
+            </div>
+          </div>
+
+          <div>
+            <label class="text-sm font-medium" for="{{ edit_form.motivation.id_for_label }}">Motivation</label>
+            {{ edit_form.motivation }} {{ edit_form.motivation.errors }}
+          </div>
+
+          <div class="flex justify-end gap-3">
+            <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Enregistrer les modifications</button>
+          </div>
+        </form>
+        <p class="mt-2 text-xs text-slate-500">Conseil : après modification, le dossier peut repasser en “En attente”.</p>
+      </div>
+
+      {% if allow_add %}
+      <!-- Ajouter des documents -->
+      <div id="add-docs" class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6 space-y-3">
+        <h2 class="text-lg font-bold">Ajouter des documents</h2>
+        <form method="post" enctype="multipart/form-data" class="space-y-3">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="add_docs">
+          {{ formset.management_form }}
+          <div class="grid md:grid-cols-2 gap-3">
+            {% for f in formset %}
+              <div class="rounded-xl p-3 bg-slate-50 dark:bg-slate-800/50 space-y-2">
+                <label class="block text-sm font-medium">Type de document</label>
+                {{ f.doc_type }}
+                <label class="block text-sm font-medium mt-2">Fichier</label>
+                {{ f.file }}
+                {% if f.doc_type.errors or f.file.errors %}
+                  <p class="text-xs text-rose-600 mt-1">{{ f.doc_type.errors }} {{ f.file.errors }}</p>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+          <div class="flex items-center justify-between">
+            <p class="text-xs text-slate-500">Formats conseillés : JPG, PNG, PDF. ideal moins de 5 Mo.</p>
+            <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Ajouter</button>
+          </div>
+        </form>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <!-- Colonne DROITE : Aperçu compact -->
+    <aside class="space-y-6">
+
+      <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-xl ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
+        <div class="p-6">
+          <!-- Visuel principal réduit -->
+          <div class="overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800 ring-1 ring-black/5 dark:ring-white/10 flex items-center justify-center">
+  {% if main_image_url %}
+    <img src="{{ main_image_url }}" alt="Visuel principal" class="w-full object-cover max-h-72">
+  {% else %}
+    <div class="text-center text-slate-400 text-sm py-10 w-full">
+      <img src="{% static 'img/avatar-placeholder.svg' %}" class="h-20 w-20 opacity-60 mx-auto mb-3" alt="">
+      Aucun visuel disponible
+    </div>
+  {% endif %}
+</div>
+
+          <!-- Résumé -->
+          <div class="mt-5 space-y-2 text-sm">
+            <p><span class="text-slate-500">Nom :</span> <span class="font-medium">{{ app.full_name }}</span></p>
+            <p><span class="text-slate-500">Téléphone :</span> <span class="font-medium">{{ app.phone }}</span></p>
+            <p><span class="text-slate-500">Adresse :</span>
+              <span class="font-medium">
+                {{ app.address_line1 }}{% if app.address_line2 %}, {{ app.address_line2 }}{% endif %},
+                {{ app.postal_code }} {{ app.city }}{% if app.state %}, {{ app.state }}{% endif %} — {{ app.country }}
+              </span>
+            </p>
+            <p><span class="text-slate-500">Pièce :</span> <span class="font-medium">{{ app.get_id_type_display }} ({{ app.id_number }}){% if app.id_expiry %}, exp. {{ app.id_expiry|date:"d/m/Y" }}{% endif %}</span></p>
+            {% if app.motivation %}<p class="mt-2"><span class="text-slate-500">Motivation :</span> <span class="font-medium">{{ app.motivation|truncatechars:140 }}</span></p>{% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Mini-galerie (vignettes réduites) -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-5">
+        <h3 class="font-semibold mb-3">Documents (aperçu)</h3>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {% for d in docs %}
+            {% if d.file|is_image %}
+              <a href="{{ d.file.url }}" target="_blank" class="block rounded-lg overflow-hidden ring-1 ring-black/5 dark:ring-white/10">
+                <img src="{{ d.file.url }}" alt="{{ d.get_doc_type_display }}" class="h-28 w-full object-cover">
+              </a>
+            {% else %}
+              <a href="{{ d.file.url }}" target="_blank" class="h-28 w-full flex items-center justify-center rounded-lg ring-1 ring-black/5 dark:ring-white/10 bg-slate-50 dark:bg-slate-800/50 text-xs text-slate-600 dark:text-slate-300">
+                {{ d.get_doc_type_display }} (ouvrir)
+              </a>
+            {% endif %}
+          {% empty %}
+            <p class="text-sm text-slate-500">Aucun document.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+</section>
+
+<style>
+@media print{
+  body{ background: white !important; }
+  header, nav, footer{ display:none !important; }
+  .print\:hidden{ display:none !important; }
+}
+</style>
+{% endblock %}

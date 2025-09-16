@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+{% load static i18n humanize %}
+
+{% block title %}{{ project.title }} — BAMU WELLBEING Foundation{% endblock %}
+
+{% block content %}
+<article itemscope itemtype="https://schema.org/Project" class="scroll-smooth">
+
+  {# ───────── ENTÊTE sobre (pas de hero photo façon réseau social) ───────── #}
+  <header class="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+    <div class="max-w-screen-xl mx-auto px-4 py-6 md:py-8">
+      <nav aria-label="{% trans 'Fil d’Ariane' %}" class="text-slate-600 dark:text-slate-300 text-xs sm:text-sm mb-2 flex items-center gap-2">
+        <a href="{% url 'core:project' %}" class="hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500/40 rounded">
+          {% trans "Projets" %}
+        </a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page" class="opacity-95">{{ project.title }}</span>
+      </nav>
+
+      <h1 itemprop="headline" class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white">
+        {{ project.title }}
+      </h1>
+
+      {# Meta en simple liste, sans badges #}
+      <dl class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-1 text-sm">
+        {% if project.category %}
+          <div class="flex gap-2">
+            <dt class="text-slate-500 dark:text-slate-400">{% trans "Catégorie" %}</dt>
+            <dd class="font-medium text-slate-900 dark:text-slate-100">{{ project.category }}</dd>
+          </div>
+        {% endif %}
+        {% if project.status %}
+          <div class="flex gap-2">
+            <dt class="text-slate-500 dark:text-slate-400">{% trans "Statut" %}</dt>
+            <dd class="font-medium text-slate-900 dark:text-slate-100">{{ project.status }}</dd>
+          </div>
+        {% endif %}
+        {% if project.start_date or project.end_date %}
+          <div class="flex gap-2">
+            <dt class="text-slate-500 dark:text-slate-400">{% trans "Période" %}</dt>
+            <dd class="font-medium text-slate-900 dark:text-slate-100">
+              {% if project.start_date %}{{ project.start_date|date:"d M Y" }}{% endif %}
+              {% if project.end_date %} → {{ project.end_date|date:"d M Y" }}{% endif %}
+              {% if project.start_date %}<meta itemprop="startDate" content="{{ project.start_date|date:'Y-m-d' }}">{% endif %}
+              {% if project.end_date %}<meta itemprop="endDate" content="{{ project.end_date|date:'Y-m-d' }}">{% endif %}
+            </dd>
+          </div>
+        {% endif %}
+      </dl>
+    </div>
+  </header>
+
+  {# ───────── Corps de page en 2 colonnes (Sommaire + Contenu + Fiche projet) ───────── #}
+  <section class="max-w-screen-xl mx-auto px-4 py-8 md:py-10">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+      {# Sommaire latéral (institutionnel) #}
+      <nav class="lg:col-span-3 lg:self-start lg:sticky lg:top-24 order-2 lg:order-1" aria-label="{% trans 'Sommaire' %}">
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4">
+          <h2 class="text-sm font-semibold text-slate-800 dark:text-slate-200 mb-3">{% trans "Sommaire" %}</h2>
+          <ol class="space-y-2 text-sm">
+            <li><a href="#presentation" class="hover:underline">{% trans "Présentation" %}</a></li>
+            {% if project.objectives %}<li><a href="#objectifs" class="hover:underline">{% trans "Objectifs" %}</a></li>{% endif %}
+            {% if project.activities %}<li><a href="#activites" class="hover:underline">{% trans "Activités" %}</a></li>{% endif %}
+            {% if project.results or project.outputs %}<li><a href="#resultats" class="hover:underline">{% trans "Résultats" %}</a></li>{% endif %}
+            {% with partners=project.partners.all %}{% if partners %}
+              <li><a href="#partenaires" class="hover:underline">{% trans "Partenaires" %}</a></li>
+            {% endif %}{% endwith %}
+            {% if project.documents or project.files %}
+              <li><a href="#documents" class="hover:underline">{% trans "Documents" %}</a></li>
+            {% endif %}
+          </ol>
+        </div>
+      </nav>
+
+      {# Colonne principale éditoriale #}
+      <main class="lg:col-span-6 order-1 lg:order-2" id="main">
+        <section id="presentation" class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 sm:p-8">
+          {% if project.image %}
+            <figure class="mb-6">
+              <div class="relative w-full rounded-lg overflow-hidden ring-1 ring-slate-200 dark:ring-slate-800 bg-slate-50 dark:bg-slate-900">
+                <img
+                  src="{{ project.image.url }}"
+                  alt="{{ project.title }}"
+                  class="block w-full h-auto max-h-[420px] object-contain"
+                  loading="lazy" decoding="async" width="1600" height="900"
+                  sizes="(min-width: 1024px) 740px, 100vw">
+                <meta itemprop="image" content="{{ project.image.url }}">
+              </div>
+              {% if project.caption %}
+                <figcaption class="mt-2 text-center text-xs text-slate-500 dark:text-slate-400">{{ project.caption }}</figcaption>
+              {% endif %}
+            </figure>
+          {% endif %}
+
+          <div itemprop="description"
+               class="prose prose-slate dark:prose-invert max-w-none prose-headings:scroll-mt-24">
+            {% if project.description %}
+              {{ project.description|linebreaksbr }}
+            {% else %}
+              <p class="text-slate-600 dark:text-slate-300">{% trans "Description à venir." %}</p>
+            {% endif %}
+          </div>
+        </section>
+
+        {% if project.objectives %}
+          <section id="objectifs" class="mt-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 sm:p-8">
+            <h2 class="text-xl font-semibold mb-3 text-slate-900 dark:text-slate-100">{% trans "Objectifs" %}</h2>
+            <div class="prose prose-slate dark:prose-invert max-w-none">
+              {{ project.objectives|linebreaksbr }}
+            </div>
+          </section>
+        {% endif %}
+
+        {% if project.activities %}
+          <section id="activites" class="mt-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 sm:p-8">
+            <h2 class="text-xl font-semibold mb-3 text-slate-900 dark:text-slate-100">{% trans "Activités" %}</h2>
+            <div class="prose prose-slate dark:prose-invert max-w-none">
+              {{ project.activities|linebreaksbr }}
+            </div>
+          </section>
+        {% endif %}
+
+        {% if project.results or project.outputs %}
+          <section id="resultats" class="mt-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 sm:p-8">
+            <h2 class="text-xl font-semibold mb-3 text-slate-900 dark:text-slate-100">{% trans "Résultats & indicateurs" %}</h2>
+            <div class="prose prose-slate dark:prose-invert max-w-none">
+              {% if project.results %}{{ project.results|linebreaksbr }}{% endif %}
+              {% if project.outputs %}{{ project.outputs|linebreaksbr }}{% endif %}
+            </div>
+          </section>
+        {% endif %}
+
+        {% with partners=project.partners.all %}
+          {% if partners %}
+            <section id="partenaires" class="mt-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 sm:p-8">
+              <h2 class="text-xl font-semibold mb-4 text-slate-900 dark:text-slate-100">{% trans "Partenaires" %}</h2>
+              <ul class="divide-y divide-slate-200 dark:divide-slate-800">
+                {% for p in partners %}
+                  <li class="py-3 flex items-center gap-3">
+                    {% if p.logo %}
+                      <img src="{{ p.logo.url }}" alt="{% blocktrans with n=p.name %}Logo {{ n }}{% endblocktrans %}"
+                           class="h-10 w-10 object-contain rounded bg-white ring-1 ring-slate-200 dark:ring-slate-800"
+                           loading="lazy" decoding="async" width="64" height="64">
+                    {% endif %}
+                    <div class="min-w-0">
+                      <p class="font-medium text-slate-900 dark:text-slate-100 truncate">{{ p.name }}</p>
+                      {% if p.website %}
+                        <a href="{{ p.website }}" target="_blank" rel="noopener" class="text-xs text-blue-700 dark:text-blue-300 hover:underline">
+                          {% trans "Site web" %}
+                        </a>
+                      {% endif %}
+                    </div>
+                  </li>
+                {% endfor %}
+              </ul>
+            </section>
+          {% endif %}
+        {% endwith %}
+
+        {% if project.documents or project.files %}
+          <section id="documents" class="mt-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 sm:p-8">
+            <h2 class="text-xl font-semibold mb-3 text-slate-900 dark:text-slate-100">{% trans "Documents" %}</h2>
+            <ul class="list-disc pl-5 space-y-1">
+              {% for doc in project.documents.all|default:project.files.all %}
+                <li><a href="{{ doc.file.url }}" class="hover:underline" target="_blank" rel="noopener">{{ doc.title|default:doc.file.name }}</a></li>
+              {% endfor %}
+            </ul>
+          </section>
+        {% endif %}
+      </main>
+
+      {# FICHE PROJET (infos clés + actions discrètes) #}
+      <aside class="lg:col-span-3 lg:self-start lg:sticky lg:top-24 order-3" aria-label="{% trans 'Fiche projet' %}">
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 space-y-5">
+          <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{% trans "Fiche projet" %}</h2>
+
+          <dl class="text-sm space-y-2">
+            {% if project.category %}
+              <div class="flex justify-between gap-3"><dt class="text-slate-500 dark:text-slate-400">{% trans "Catégorie" %}</dt><dd class="font-medium">{{ project.category }}</dd></div>
+            {% endif %}
+            {% if project.status %}
+              <div class="flex justify-between gap-3"><dt class="text-slate-500 dark:text-slate-400">{% trans "Statut" %}</dt><dd class="font-medium">{{ project.status }}</dd></div>
+            {% endif %}
+            {% if project.start_date %}
+              <div class="flex justify-between gap-3"><dt class="text-slate-500 dark:text-slate-400">{% trans "Début" %}</dt><dd class="font-medium">{{ project.start_date|date:"d/m/Y" }}</dd></div>
+            {% endif %}
+            {% if project.end_date %}
+              <div class="flex justify-between gap-3"><dt class="text-slate-500 dark:text-slate-400">{% trans "Fin" %}</dt><dd class="font-medium">{{ project.end_date|date:"d/m/Y" }}</dd></div>
+            {% endif %}
+          </dl>
+
+          {% if project.link %}
+            <a href="{{ project.link }}" target="_blank" rel="noopener"
+               class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg
+                      ring-1 ring-slate-300 dark:ring-slate-700 hover:bg-slate-50 dark:hover:bg-white/5 font-medium transition">
+              🔗 {% trans "Site du projet" %}
+            </a>
+          {% endif %}
+
+          <a href="{% url 'core:contact' %}"
+             class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg
+                    bg-blue-600 hover:bg-blue-700 text-white font-semibold transition">
+            {% trans "Nous contacter" %}
+          </a>
+
+          <button type="button" id="print-page"
+                  class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg
+                         ring-1 ring-slate-300 dark:ring-slate-700 hover:bg-slate-50 dark:hover:bg-white/5 font-medium transition">
+            🖨 {% trans "Imprimer / PDF" %}
+          </button>
+
+          {# Partage réduit (institutionnel) #}
+          <div class="pt-1">
+            <button type="button" id="copy-link"
+                    class="text-sm underline underline-offset-2 hover:no-underline">
+              {% trans "Copier le lien de la page" %}
+            </button>
+            <p id="copy-feedback" class="mt-1 text-xs text-emerald-600 dark:text-emerald-400 hidden">{% trans "Lien copié ✔" %}</p>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+
+    {# Projets liés (grille simple, sans effets "réseau social") #}
+    <section class="mt-12">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{% trans "Autres projets" %}</h2>
+        <a href="{% url 'core:project' %}" class="text-sm text-blue-700 dark:text-blue-300 hover:underline">{% trans "Voir tous" %}</a>
+      </div>
+
+      {% if other_projects %}
+        <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {% for p in other_projects %}
+            <li class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4">
+              <a href="{% url 'core:project_detail' p.slug %}" class="block">
+                {% if p.image %}
+                  <img src="{{ p.image.url }}" alt="{{ p.title }}"
+                       class="rounded-md w-full h-40 object-cover mb-3"
+                       loading="lazy" decoding="async" width="640" height="360">
+                {% endif %}
+                <h3 class="font-semibold text-slate-900 dark:text-slate-100 line-clamp-2">{{ p.title }}</h3>
+                {% if p.description %}
+                  <p class="text-sm text-slate-600 dark:text-slate-300 line-clamp-2 mt-1">{{ p.description }}</p>
+                {% endif %}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-sm text-slate-500 dark:text-slate-400">—</p>
+      {% endif %}
+    </section>
+
+    {% if previous_project or next_project %}
+      <nav class="mt-10 grid grid-cols-2 gap-3" aria-label="{% trans 'Navigation entre projets' %}">
+        <div>
+          {% if previous_project %}
+            <a href="{% url 'core:project_detail' previous_project.slug %}"
+               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg ring-1 ring-slate-300 dark:ring-slate-700 hover:bg-slate-50 dark:hover:bg-white/5 transition">
+              ← {{ previous_project.title }}
+            </a>
+          {% endif %}
+        </div>
+        <div class="text-right">
+          {% if next_project %}
+            <a href="{% url 'core:project_detail' next_project.slug %}"
+               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg ring-1 ring-slate-300 dark:ring-slate-700 hover:bg-slate-50 dark:hover:bg-white/5 transition">
+               {{ next_project.title }} →
+            </a>
+          {% endif %}
+        </div>
+      </nav>
+    {% endif %}
+  </section>
+</article>
+
+{# ───────── JSON-LD (SEO) ───────── #}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Project",
+  "name": "{{ project.title|escapejs }}",
+  {% if project.description %}"description": "{{ project.description|striptags|escapejs }}",{% endif %}
+  "url": "{{ request.build_absolute_uri }}",
+  {% if project.image %}"image": "{{ project.image.url }}",{% endif %}
+  {% if project.start_date %}"startDate": "{{ project.start_date|date:'Y-m-d' }}",{% endif %}
+  {% if project.end_date %}"endDate": "{{ project.end_date|date:'Y-m-d' }}",{% endif %}
+  {% with ps=project.partners.all %}
+  {% if ps %}
+  "sponsor": [
+    {% for p in ps %}
+      {
+        "@type": "Organization",
+        "name": "{{ p.name|escapejs }}"{% if p.website %},
+        "url": "{{ p.website }}"{% endif %}
+      }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+  {% endif %}
+  {% endwith %}
+}
+</script>
+
+{# ───────── Scripts (copie lien + impression) ───────── #}
+<script>
+(function(){
+  const copyBtn = document.getElementById('copy-link');
+  const fb  = document.getElementById('copy-feedback');
+  const printBtn = document.getElementById('print-page');
+  const url = '{{ request.build_absolute_uri }}';
+
+  if (copyBtn) {
+    copyBtn.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(url);
+        if (fb) { fb.classList.remove('hidden'); setTimeout(()=>fb.classList.add('hidden'), 1500); }
+      } catch(_) {}
+    });
+  }
+  if (printBtn) {
+    printBtn.addEventListener('click', () => { window.print(); });
+  }
+})();
+</script>
+{% endblock %}

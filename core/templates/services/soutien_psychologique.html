@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Soutien psychologique — BAMU WELLBEING Foundation{% endblock %}
+
+{% block content %}
+<article class="max-w-7xl mx-auto text-slate-800 dark:text-slate-100">
+
+  {# ───────── HERO ───────── #}
+  {% static 'img/placeholder-16x9.jpg' as placeholder %}
+  <section class="relative overflow-hidden rounded-2xl mb-8">
+    <div class="relative w-full h-[28vh] sm:h-[32vh] lg:h-[36vh] bg-slate-200 dark:bg-slate-800">
+      <img src="{{ hero_url|default:placeholder }}" alt="Soutien psychologique"
+           class="absolute inset-0 w-full h-full object-cover">
+      <div class="absolute inset-0 bg-gradient-to-tr from-black/70 via-black/20 to-transparent"></div>
+
+      <div class="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <p class="text-blue-200 text-sm tracking-wide uppercase">Soutien psychologique</p>
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white drop-shadow">
+              Écoute, orientation & appui psychosocial
+            </h1>
+          </div>
+          <div class="flex items-center gap-2">
+            <a href="{% url 'benevoles:missions_browse' %}"
+               class="inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700">
+              Devenir bénévole
+            </a>
+            <a href="{% url 'core:contact' %}"
+               class="inline-flex items-center rounded-xl border border-white/40 px-4 py-2 font-semibold text-white/95 hover:bg-white/10">
+              Demander un appui
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {# ───────── BANDEAU URGENCE ───────── #}
+  <div class="mb-8 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 p-4">
+    <p class="font-semibold text-red-700 dark:text-red-300">
+      Urgence immédiate ? Appelez les services d’urgence locaux ou rendez-vous au centre de santé le plus proche.
+    </p>
+    <p class="text-sm text-red-800/80 dark:text-red-200/80 mt-1">
+      Nous n’assurons pas la prise en charge d’urgence. Cette page concerne l’écoute, l’orientation et l’appui non urgent.
+    </p>
+  </div>
+
+  {# ───────── PRINCIPES ───────── #}
+  <section class="grid gap-6 md:grid-cols-3 mb-8">
+    <div class="rounded-2xl border p-6">
+      <h3 class="font-bold">Confidentialité</h3>
+      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Informations protégées, partagées uniquement avec votre consentement.</p>
+    </div>
+    <div class="rounded-2xl border p-6">
+      <h3 class="font-bold">Dignité & respect</h3>
+      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Accueil sans jugement, prise en compte de vos choix et priorités.</p>
+    </div>
+    <div class="rounded-2xl border p-6">
+      <h3 class="font-bold">Inclusion</h3>
+      <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Accès équitable pour tous, notamment les plus vulnérables.</p>
+    </div>
+  </section>
+
+  {# ───────── TEMOIGNAGE + KPI ───────── #}
+  {% if story %}
+  <section class="grid md:grid-cols-3 gap-6 mb-8">
+    <div class="md:col-span-2 rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800 p-6">
+      {% if story.quote %}
+        <blockquote class="text-lg italic opacity-90">“{{ story.quote }}”</blockquote>
+      {% endif %}
+    </div>
+
+    <aside class="rounded-xl bg-white dark:bg-slate-900 ring-1 ring-slate-200 dark:ring-slate-800 p-6">
+      <h3 class="font-semibold">Impact (aperçu)</h3>
+      <dl class="mt-3 grid grid-cols-2 gap-3 text-sm">
+        <div class="p-3 rounded-lg bg-indigo-50 text-indigo-900 dark:bg-indigo-900/20 dark:text-indigo-100 ring-1 ring-indigo-200/70 dark:ring-indigo-900/30">
+          <dt>Bénéficiaires</dt>
+          <dd class="text-2xl font-extrabold">{{ kpi.children_supported|default:0 }}</dd>
+        </div>
+        <div class="p-3 rounded-lg bg-emerald-50 text-emerald-900 dark:bg-emerald-900/20 dark:text-emerald-100 ring-1 ring-emerald-200/70 dark:ring-emerald-900/30">
+          <dt>Villes</dt>
+          <dd class="text-2xl font-extrabold">{{ kpi.cities|default:0 }}</dd>
+        </div>
+      </dl>
+      {% if kpi.city_names %}
+        <p class="mt-3 text-xs text-slate-500">Exemples : {{ kpi.city_names }}</p>
+      {% endif %}
+    </aside>
+  </section>
+  {% endif %}
+
+  {# ───────── SERVICES ───────── #}
+  <section id="services" class="mb-8">
+    <h2 class="text-2xl font-extrabold">Nos services</h2>
+    <div class="mt-4 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div class="rounded-2xl border p-6"><h3 class="font-semibold">Écoute & orientation</h3><p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Accueil bienveillant, évaluation rapide, premières pistes d’appui.</p></div>
+      <div class="rounded-2xl border p-6"><h3 class="font-semibold">Appui psychosocial individuel</h3><p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Séances d’accompagnement et renforcement des capacités d’adaptation.</p></div>
+      <div class="rounded-2xl border p-6"><h3 class="font-semibold">Médiation familiale & communautaire</h3><p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Prévenir l’escalade, rétablir le dialogue, réduire les tensions.</p></div>
+      <div class="rounded-2xl border p-6"><h3 class="font-semibold">Inclusion sociale</h3><p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Accès aux droits, vie scolaire/professionnelle, participation sociale.</p></div>
+      <div class="rounded-2xl border p-6"><h3 class="font-semibold">Réinsertion & lien social</h3><p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Reprise d’activité, autonomie, activités socio-culturelles.</p></div>
+      <div class="rounded-2xl border p-6"><h3 class="font-semibold">Sensibilisation santé mentale</h3><p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Ateliers, causeries, plaidoyer anti-stigmatisation.</p></div>
+    </div>
+  </section>
+
+  {# ───────── DEMARCHE ───────── #}
+  <section class="mb-8">
+    <h2 class="text-2xl font-extrabold">Comment ça se passe ?</h2>
+    <div class="mt-4 grid md:grid-cols-4 gap-4">
+      <div class="rounded-xl border p-4"><p class="text-sm font-semibold">1. Accueil & écoute</p><p class="text-sm mt-1 text-slate-600 dark:text-slate-300">Comprendre votre situation.</p></div>
+      <div class="rounded-xl border p-4"><p class="text-sm font-semibold">2. Évaluation rapide</p><p class="text-sm mt-1 text-slate-600 dark:text-slate-300">Priorités et objectifs.</p></div>
+      <div class="rounded-xl border p-4"><p class="text-sm font-semibold">3. Plan d’appui</p><p class="text-sm mt-1 text-slate-600 dark:text-slate-300">Séances, médiation, inclusion.</p></div>
+      <div class="rounded-xl border p-4"><p class="text-sm font-semibold">4. Suivi</p><p class="text-sm mt-1 text-slate-600 dark:text-slate-300">Points réguliers & ajustements.</p></div>
+    </div>
+  </section>
+
+  {# ───────── CTA CONTACT ───────── #}
+  <section class="mb-8 rounded-2xl border p-6 flex items-center justify-between flex-wrap gap-4">
+    <div>
+      <h3 class="font-semibold">Besoin d’un appui ?</h3>
+      <p class="text-sm text-slate-600 dark:text-slate-300">Contactez-nous en précisant « Soutien psychologique ».</p>
+    </div>
+    <a href="{% url 'core:contact' %}" class="inline-flex items-center rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700">
+      Ouvrir le formulaire de contact
+    </a>
+  </section>
+
+  {# ───────── GALERIE (optionnelle) ───────── #}
+  {% if story and gallery %}
+  <section class="mb-10">
+    <h2 class="text-2xl font-extrabold">En images</h2>
+    <div class="mt-4 grid sm:grid-cols-3 gap-3">
+      {% for img in gallery %}
+        <figure class="rounded-xl overflow-hidden ring-1 ring-slate-200 dark:ring-slate-800">
+          <img src="{{ img.url }}" alt="" class="w-full h-56 object-cover">
+          {% if img.caption %}
+            <figcaption class="p-2 text-xs text-slate-600 dark:text-slate-300">{{ img.caption }}</figcaption>
+          {% endif %}
+        </figure>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {# ───────── FAQ ───────── #}
+  <section class="mb-8">
+    <h2 class="text-2xl font-extrabold">FAQ</h2>
+    <div class="mt-4 space-y-4">
+      <details class="rounded-xl border p-4">
+        <summary class="font-semibold cursor-pointer">Sous quel délai aurez-vous un retour ?</summary>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Généralement sous quelques jours ouvrés (selon le volume de demandes).</p>
+      </details>
+      <details class="rounded-xl border p-4">
+        <summary class="font-semibold cursor-pointer">Mes informations sont-elles confidentielles ?</summary>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Oui. Nous ne partageons rien sans votre consentement éclairé.</p>
+      </details>
+    </div>
+  </section>
+
+  {# ───────── SEO JSON-LD ───────── #}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "NGO",
+    "name": "BAMU WELLBEING Foundation",
+    "areaServed": ["Kinshasa","Kindu/Maniema"],
+    "knowsAbout": ["Mental health","Psychosocial support","Inclusion","Reintegration"],
+    "isAccessibleForFree": true,
+    "url": "{{ request.build_absolute_uri }}"
+  }
+  </script>
+
+</article>
+{% endblock %}

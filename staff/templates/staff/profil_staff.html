@@ -1,0 +1,205 @@
+﻿{% extends "staff/base_staff.html" %}
+{% load static %}
+
+{% block staff_title %}Profil · Staff{% endblock %}
+
+{% block breadcrumb %}
+  <nav class="text-sm text-slate-500 mb-2">
+    <a href="{% url 'staff:dashboard' %}" class="hover:underline">Tableau de bord</a>
+    <span class="mx-2">/</span>
+    <span class="text-slate-700">Profil</span>
+  </nav>
+{% endblock %}
+
+{% block staff_content %}
+  <div class="md:col-span-9 lg:col-span-10 space-y-6">
+    <div class="grid md:grid-cols-3 gap-4">
+      <!-- Carte utilisateur -->
+      <aside class="md:col-span-1 bg-white dark:bg-slate-900 rounded-2xl shadow border border-slate-200/60 dark:border-white/10 p-5">
+        <div class="flex items-center gap-4">
+          <img src="{% static 'img/anonyme.png' %}" alt="Avatar" class="w-16 h-16 rounded-full object-cover ring-2 ring-blue-100">
+          <div>
+            <p class="font-semibold text-slate-900 dark:text-slate-100">{{ user.get_full_name|default:user.username }}</p>
+            <p class="text-xs text-slate-500">{{ user.email }}</p>
+          </div>
+        </div>
+        <div class="mt-4 grid grid-cols-2 gap-2 text-xs">
+          <div class="px-3 py-2 rounded-lg bg-blue-50 text-blue-800 border border-blue-100">Staff</div>
+          {% if user.is_superuser %}
+            <div class="px-3 py-2 rounded-lg bg-purple-50 text-purple-800 border border-purple-100">Superuser</div>
+          {% endif %}
+        </div>
+        <div class="mt-4 space-y-2">
+          <a href="{% url 'account_change_password' %}" class="block text-sm px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10">Changer mon mot de passe</a>
+          {% if user.is_staff %}
+            <a href="/admin/" class="block text-sm px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10">Aller au Django Admin</a>
+          {% endif %}
+          <a href="{% url 'benevoles:profile_benevole' %}" class="block text-sm px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 dark:bg-white/5 dark:hover:bg-white/10">Profil bénévole</a>
+        </div>
+      </aside>
+
+      <!-- Infos -->
+      <section class="md:col-span-2 bg-white dark:bg-slate-900 rounded-2xl shadow border border-slate-200/60 dark:border-white/10 p-5">
+        <h1 class="text-lg font-semibold mb-4">Informations du compte</h1>
+        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+          <div>
+            <dt class="text-slate-500">Nom d’utilisateur</dt>
+            <dd class="font-medium">{{ user.username }}</dd>
+          </div>
+          <div>
+            <dt class="text-slate-500">Email</dt>
+            <dd class="font-medium">{{ user.email|default:'—' }}</dd>
+          </div>
+          <div>
+            <dt class="text-slate-500">Nom complet</dt>
+            <dd class="font-medium">{{ user.get_full_name|default:'—' }}</dd>
+          </div>
+          <div>
+            <dt class="text-slate-500">Dernière connexion</dt>
+            <dd class="font-medium">{{ user.last_login|date:'d/m/Y H:i'|default:'—' }}</dd>
+          </div>
+          <div>
+            <dt class="text-slate-500">Membre depuis</dt>
+            <dd class="font-medium">{{ user.date_joined|date:'d/m/Y' }}</dd>
+          </div>
+          <div>
+            <dt class="text-slate-500">Groupes</dt>
+            <dd class="font-medium">
+              {% for g in user.groups.all %}
+                {{ g.name }}{% if not forloop.last %}, {% endif %}
+              {% empty %}—{% endfor %}
+            </dd>
+          </div>
+          <div class="sm:col-span-2">
+            <dt class="text-slate-500">Permissions (total)</dt>
+            <dd class="font-medium">{{ user.get_all_permissions|length }}</dd>
+          </div>
+        </dl>
+      </section>
+    </div>
+
+    <!-- Mon équipe -->
+    <section class="bg-white dark:bg-slate-900 rounded-2xl shadow border border-slate-200/60 dark:border-white/10 p-5">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold">Mon équipe</h2>
+        <div class="flex gap-2">
+          <a href="{% url 'staff:team_list' %}" class="text-sm px-3 py-2 rounded-lg border hover:bg-slate-50 dark:hover:bg-white/5">Voir l’équipe</a>
+          {% if user.is_superuser %}
+            <a href="{% url 'staff:team_create' %}" class="text-sm px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Ajouter un membre</a>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if team_member %}
+        <div class="mt-4 grid gap-3 sm:grid-cols-3 text-sm">
+          <div><span class="text-slate-500">Nom</span><div class="font-medium">{{ team_member.name }}</div></div>
+          <div><span class="text-slate-500">Rôle</span><div class="font-medium">{{ team_member.role|default:'—' }}</div></div>
+          <div><span class="text-slate-500">Département</span><div class="font-medium">{{ team_member.department|default:'—' }}</div></div>
+          <div><span class="text-slate-500">Email</span><div class="font-medium">{{ team_member.email|default:'—' }}</div></div>
+          <div><span class="text-slate-500">Téléphone</span><div class="font-medium">{{ team_member.phone|default:'—' }}</div></div>
+        </div>
+        <div class="mt-4 flex gap-2">
+          <a href="{% url 'staff:team_detail' team_member.slug %}" class="text-sm px-3 py-2 rounded-lg border hover:bg-slate-50 dark:hover:bg-white/5">Voir</a>
+          {% if user.is_superuser %}
+            <a href="{% url 'staff:team_update' team_member.slug %}" class="text-sm px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Modifier</a>
+          {% endif %}
+        </div>
+      {% else %}
+        <p class="mt-3 text-sm text-slate-500">Aucun profil d’équipe lié à votre compte.</p>
+      {% endif %}
+    </section>
+
+    {% if user.is_superuser %}
+    <!-- Sécurité / Clés API (réservé superuser) -->
+    <section class="bg-white dark:bg-slate-900 rounded-2xl shadow border border-slate-200/60 dark:border-white/10 p-5">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold">Sécurité · Clés API</h2>
+        <div class="flex gap-2">
+          <a href="{% url 'staff:key_list' %}" class="text-sm px-3 py-2 rounded-lg border hover:bg-slate-50 dark:hover:bg-white/5">Gérer mes clés</a>
+          <a href="{% url 'staff:create_key' %}" class="text-sm px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">Créer une clé</a>
+        </div>
+      </div>
+
+      <p class="mt-1 text-xs text-slate-500">Vous avez {{ api_keys_total }} clé{{ api_keys_total|pluralize }} au total.</p>
+
+      {% if api_keys %}
+        <div class="mt-3 overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="text-left text-slate-500">
+              <tr>
+                <th class="py-2 pr-4">Libellé</th>
+                <th class="py-2 pr-4">Niveau</th>
+                <th class="py-2 pr-4">Utilisations</th>
+                <th class="py-2 pr-4">Expiration</th>
+                <th class="py-2 pr-4">Statut</th>
+                <th class="py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+              {% for k in api_keys %}
+              <tr>
+                <td class="py-2 pr-4">{{ k.label|default:k.token_prefix }}</td>
+                <td class="py-2 pr-4">{{ k.get_level_display }}</td>
+                <td class="py-2 pr-4">{{ k.uses_count }}{% if k.max_uses %}/{{ k.max_uses }}{% endif %}</td>
+                <td class="py-2 pr-4">{% if k.expires_at %}{{ k.expires_at|date:'d/m/Y H:i' }}{% else %}—{% endif %}</td>
+                <td class="py-2 pr-4">
+                  {% if k.is_active %}
+                    <span class="px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">Active</span>
+                  {% else %}
+                    <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border">Inact.</span>
+                  {% endif %}
+                </td>
+                <td class="py-2">
+                  <form method="post" action="{% url 'staff:revoke_key' k.id %}" onsubmit="return confirm('Révoquer cette clé ?');">
+                    {% csrf_token %}
+                    <button class="text-red-600 hover:underline">Révoquer</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="mt-3 text-sm text-slate-500">Aucune clé pour l’instant.</p>
+      {% endif %}
+    </section>
+
+    <!-- Activité récente -->
+    <section class="bg-white dark:bg-slate-900 rounded-2xl shadow border border-slate-200/60 dark:border-white/10 p-5">
+      <h2 class="text-lg font-semibold">Activité récente (clés)</h2>
+      {% if key_uses %}
+        <ul class="mt-2 divide-y divide-slate-200 dark:divide-white/10">
+          {% for u in key_uses %}
+            <li class="py-2 flex items-center justify-between text-sm">
+              <div class="min-w-0">
+                <p class="font-medium truncate">
+                  {{ u.action }} · <span class="text-slate-500">{{ u.object_repr|default:u.object_pk }}</span>
+                </p>
+                <p class="text-xs text-slate-500">
+                  Clé :
+                  {% if u.key %}
+                    {{ u.key.label|default:u.key.token_prefix }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="text-xs text-slate-500">{{ u.used_at|date:'d/m/Y H:i' }}</p>
+                {% if u.success %}
+                  <span class="px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 text-xs">Succès</span>
+                {% else %}
+                  <span class="px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 text-xs">Échec</span>
+                {% endif %}
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="mt-2 text-sm text-slate-500">Aucune activité récente.</p>
+      {% endif %}
+    </section>
+    {% endif %}
+  </div>
+{% endblock %}

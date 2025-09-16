@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Notifications-BAMU WELLBEING Foundation{% endblock %}
+
+{% block content %}
+<section class="max-w-3xl mx-auto space-y-4">
+  <!-- Header -->
+  <header class="flex items-center justify-between gap-3">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100">Notifications</h1>
+      <p class="text-sm text-slate-600 dark:text-slate-400">Vos dernières activités et alertes.</p>
+    </div>
+    <form action="{% url 'notifications:read_all' %}" method="post">
+      {% csrf_token %}
+      <button type="submit"
+        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg
+               bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700
+               text-sm transition">
+        <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path d="M16.707 5.293a1 1 0 00-1.414 0L9 11.586 6.707 9.293A1 1 0 105.293 10.707l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z"/></svg>
+        Tout marquer comme lu
+      </button>
+    </form>
+  </header>
+
+  <!-- Filtres rapides -->
+  {% with read=request.GET.read %}
+  <nav class="flex items-center gap-2">
+    <a href="{% url 'notifications:list' %}"
+       class="px-3 py-1.5 rounded-full text-sm border
+              {% if not read %}bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-transparent{% else %}bg-white/70 dark:bg-slate-900/60 border-slate-200 dark:border-slate-700{% endif %}">
+      Toutes
+    </a>
+    <a href="{% url 'notifications:list' %}?read=0"
+       class="px-3 py-1.5 rounded-full text-sm border
+              {% if read == '0' %}bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-transparent{% else %}bg-white/70 dark:bg-slate-900/60 border-slate-200 dark:border-slate-700{% endif %}">
+      Non lues
+    </a>
+    <a href="{% url 'notifications:list' %}?read=1"
+       class="px-3 py-1.5 rounded-full text-sm border
+              {% if read == '1' %}bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-transparent{% else %}bg-white/70 dark:bg-slate-900/60 border-slate-200 dark:border-slate-700{% endif %}">
+      Lues
+    </a>
+  </nav>
+  {% endwith %}
+
+  <!-- Liste -->
+  <ul class="rounded-2xl overflow-hidden border border-slate-200/70 dark:border-slate-700/60 divide-y divide-slate-200/60 dark:divide-slate-700/50 bg-white/70 dark:bg-slate-900/60 backdrop-blur">
+    {% for n in notifications %}
+      <li class="{% if not n.is_read %}ring-1 ring-inset ring-blue-500/20{% endif %}">
+        <a href="{% url 'notifications:open' n.pk %}" class="flex gap-3 p-4 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
+          <!-- Pastille état -->
+          <span class="mt-1.5 h-2.5 w-2.5 rounded-full shrink-0 ring-2 ring-white dark:ring-slate-900
+                       {% if not n.is_read %}bg-blue-500{% else %}bg-slate-300 dark:bg-slate-600{% endif %}">
+          </span>
+
+          <div class="min-w-0 flex-1">
+            <div class="flex items-start justify-between gap-3">
+              <h2 class="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
+                {{ n.title|default:"Notification" }}
+              </h2>
+              <!-- Badge verbe -->
+              <span class="shrink-0 text-[10px] px-2 py-0.5 rounded-full
+                {% if n.verb == 'created' %}bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200{% endif %}
+                {% if n.verb == 'updated' %}bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200{% endif %}
+                {% if n.verb == 'deleted' %}bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-200{% endif %}">
+                {% if n.verb == 'created' %}créé{% elif n.verb == 'updated' %}modifié{% elif n.verb == 'deleted' %}supprimé{% else %}info{% endif %}
+              </span>
+            </div>
+
+            {% if n.message %}
+              <p class="mt-0.5 text-xs text-slate-600 dark:text-slate-400 break-words">
+                {{ n.message }}
+              </p>
+            {% endif %}
+
+            <div class="mt-1 text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2 flex-wrap">
+              {% if n.actor %}<span>par {{ n.actor.get_full_name|default:n.actor.username }}</span>{% endif %}
+              <span aria-hidden="true">•</span>
+              <time datetime="{{ n.created_at|date:'c' }}">{{ n.created_at|naturaltime }}</time>
+            </div>
+          </div>
+
+          <!-- Chevron -->
+          <svg class="w-4 h-4 mt-1 shrink-0 opacity-60 group-hover:opacity-100" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707A1 1 0 118.707 5.293l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+          </svg>
+        </a>
+      </li>
+    {% empty %}
+      <li class="p-10 text-center">
+        <div class="inline-flex items-center gap-3 text-slate-500 dark:text-slate-400">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span>Aucune notification pour le moment.</span>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <!-- Pagination (si disponible) -->
+  {% if page_obj %}
+    <div class="flex items-center justify-between pt-2">
+      <span class="text-sm text-slate-500 dark:text-slate-400">
+        Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+      </span>
+      <div class="flex gap-2">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.read %}&read={{ request.GET.read }}{% endif %}{% if request.GET.verb %}&verb={{ request.GET.verb }}{% endif %}"
+             class="px-3 py-1.5 rounded-lg text-sm border bg-white/70 dark:bg-slate-900/60 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/60">
+            Précédent
+          </a>
+        {% else %}
+          <span class="px-3 py-1.5 rounded-lg text-sm border border-transparent text-slate-400">Précédent</span>
+        {% endif %}
+
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}{% if request.GET.read %}&read={{ request.GET.read }}{% endif %}{% if request.GET.verb %}&verb={{ request.GET.verb }}{% endif %}"
+             class="px-3 py-1.5 rounded-lg text-sm border bg-white/70 dark:bg-slate-900/60 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/60">
+            Suivant
+          </a>
+        {% else %}
+          <span class="px-3 py-1.5 rounded-lg text-sm border border-transparent text-slate-400">Suivant</span>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

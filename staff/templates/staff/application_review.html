@@ -1,0 +1,204 @@
+{% extends "staff/base_staff.html" %}
+{% block staff_title %}Revue candidature #{{ app.id }}{% endblock %}
+
+{% block staff_content %}
+<section class="space-y-6">
+
+  <!-- En-tête -->
+  <header class="flex items-start justify-between gap-4 bg-white dark:bg-slate-900 rounded-2xl shadow
+                 ring-1 ring-black/5 dark:ring-white/10 p-6">
+    <div>
+      <h1 class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">
+        Candidature #{{ app.id }}
+      </h1>
+      <p class="text-sm text-slate-600 dark:text-slate-300">
+        Par <span class="font-medium">{{ app.user }}</span>
+        • Soumise le {{ app.submitted_at|date:"d/m/Y H:i" }}
+        {% if app.reviewed_at %} • Dernière revue le {{ app.reviewed_at|date:"d/m/Y H:i" }}{% endif %}
+      </p>
+
+      <!-- Badge statut -->
+      <div class="mt-2">
+        {% if app.status == 'pending' %}
+          <span class="inline-flex items-center rounded-full bg-amber-100 text-amber-800
+                         dark:bg-amber-900/30 dark:text-amber-200 px-3 py-1 text-xs font-semibold">
+            En attente de vérification
+          </span>
+        {% elif app.status == 'needs_changes' %}
+          <span class="inline-flex items-center rounded-full bg-rose-100 text-rose-800
+                         dark:bg-rose-900/30 dark:text-rose-200 px-3 py-1 text-xs font-semibold">
+            Corrections demandées
+          </span>
+        {% elif app.status == 'approved' %}
+          <span class="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800
+                         dark:bg-emerald-900/30 dark:text-emerald-200 px-3 py-1 text-xs font-semibold">
+            Approuvée
+          </span>
+        {% else %}
+          <span class="inline-flex items-center rounded-full bg-slate-200 text-slate-700
+                         dark:bg-slate-800 dark:text-slate-300 px-3 py-1 text-xs font-semibold">
+            Refusée
+          </span>
+        {% endif %}
+      </div>
+
+      {% if app.review_note %}
+        <p class="mt-2 text-sm text-amber-700 dark:text-amber-300">
+          <span class="font-medium">Note :</span> {{ app.review_note }}
+        </p>
+      {% endif %}
+    </div>
+
+    <!-- Actions de revue -->
+    <form method="post"
+          class="space-y-2 js-auth-managed"
+          data-auth-message="Clé requise pour modifier le statut de la candidature."
+          data-superuser="{{ request.user.is_superuser|yesno:'true,false' }}"
+          >
+          
+      {% csrf_token %}
+      <textarea name="note" rows="2"
+                class="w-72 max-w-[80vw] px-3 py-2 rounded-lg
+                       bg-white dark:bg-slate-900/60
+                       border border-slate-300 dark:border-white/10
+                       text-slate-900 dark:text-slate-100
+                       placeholder-slate-400 focus:outline-none
+                       focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/30"
+                placeholder="Note au candidat (optionnel)"></textarea>
+
+      <div class="flex flex-wrap gap-2 justify-end">
+        {% if app.status == 'approved' %}
+          <button name="action" value="unapprove"
+                  class="px-3 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-700
+                         focus:outline-none focus:ring-2 focus:ring-slate-400/40">
+            Annuler l’approbation
+          </button>
+          <button disabled
+                  class="px-3 py-2 rounded-lg bg-slate-200 text-slate-500 cursor-not-allowed
+                         dark:bg-slate-800/50 dark:text-slate-500">
+            Demander corrections
+          </button>
+          <button disabled
+                  class="px-3 py-2 rounded-lg bg-slate-200 text-slate-500 cursor-not-allowed
+                         dark:bg-slate-800/50 dark:text-slate-500">
+            Refuser
+          </button>
+        {% else %}
+          <button name="action" value="needs_changes"
+                  class="px-3 py-2 rounded-lg bg-amber-500 text-white hover:bg-amber-600
+                         focus:outline-none focus:ring-2 focus:ring-amber-300/40">
+            Demander corrections
+          </button>
+          <button name="action" value="reject"
+                  class="px-3 py-2 rounded-lg bg-rose-600 text-white hover:bg-rose-700
+                         focus:outline-none focus:ring-2 focus:ring-rose-300/40">
+            Refuser
+          </button>
+          <button name="action" value="approve"
+                  class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700
+                         focus:outline-none focus:ring-2 focus:ring-emerald-300/40">
+            Approuver
+          </button>
+        {% endif %}
+      </div>
+    </form>
+  </header>
+
+  <!-- Infos & Historique -->
+  <div class="grid md:grid-cols-2 gap-4 bg-white dark:bg-slate-900 rounded-2xl shadow
+              ring-1 ring-black/5 dark:ring-white/10 p-6">
+    <div>
+      <h2 class="font-semibold text-slate-900 dark:text-slate-100 mb-2">Infos</h2>
+      <ul class="text-sm space-y-1 text-slate-800 dark:text-slate-200">
+        <li><span class="text-slate-500 dark:text-slate-400">Nom :</span> {{ app.full_name }}</li>
+        <li><span class="text-slate-500 dark:text-slate-400">Téléphone :</span> {{ app.phone|default:"—" }}</li>
+        <li><span class="text-slate-500 dark:text-slate-400">Naissance :</span> {{ app.birth_date|default:"—" }}</li>
+        <li><span class="text-slate-500 dark:text-slate-400">Adresse :</span> {{ app.address_line1 }} {{ app.address_line2 }}</li>
+        <li><span class="text-slate-500 dark:text-slate-400">Ville :</span> {{ app.city }} ({{ app.postal_code }}) — {{ app.country }}</li>
+        <li><span class="text-slate-500 dark:text-slate-400">Pièce :</span> {{ app.get_id_type_display }} {{ app.id_number }}{% if app.id_expiry %} (exp. {{ app.id_expiry|date:"d/m/Y" }}){% endif %}</li>
+        {% if app.motivation %}
+          <li class="pt-2">
+            <span class="text-slate-500 dark:text-slate-400">Motivation :</span>
+            <div class="mt-1 rounded-lg bg-slate-50 dark:bg-slate-800/50 p-3 text-slate-800 dark:text-slate-200">
+              {{ app.motivation|linebreaksbr }}
+            </div>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+
+    <div>
+      <h2 class="font-semibold text-slate-900 dark:text-slate-100 mb-2">Historique</h2>
+      <ul class="text-sm text-slate-600 dark:text-slate-300 space-y-1">
+        <li>Soumise le {{ app.submitted_at|date:"d/m/Y H:i" }}</li>
+        {% if app.reviewed_at %}
+          <li>Dernière revue le {{ app.reviewed_at|date:"d/m/Y H:i" }} par {{ app.reviewed_by }}</li>
+        {% endif %}
+      </ul>
+      {% if app.status == 'needs_changes' and app.review_note %}
+        <div class="mt-3 rounded-xl border border-rose-300/50 bg-rose-50
+                    dark:border-rose-900/50 dark:bg-rose-950/30 p-3 text-sm">
+          <div class="font-semibold text-rose-800 dark:text-rose-200">Corrections demandées</div>
+          <div class="mt-1 text-rose-700 dark:text-rose-300">{{ app.review_note }}</div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Documents -->
+  <div class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6 space-y-3">
+    <h2 class="font-semibold text-slate-900 dark:text-slate-100">Documents</h2>
+
+    {% if app.status == 'approved' %}
+      <p class="text-xs text-slate-500 dark:text-slate-400">
+        La candidature est approuvée : pour revoir des documents, utilisez « Annuler l’approbation » d’abord.
+      </p>
+    {% endif %}
+
+    <ul class="space-y-2">
+      {% for d in docs %}
+        <li class="flex items-center justify-between gap-3 p-3 rounded-xl
+                   bg-slate-50 dark:bg-slate-800/50">
+          <div>
+            <p class="font-medium text-slate-900 dark:text-slate-100">{{ d.get_doc_type_display }}</p>
+            <p class="text-xs text-slate-600 dark:text-slate-300">
+              Statut : {{ d.get_status_display }}
+              {% if d.reviewer_note %} — Note : {{ d.reviewer_note }}{% endif %}
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <a href="{{ d.file.url }}" target="_blank"
+               class="px-3 py-1 rounded-lg bg-blue-600 text-white hover:bg-blue-700
+                      focus:outline-none focus:ring-2 focus:ring-blue-300/50">
+              Voir
+            </a>
+
+            {% if app.status != 'approved' %}
+              <form method="post" class="flex gap-2 js-auth-managed"
+                    data-auth-message="Clé requise pour modifier le statut du document."
+                    data-superuser="{{ request.user.is_superuser|yesno:'true,false' }}">
+                {% csrf_token %}
+                <input type="hidden" name="doc_id" value="{{ d.id }}">
+                <button name="action" value="doc_approve"
+                        class="px-3 py-1 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 text-xs
+                               focus:outline-none focus:ring-2 focus:ring-emerald-300/50">
+                  Approuver
+                </button>
+                <button name="action" value="doc_reject"
+                        class="px-3 py-1 rounded-lg bg-rose-600 text-white hover:bg-rose-700 text-xs
+                               focus:outline-none focus:ring-2 focus:ring-rose-300/50">
+                  Refuser
+                </button>
+              </form>
+            {% endif %}
+          </div>
+        </li>
+      {% empty %}
+        <li class="text-sm text-slate-500 dark:text-slate-400">Aucun document.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+</section>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "staff/base_staff.html" %}
+{% block staff_title %}Clés d’autorisation{% endblock %}
+
+{% block staff_content %}
+<section class="max-w-6xl mx-auto space-y-6">
+  <header class="flex items-center justify-between">
+    <h1 class="text-2xl font-extrabold text-blue-700 dark:text-blue-300">Clés d’autorisation</h1>
+    <a href="{% url 'staff:create_key' %}"
+       class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+      Nouvelle clé
+    </a>
+  </header>
+
+  <div class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 dark:bg-slate-800/60">
+        <tr class="text-left">
+          <th class="p-3">Libellé</th>
+          <th class="p-3">Prefix</th>
+          <th class="p-3">Niveau</th>
+          <th class="p-3">Actions autorisées</th>
+          <th class="p-3">Utilisations</th>
+          <th class="p-3">Expiration</th>
+          <th class="p-3">Actif</th>
+          <th class="p-3">Créée par</th>
+          <th class="p-3 text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+        {% for k in keys %}
+        <tr class="bg-white dark:bg-slate-900">
+          <td class="p-3 font-medium text-slate-900 dark:text-slate-100">{{ k.label|default:"—" }}</td>
+          <td class="p-3 font-mono text-xs">{{ k.token_prefix }}</td>
+          <td class="p-3">{{ k.get_level_display }}</td>
+          <td class="p-3">
+            {# ⚠️ Pas de liste littérale dans un if : utiliser == "*" ou "*" in #}
+            {% if k.allowed_actions == "*" or "*" in k.allowed_actions %}
+              <span class="px-2 py-1 text-xs rounded bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-900/40">Toutes</span>
+            {% elif k.allowed_actions %}
+              <span class="text-xs text-slate-700 dark:text-slate-200">{{ k.allowed_actions|join:", " }}</span>
+            {% else %}
+              <span class="text-xs text-slate-500 dark:text-slate-400">—</span>
+            {% endif %}
+          </td>
+          <td class="p-3">
+            {% if k.max_uses %}
+              {{ k.uses_count }} / {{ k.max_uses }}
+            {% else %}
+              {{ k.uses_count }}
+            {% endif %}
+          </td>
+          <td class="p-3">{% if k.expires_at %}{{ k.expires_at }}{% else %}—{% endif %}</td>
+          <td class="p-3">
+            {% if k.is_active %}
+              <span class="px-2 py-1 text-xs rounded bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-900/40">Actif</span>
+            {% else %}
+              <span class="px-2 py-1 text-xs rounded bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-900/40">Inactif</span>
+            {% endif %}
+          </td>
+          <td class="p-3">{{ k.created_by.get_full_name|default:k.created_by.username }}</td>
+          <td class="p-3 text-right space-x-2">
+            {% if k.is_active %}
+              <form method="post" action="{% url 'staff:revoke_key' k.id %}" class="inline">{% csrf_token %}
+                <button class="px-3 py-1.5 rounded bg-rose-600 text-white hover:bg-rose-700"
+                        onclick="return confirm('Révoquer cette clé ?');">
+                  Révoquer
+                </button>
+              </form>
+            {% else %}
+              <span class="px-3 py-1.5 rounded ring-1 ring-slate-200 dark:ring-white/10 text-slate-500 dark:text-slate-400">Révoquée</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="p-6 text-center text-slate-500 dark:text-slate-400">Aucune clé.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <p class="text-xs text-slate-500 dark:text-slate-400">
+    Astuce : le <em>token</em> complet n’est visible qu’à la création. Conservez-le en lieu sûr. Pour partager à nouveau, créez une nouvelle clé.
+  </p>
+</section>
+{% endblock %}

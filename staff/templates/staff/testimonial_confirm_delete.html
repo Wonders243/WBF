@@ -1,0 +1,17 @@
+{% extends "staff/base_staff.html" %}
+{% block staff_title %}Confirmer la suppression{% endblock %}
+
+{% block staff_content %}
+<section class="max-w-2xl">
+  <h1 class="text-xl font-bold text-rose-700 dark:text-rose-300 mb-4">Supprimer ce témoignage ?</h1>
+  <div class="p-4 rounded-xl bg-white dark:bg-slate-900 ring-1 ring-black/5 dark:ring-white/10">
+    <p class="text-sm text-slate-700 dark:text-slate-300 mb-4">Auteur: <strong>{{ obj.author }}</strong></p>
+    <form method="post">
+      {% csrf_token %}
+      <button class="px-4 py-2 rounded-lg bg-rose-600 text-white hover:bg-rose-700">Supprimer</button>
+      <a href="{% url 'staff:testimonials_list' %}" class="ml-2 px-4 py-2 rounded-lg ring-1 ring-slate-200 dark:ring-white/10 hover:bg-slate-50 dark:hover:bg-white/5">Annuler</a>
+    </form>
+  </div>
+</section>
+{% endblock %}
+

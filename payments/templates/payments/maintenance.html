@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Paiement indisponible" %}{% endblock %}
+
+{% block content %}
+<section class="max-w-md mx-auto my-10 rounded-xl border border-amber-200 bg-amber-50 p-5 text-amber-900 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-100">
+  <div class="flex items-center gap-3">
+    <svg aria-hidden="true" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+    </svg>
+    <h1 class="text-base sm:text-lg font-semibold">{% trans "Page en maintenance" %}</h1>
+  </div>
+
+  <p class="mt-2 text-sm leading-6">
+    {% trans "Le module de paiement est momentanément indisponible." %}<br>
+    {% trans "Veuillez contacter notre service pour finaliser votre don." %}
+  </p>
+
+  <div class="mt-4 space-y-1 text-sm">
+    {% if support_email %}
+      <p>Email : <a href="mailto:{{ support_email }}" class="text-blue-700 dark:text-blue-300 underline">{{ support_email }}</a></p>
+    {% endif %}
+    {% if support_phone %}
+      <p>Tél. : <a href="tel:{{ support_phone }}" class="text-blue-700 dark:text-blue-300 underline">{{ support_phone }}</a></p>
+    {% endif %}
+    {% if support_whatsapp %}
+      <p>WhatsApp : <a href="https://wa.me/{{ support_whatsapp|cut:'+' }}" class="text-blue-700 dark:text-blue-300 underline">{{ support_whatsapp }}</a></p>
+    {% endif %}
+    {% if support_url %}
+      <p><a href="{{ support_url }}" class="text-blue-700 dark:text-blue-300 underline">{% trans "Formulaire de contact" %}</a></p>
+    {% endif %}
+  </div>
+
+  <div class="mt-5">
+    <a href="{% url 'core:accueil' %}" class="inline-flex items-center justify-center rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-900 dark:bg-slate-200 dark:text-slate-900 dark:hover:bg-white">
+      {% trans "Retour à l’accueil" %}
+    </a>
+  </div>
+
+  {# Meta SEO (pas indexer la maintenance) #}
+  <div class="sr-only">
+    <meta name="robots" content="noindex, nofollow">
+  </div>
+</section>
+{% endblock %}

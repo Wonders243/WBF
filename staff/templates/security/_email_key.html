@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+  <body style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; line-height:1.5; color:#0f172a;">
+    <h2 style="margin:0 0 12px; color:#1d4ed8;">Clé d'autorisation</h2>
+    <p style="margin:0 0 12px;">Voici votre clé. Conservez-la en lieu sûr et ne la partagez pas publiquement.</p>
+
+    <div style="margin:12px 0; padding:12px; border:1px solid #e2e8f0; border-radius:10px; background:#f8fafc;">
+      <div style="font-size:12px; color:#475569;">Token</div>
+      <div style="font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:14px; word-break:break-all;">{{ token }}</div>
+    </div>
+
+    <ul style="margin:12px 0; padding-left:18px; color:#334155;">
+      <li><strong>Préfixe:</strong> {{ key.token_prefix }}</li>
+      <li><strong>Niveau:</strong> {{ key.get_level_display }}</li>
+      <li><strong>Expiration:</strong> {% if key.expires_at %}{{ key.expires_at|date:'d/m/Y H:i' }}{% else %}—{% endif %}</li>
+    </ul>
+
+    <p style="margin:12px 0 0; font-size:12px; color:#64748b;">Astuce: le token complet n'est visible qu'à la création. Si vous devez en renvoyer un, créez une nouvelle clé (rotation).</p>
+  </body>
+  </html>
+

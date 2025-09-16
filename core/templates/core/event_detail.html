@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ event.title }} — Événement{% endblock %}
+
+{% block content %}
+<article itemscope itemtype="https://schema.org/Event" class="scroll-smooth">
+
+  <header class="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+    <div class="max-w-6xl mx-auto px-4 py-6 md:py-8">
+      <nav aria-label="{% trans 'Fil d’Ariane' %}" class="text-slate-600 dark:text-slate-300 text-xs sm:text-sm mb-2 flex items-center gap-2">
+        <a href="{% url 'core:events_list' %}" class="hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500/40 rounded">
+          {% trans "Événements" %}
+        </a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page" class="opacity-95">{{ event.title }}</span>
+      </nav>
+
+      <h1 itemprop="name" class="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white">
+        {{ event.title }}
+      </h1>
+
+      <dl class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-1 text-sm">
+        <div class="flex gap-2">
+          <dt class="text-slate-500 dark:text-slate-400">{% trans "Date" %}</dt>
+          <dd class="font-medium text-slate-900 dark:text-slate-100">
+            <time itemprop="startDate" datetime="{{ event.date|date:'c' }}">
+              {{ event.date|date:"l d F Y" }}
+            </time>
+          </dd>
+        </div>
+        {% if event.lieu %}
+        <div class="flex gap-2">
+          <dt class="text-slate-500 dark:text-slate-400">{% trans "Lieu" %}</dt>
+          <dd class="font-medium text-slate-900 dark:text-slate-100" itemprop="location" itemscope itemtype="https://schema.org/Place">
+            <span itemprop="name">{{ event.lieu }}</span>
+          </dd>
+        </div>
+        {% endif %}
+      </dl>
+    </div>
+  </header>
+
+  <section class="max-w-5xl mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+      {# ————— Colonne principale ————— #}
+      <main class="lg:col-span-8" id="main">
+        <article class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 overflow-hidden">
+          {% if event.image %}
+            <figure>
+              <img
+                src="{{ event.image.url }}"
+                alt="{{ event.title }}"
+                class="w-full max-h-[420px] object-cover"
+                itemprop="image"
+                loading="eager" decoding="async" width="1600" height="900">
+            </figure>
+          {% endif %}
+
+          <div class="p-6 sm:p-7">
+            <div class="prose prose-slate dark:prose-invert max-w-none" itemprop="description">
+              {% if event.description %}
+                {{ event.description|linebreaksbr }}
+              {% else %}
+                <p class="text-slate-600 dark:text-slate-300">{% trans "Description à venir." %}</p>
+              {% endif %}
+            </div>
+          </div>
+        </article>
+      </main>
+
+      {# ————— Fiche événement (infos clés + actions sobres) ————— #}
+      <aside class="lg:col-span-4 lg:self-start lg:sticky lg:top-24" aria-label="{% trans 'Fiche événement' %}">
+        <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 space-y-5">
+
+          <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">{% trans "Informations clés" %}</h2>
+          <dl class="text-sm space-y-2">
+            <div class="flex justify-between gap-3">
+              <dt class="text-slate-500 dark:text-slate-400">{% trans "Date" %}</dt>
+              <dd class="font-medium">
+                {{ event.date|date:"d/m/Y" }}
+              </dd>
+            </div>
+            {% if event.lieu %}
+            <div class="flex justify-between gap-3">
+              <dt class="text-slate-500 dark:text-slate-400">{% trans "Lieu" %}</dt>
+              <dd class="font-medium text-right">
+                {{ event.lieu }}
+              </dd>
+            </div>
+            {% endif %}
+          </dl>
+
+          {# CTA d’inscription si disponible, sinon contact #}
+          {% if event.registration_url %}
+            <a href="{{ event.registration_url }}" target="_blank" rel="noopener"
+               class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg
+                      bg-blue-600 hover:bg-blue-700 text-white font-semibold transition">
+              {% trans "S’inscrire" %}
+            </a>
+          {% else %}
+            <a href="{% url 'core:contact' %}"
+               class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg
+                      bg-blue-600 hover:bg-blue-700 text-white font-semibold transition">
+              {% trans "Nous contacter" %}
+            </a>
+          {% endif %}
+
+          {# Ajouter au calendrier #}
+          <div class="space-y-2"
+               id="calendar-actions"
+               data-title="{{ event.title|escapejs }}"
+               data-date-start="{{ event.date|date:'Y-m-d' }}"
+               {% if event.end_date %}data-date-end="{{ event.end_date|date:'Y-m-d' }}"{% endif %}
+               {% if event.lieu %}data-location="{{ event.lieu|escapejs }}"{% endif %}
+               {% if event.description %}data-description="{{ event.description|striptags|escapejs }}"{% endif %}>
+            <button type="button" id="ics-download"
+                    class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg
+                           ring-1 ring-slate-300 dark:ring-slate-700 hover:bg-slate-50 dark:hover:bg-white/5 text-sm font-medium transition">
+              📅 {% trans "Télécharger .ics" %}
+            </button>
+            <a id="gcal-link" href="#" target="_blank" rel="noopener"
+               class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg
+                      ring-1 ring-slate-300 dark:ring-slate-700 hover:bg-slate-50 dark:hover:bg-white/5 text-sm font-medium transition">
+              🗓 {% trans "Ajouter à Google Calendar" %}
+            </a>
+          </div>
+
+          <button type="button" id="print-page"
+                  class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg
+                         ring-1 ring-slate-300 dark:ring-slate-700 hover:bg-slate-50 dark:hover:bg-white/5 text-sm font-medium transition">
+            🖨 {% trans "Imprimer / PDF" %}
+          </button>
+
+          <div class="pt-1">
+            <button type="button" id="copy-link"
+                    class="text-sm underline underline-offset-2 hover:no-underline">
+              {% trans "Copier le lien de la page" %}
+            </button>
+            <p id="copy-feedback" class="mt-1 text-xs text-emerald-600 dark:text-emerald-400 hidden">{% trans "Lien copié ✔" %}</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="mt-8">
+      <a href="{% url 'core:events_list' %}"
+         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg ring-1 ring-slate-300 dark:ring-slate-700 hover:bg-slate-50 dark:hover:bg-white/5 transition">
+        ← {% trans "Tous les événements" %}
+      </a>
+    </div>
+  </section>
+</article>
+
+{# ——— JSON-LD (SEO Event) ——— #}
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Event",
+  "name":"{{ event.title|escapejs }}",
+  "startDate":"{{ event.date|date:'c' }}",
+  {% if event.end_date %}"endDate":"{{ event.end_date|date:'c' }}",{% endif %}
+  {% if event.image %}"image":"{{ event.image.url }}",{% endif %}
+  {% if event.lieu %}"location":{"@type":"Place","name":"{{ event.lieu|escapejs }}"},{% endif %}
+  "eventAttendanceMode":"https://schema.org/OfflineEventAttendanceMode",
+  "eventStatus":"https://schema.org/EventScheduled",
+  "description":{% if event.description %}"{{ event.description|striptags|escapejs }}"{% else %}"Event"{% endif %},
+  "organizer":{"@type":"Organization","name":"BAMU WELLBEING Foundation"}
+}
+</script>
+
+{# ——— Scripts: .ics, Google Calendar, impression & copie ——— #}
+<script>
+(function(){
+  const root = document.getElementById('calendar-actions');
+  const copyBtn = document.getElementById('copy-link');
+  const fb  = document.getElementById('copy-feedback');
+  const printBtn = document.getElementById('print-page');
+  const gcal = document.getElementById('gcal-link');
+  const icsBtn = document.getElementById('ics-download');
+
+  const pageUrl = '{{ request.build_absolute_uri }}';
+  const title = root?.dataset.title || document.title;
+  const loc = root?.dataset.location || '';
+  const desc = root?.dataset.description || '';
+  const start = root?.dataset.dateStart; // "YYYY-MM-DD"
+  const end   = root?.dataset.dateEnd;   // "YYYY-MM-DD" (optionnel)
+
+  function ymdToCal(s){
+    // retourne "YYYYMMDD" ; si invalide -> null
+    if(!s) return null;
+    const d = new Date(s + 'T00:00:00');
+    if (isNaN(d)) return null;
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    return `${yyyy}${mm}${dd}`;
+  }
+
+  function nextDay(yyyyMMdd){
+    const y = Number(yyyyMMdd.slice(0,4));
+    const m = Number(yyyyMMdd.slice(4,6))-1;
+    const d = Number(yyyyMMdd.slice(6,8));
+    const dt = new Date(Date.UTC(y,m,d));
+    dt.setUTCDate(dt.getUTCDate()+1);
+    const yy = dt.getUTCFullYear();
+    const mm = String(dt.getUTCMonth()+1).padStart(2,'0');
+    const dd = String(dt.getUTCDate()).padStart(2,'0');
+    return `${yy}${mm}${dd}`;
+  }
+
+  const dtStart = ymdToCal(start);
+  const dtEnd   = end ? ymdToCal(end) : (dtStart ? nextDay(dtStart) : null); // all-day: DTEND exclusif (jour suivant)
+
+  // Google Calendar (all-day)
+  if (gcal && dtStart && dtEnd) {
+    const base = 'https://calendar.google.com/calendar/render?action=TEMPLATE';
+    const params = new URLSearchParams({
+      text: title,
+      dates: `${dtStart}/${dtEnd}`,
+      details: desc,
+      location: loc
+    });
+    gcal.href = `${base}&${params.toString()}`;
+  } else if (gcal) {
+    gcal.classList.add('pointer-events-none','opacity-50');
+  }
+
+  // ICS file (all-day)
+  if (icsBtn && dtStart && dtEnd) {
+    icsBtn.addEventListener('click', () => {
+      const uid = Math.random().toString(36).slice(2) + '@bamu.org';
+      const now = new Date().toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z';
+      const ESC = s => (s||'').toString().replace(/\r?\n/g, '\\n').replace(/,/g,'\\,').replace(/;/g,'\\;');
+
+      const ics =
+`BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//BAMU WELLBEING//Event//FR
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:${uid}
+DTSTAMP:${now}
+DTSTART;VALUE=DATE:${dtStart}
+DTEND;VALUE=DATE:${dtEnd}
+SUMMARY:${ESC(title)}
+DESCRIPTION:${ESC(desc)}
+${loc ? 'LOCATION:' + ESC(loc) : ''}
+URL:${pageUrl}
+END:VEVENT
+END:VCALENDAR`;
+
+      const blob = new Blob([ics], {type: 'text/calendar;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = (title || 'event') + '.ics';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 1500);
+    });
+  } else if (icsBtn) {
+    icsBtn.classList.add('pointer-events-none','opacity-50');
+  }
+
+  if (copyBtn) {
+    copyBtn.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(pageUrl);
+        if (fb) { fb.classList.remove('hidden'); setTimeout(()=>fb.classList.add('hidden'), 1500); }
+      } catch(_) {}
+    });
+  }
+  if (printBtn) printBtn.addEventListener('click', () => window.print());
+})();
+</script>
+{% endblock %}

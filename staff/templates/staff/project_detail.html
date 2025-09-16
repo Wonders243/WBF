@@ -1,0 +1,121 @@
+{% extends "staff/base_staff.html" %}
+{% block staff_title %}Staff — Projet : {{ project.title }}{% endblock %}
+
+{% block staff_content %}
+<section class="space-y-6">
+  <!-- En-tête -->
+  <header class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-extrabold text-blue-700 dark:text-blue-300">{{ project.title }}</h1>
+      {% if project.link %}
+        <a href="{{ project.link }}" target="_blank"
+           class="text-blue-600 dark:text-blue-300 hover:underline text-sm">
+          Lien du projet
+        </a>
+      {% endif %}
+    </div>
+    <div class="flex gap-2">
+      <a href="{% url 'staff:project_update' project.id %}"
+         class="px-4 py-2 rounded-lg ring-1 ring-slate-200 hover:bg-slate-50
+                dark:ring-white/10 dark:hover:bg-white/5">
+        Éditer
+      </a>
+      <a href="{% url 'staff:projects_list' %}"
+         class="px-4 py-2 rounded-lg ring-1 ring-slate-200 hover:bg-slate-50
+                dark:ring-white/10 dark:hover:bg-white/5">
+        Retour
+      </a>
+    </div>
+  </header>
+
+  <!-- Contenu principal -->
+  <div class="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
+    <article class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+      <h2 class="text-lg font-semibold mb-3 text-slate-900 dark:text-slate-100">Description</h2>
+      <p class="whitespace-pre-line text-slate-800 dark:text-slate-200">
+        {{ project.description|default:"(Aucune description)" }}
+      </p>
+      {% if project.image %}
+        <img src="{{ project.image.url }}" alt=""
+             class="mt-4 rounded-xl max-h-72 w-full object-cover ring-1 ring-black/5 dark:ring-white/10">
+      {% endif %}
+    </article>
+
+    <aside class="space-y-3">
+      <div class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4">
+        <div class="text-sm text-slate-500 dark:text-slate-400">Partenaires</div>
+        <div class="text-sm text-slate-800 dark:text-slate-200 mt-1">
+          {% if partners %}
+            <ul class="list-disc ml-5 space-y-1">
+              {% for p in partners %}
+                <li>{{ p }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}—{% endif %}
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Événements liés -->
+  <section class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">
+        Événements liés ({{ events|length }})
+      </h2>
+      <a href="{% url 'staff:event_create' %}?project={{ project.id }}"
+         class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+        Créer un événement lié
+      </a>
+    </div>
+    <ul class="divide-y divide-slate-200 dark:divide-white/10">
+      {% for e in events %}
+        <li class="py-3 flex items-center justify-between">
+          <div class="min-w-0">
+            <p class="font-medium text-slate-900 dark:text-slate-100 truncate">{{ e.title }}</p>
+            <p class="text-xs text-slate-600 dark:text-slate-400">
+              {{ e.date|date:"Y-m-d" }} · {{ e.location|default:"Lieu à confirmer" }}
+            </p>
+          </div>
+          <div class="flex gap-2">
+            <a href="{% url 'staff:event_detail' e.id %}"
+               class="text-blue-600 dark:text-blue-300 hover:underline">
+              Détails événement
+            </a>
+          </div>
+        </li>
+      {% empty %}
+        <li class="py-3 text-sm text-slate-500 dark:text-slate-400">Aucun événement lié.</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <!-- Missions liées -->
+  <section class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+    <h2 class="text-lg font-semibold mb-4 text-slate-900 dark:text-slate-100">
+      Missions liées (via événements) — {{ missions|length }}
+    </h2>
+    <ul class="divide-y divide-slate-200 dark:divide-white/10">
+      {% for m in missions %}
+        <li class="py-3 flex items-center justify-between">
+          <div class="min-w-0">
+            <p class="font-medium text-slate-900 dark:text-slate-100 truncate">{{ m.title }}</p>
+            <p class="text-xs text-slate-600 dark:text-slate-400">
+              {% if m.start_date %}{{ m.start_date|date:"Y-m-d H:i" }}{% else %}Date à confirmer{% endif %}
+              · {{ m.location|default:"Lieu à confirmer" }}
+            </p>
+          </div>
+          <div class="flex gap-2">
+            <a href="{% url 'staff:mission_detail' m.id %}"
+               class="text-blue-600 dark:text-blue-300 hover:underline">
+              Détails mission
+            </a>
+          </div>
+        </li>
+      {% empty %}
+        <li class="py-3 text-sm text-slate-500 dark:text-slate-400">Aucune mission liée.</li>
+      {% endfor %}
+    </ul>
+  </section>
+</section>
+{% endblock %}

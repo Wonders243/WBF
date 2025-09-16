@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fr" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>{% block title %}Bientôt disponible{% endblock %}</title>
+  <!-- Si tu as Tailwind via ton build, retire cette ligne CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="h-full bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+  <main class="min-h-full grid place-items-center p-6">
+    <section class="w-full max-w-xl">
+      <div class="rounded-2xl p-[1px] bg-gradient-to-br from-blue-600/60 via-indigo-500/50 to-violet-600/60 shadow-2xl">
+        <div class="rounded-2xl bg-white/95 dark:bg-slate-900/95 ring-1 ring-black/5 dark:ring-white/10 backdrop-blur-lg">
+          <div class="p-6 sm:p-8">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="inline-grid place-items-center h-10 w-10 rounded-xl bg-blue-600 text-white text-xl">🚧</span>
+              <h1 class="text-xl sm:text-2xl font-extrabold">
+                Cette page n’est pas encore disponible
+              </h1>
+            </div>
+
+            <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400">
+              Nous travaillons dessus et elle sera accessible très bientôt.
+              {% if eta %}Estimation&nbsp;: <span class="font-medium text-slate-900 dark:text-slate-100">{{ eta }}</span>.{% endif %}
+            </p>
+
+            {% if subtext %}
+              <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">{{ subtext }}</p>
+            {% endif %}
+
+            <div class="mt-6 flex flex-wrap items-center gap-3">
+              <a href="{{ back_url|default:'/' }}"
+                 class="px-4 py-2 rounded-lg ring-1 ring-slate-200 hover:bg-slate-50
+                        dark:ring-white/10 dark:hover:bg-white/5">
+                ← Retour à l’accueil
+              </a>
+              {% if contact_url %}
+                <a href="{{ contact_url }}"
+                   class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+                  Nous contacter
+                </a>
+              {% endif %}
+            </div>
+
+            {% if launch_at %}
+              <div class="mt-6">
+                <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1">Compte à rebours</div>
+                <div id="cd" class="text-lg font-semibold">—</div>
+              </div>
+              <script>
+                (function(){
+                  const target = new Date("{{ launch_at|escapejs }}").getTime();
+                  if (!isNaN(target)) {
+                    const el = document.getElementById('cd');
+                    const tick = () => {
+                      const now = Date.now(), d = Math.max(0, target - now);
+                      const days = Math.floor(d / 86400000);
+                      const hrs  = Math.floor((d % 86400000) / 3600000);
+                      const min  = Math.floor((d % 3600000) / 60000);
+                      el.textContent = d > 0 ? `${days}j ${hrs}h ${min}m` : "Bientôt en ligne";
+                    };
+                    tick(); setInterval(tick, 30000);
+                  }
+                })();
+              </script>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <p class="mt-4 text-xs text-slate-500 dark:text-slate-400 text-center">
+        Merci pour votre patience 💙
+      </p>
+    </section>
+  </main>
+</body>
+</html>

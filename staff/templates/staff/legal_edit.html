@@ -1,0 +1,263 @@
+{% extends "staff/base_staff.html" %}
+{% load widget_tweaks %}
+{% block staff_title %}{% if doc %}Modifier : {{ doc.title }}{% else %}Nouveau document{% endif %}{% endblock %}
+{% block staff_content %}
+
+<form method="post"
+      class="space-y-6 js-auth-managed"
+      data-auth-message="Clé requise pour publier/modifier un document légal."
+      data-superuser="{{ request.user.is_superuser|yesno:'true,false' }}">
+  {% csrf_token %}
+
+  <!-- Header local (titre + actions rapides) -->
+  <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-extrabold text-blue-700 dark:text-blue-400">
+        {% if doc %}{{ doc.title }}{% else %}Nouveau document{% endif %}
+      </h1>
+      {% if ver %}
+        <div class="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+          {% if ver.version %}
+            <span>Version en cours : <strong>{{ ver.version }}</strong></span>
+          {% endif %}
+          {% if ver.status %}
+            <span class="px-2 py-0.5 rounded text-xs {% if ver.status == 'published' %}bg-green-600 text-white{% else %}bg-slate-300 text-slate-800 dark:bg-slate-700 dark:text-slate-100{% endif %}">
+              {{ ver.get_status_display }}
+            </span>
+          {% endif %}
+          {% if ver.effective_date %}
+            <span>· prend effet le {{ ver.effective_date|date:"j F Y" }} <span id="js-effective-in" class="opacity-80"></span></span>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="flex items-center gap-2">
+      {% if doc and ver and ver.pk %}
+        <a href="?new_version=1"
+           class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                  bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-white/5 text-sm">
+          Nouvelle version
+        </a>
+      {% endif %}
+      {% if doc and ver and ver.version %}
+        <a href="{% url 'legal:preview' doc.key ver.version doc.locale %}"
+           target="_blank"
+           class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                  bg-white dark:bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-white/5 text-sm">
+          Aperçu
+        </a>
+      {% endif %}
+    </div>
+  </header>
+
+  <!-- Carte Métadonnées du document -->
+  <section class="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow p-6">
+    <h2 class="text-lg font-semibold mb-4">Métadonnées</h2>
+    {% if doc_form.non_field_errors %}
+      <div class="mb-3 text-sm text-red-700 bg-red-50 dark:bg-red-950/30 dark:text-red-200 border border-red-200 dark:border-red-800 rounded p-2">
+        {{ doc_form.non_field_errors }}
+      </div>
+    {% endif %}
+    <div class="grid md:grid-cols-2 gap-4">
+      <label class="block">
+        <span class="text-sm text-slate-600 dark:text-slate-300">Type</span>
+        {{ doc_form.key|add_class:"mt-1 block w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40" }}
+        {% if doc_form.key.errors %}<p class="mt-1 text-xs text-red-600">{{ doc_form.key.errors|striptags }}</p>{% endif %}
+      </label>
+      <label class="block">
+        <span class="text-sm text-slate-600 dark:text-slate-300">Langue</span>
+        {{ doc_form.locale|add_class:"mt-1 block w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40" }}
+        {% if doc_form.locale.errors %}<p class="mt-1 text-xs text-red-600">{{ doc_form.locale.errors|striptags }}</p>{% endif %}
+      </label>
+      <label class="block md:col-span-2">
+        <span class="text-sm text-slate-600 dark:text-slate-300">Titre</span>
+        {{ doc_form.title|add_class:"mt-1 block w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40" }}
+        {% if doc_form.title.errors %}<p class="mt-1 text-xs text-red-600">{{ doc_form.title.errors|striptags }}</p>{% endif %}
+      </label>
+      <label class="block md:col-span-2">
+        <span class="text-sm text-slate-600 dark:text-slate-300">Slug</span>
+        {{ doc_form.slug|add_class:"mt-1 block w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40" }}
+        {% if doc_form.slug.errors %}<p class="mt-1 text-xs text-red-600">{{ doc_form.slug.errors|striptags }}</p>{% endif %}
+      </label>
+    </div>
+  </section>
+
+  <!-- Carte Version -->
+  <section class="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold">Version</h2>
+      {% if ver and ver.status %}
+        <span class="px-2 py-1 rounded text-xs {% if ver.status == 'published' %}bg-green-600 text-white{% else %}bg-slate-300 text-slate-800 dark:bg-slate-700 dark:text-slate-100{% endif %}">
+          {{ ver.get_status_display }}
+        </span>
+      {% endif %}
+    </div>
+
+    {% if ver_form.non_field_errors %}
+      <div class="mb-3 text-sm text-red-700 bg-red-50 dark:bg-red-950/30 dark:text-red-200 border border-red-200 dark:border-red-800 rounded p-2">
+        {{ ver_form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <label class="block">
+        <span class="text-sm text-slate-600 dark:text-slate-300">Version (ex. v1.0-2025-08-27)</span>
+        <div class="flex gap-2 items-center">
+          {{ ver_form.version|add_class:"mt-1 block w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40" }}
+          <button type="button" id="js-insert-date" class="mt-1 px-2 py-1 text-xs rounded border border-slate-300 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5">Insérer date</button>
+        </div>
+        {% if ver_form.version.errors %}<p class="mt-1 text-xs text-red-600">{{ ver_form.version.errors|striptags }}</p>{% endif %}
+      </label>
+      <label class="block">
+        <span class="text-sm text-slate-600 dark:text-slate-300">Statut</span>
+        {{ ver_form.status|add_class:"mt-1 block w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40" }}
+        {% if ver_form.status.errors %}<p class="mt-1 text-xs text-red-600">{{ ver_form.status.errors|striptags }}</p>{% endif %}
+      </label>
+      <label class="block">
+        <span class="text-sm text-slate-600 dark:text-slate-300">Entrée en vigueur</span>
+        {{ ver_form.effective_date|add_class:"mt-1 block w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40" }}
+        {% if ver_form.effective_date.errors %}<p class="mt-1 text-xs text-red-600">{{ ver_form.effective_date.errors|striptags }}</p>{% endif %}
+      </label>
+      <label class="block md:col-span-2">
+        <span class="text-sm text-slate-600 dark:text-slate-300">Résumé des changements</span>
+        {{ ver_form.change_log|add_class:"mt-1 block w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40" }}
+        {% if ver_form.change_log.errors %}<p class="mt-1 text-xs text-red-600">{{ ver_form.change_log.errors|striptags }}</p>{% endif %}
+      </label>
+    </div>
+
+    <div class="mt-4">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-sm text-slate-600 dark:text-slate-300">Contenu (Markdown recommandé)</span>
+        <div class="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+          <button type="button" id="js-toggle-preview" class="px-2 py-1 rounded border border-slate-300 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5">Aperçu en direct</button>
+          <span id="charCount"></span>
+        </div>
+      </div>
+      {{ ver_form.body_md|add_class:"block w-full min-h-64 md:min-h-[26rem] px-3 py-3 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-950/50 text-slate-900 dark:text-slate-100 font-mono text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500/40" }}
+      {% if ver_form.body_md.errors %}<p class="mt-1 text-xs text-red-600">{{ ver_form.body_md.errors|striptags }}</p>{% endif %}
+      <div id="mdPreview" class="hidden mt-3 p-4 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-slate-950/40">
+        <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Aperçu</div>
+        <div id="mdPreviewContent" class="prose prose-slate dark:prose-invert max-w-none"></div>
+      </div>
+      <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+        Astuce : utilisez des titres (<code>#</code>, <code>##</code>), listes (<code>-</code>), tableaux, et liens. L’aperçu public rendra le Markdown en HTML.
+      </p>
+    </div>
+  </section>
+
+  <!-- Barre d’actions sticky -->
+  <div class="sticky bottom-3 z-10">
+    <div class="rounded-2xl border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-slate-900/90 backdrop-blur p-3 flex items-center justify-end gap-2 shadow-lg">
+      <a href="{% url 'staff:legal_list' %}"
+         class="px-4 py-2 rounded-lg border border-slate-300 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5">
+        Annuler
+      </a>
+      <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Enregistrer</button>
+      <button type="button" id="js-publish" class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">Publier</button>
+    </div>
+  </div>
+</form>
+
+<!-- Améliorations UX : compteur/auto-resize/aperçu/publier/insert-date -->
+<script>
+(function(){
+  const ta = document.querySelector('textarea[name="{{ ver_form.body_md.name }}"]');
+  const cc = document.getElementById('charCount');
+  if (!ta) return;
+
+  function update() {
+    // auto-resize
+    ta.style.height = 'auto';
+    ta.style.height = (ta.scrollHeight + 6) + 'px';
+    // counter (mots + caractères)
+    const txt = ta.value || '';
+    const len = txt.length;
+    const words = (txt.trim().match(/\S+/g) || []).length;
+    cc.textContent = len ? (words.toLocaleString() + ' mots · ' + len.toLocaleString() + ' caractères') : '';
+  }
+  ta.addEventListener('input', update);
+  window.addEventListener('load', update);
+  update();
+
+  // Indication de prise d'effet (J-?)
+  const effSpan = document.getElementById('js-effective-in');
+  if (effSpan && '{{ ver.effective_date|date:"Y-m-d" }}'){
+    const d = new Date('{{ ver.effective_date|date:"Y-m-d" }}T00:00:00');
+    const today = new Date();
+    const diff = Math.ceil((d - new Date(today.getFullYear(), today.getMonth(), today.getDate())) / 86400000);
+    if (!isNaN(diff)){
+      if (diff > 0) effSpan.textContent = `(dans ${diff} j)`;
+      else if (diff === 0) effSpan.textContent = `(aujourd’hui)`;
+      else effSpan.textContent = '';
+    }
+  }
+
+  // Aide: insérer la date dans la version
+  const insertBtn = document.getElementById('js-insert-date');
+  const versionInput = document.querySelector('[name="{{ ver_form.version.name }}"]');
+  if (insertBtn && versionInput){
+    insertBtn.addEventListener('click', () => {
+      const dt = new Date();
+      const y = dt.getFullYear();
+      const m = String(dt.getMonth()+1).padStart(2,'0');
+      const d = String(dt.getDate()).padStart(2,'0');
+      const stamp = `${y}-${m}-${d}`;
+      if (!versionInput.value){
+        versionInput.value = `v1.0-${stamp}`;
+      } else if (!versionInput.value.includes(stamp)){
+        versionInput.value = versionInput.value.replace(/\s+$/, '') + `-${stamp}`;
+      }
+      versionInput.dispatchEvent(new Event('input'));
+    });
+  }
+
+  // Publier: force le statut et définit une date d'effet par défaut si manquante
+  const publishBtn = document.getElementById('js-publish');
+  const form = document.forms[0];
+  const statusSel = document.querySelector('[name="{{ ver_form.status.name }}"]');
+  const effInput = document.querySelector('[name="{{ ver_form.effective_date.name }}"]');
+  if (publishBtn && statusSel && form){
+    publishBtn.addEventListener('click', () => {
+      statusSel.value = 'published';
+      if (effInput && !effInput.value){
+        const dt = new Date();
+        const y = dt.getFullYear();
+        const m = String(dt.getMonth()+1).padStart(2,'0');
+        const d = String(dt.getDate()).padStart(2,'0');
+        effInput.value = `${y}-${m}-${d}`;
+      }
+      if (form.requestSubmit) form.requestSubmit(); else form.submit();
+    });
+  }
+
+  // Aperçu Markdown en direct (Marked + DOMPurify chargés à la volée)
+  const togglePreview = document.getElementById('js-toggle-preview');
+  const previewWrap = document.getElementById('mdPreview');
+  const previewEl = document.getElementById('mdPreviewContent');
+  function loadScript(src){
+    return new Promise((resolve, reject)=>{ const s=document.createElement('script'); s.src=src; s.async=true; s.onload=resolve; s.onerror=reject; document.head.appendChild(s); });
+  }
+  function ensureLibs(cb){
+    const jobs=[];
+    if (typeof window.marked==='undefined') jobs.push(loadScript('https://cdn.jsdelivr.net/npm/marked@12/marked.min.js'));
+    if (typeof window.DOMPurify==='undefined') jobs.push(loadScript('https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js'));
+    Promise.all(jobs).then(cb).catch(cb);
+  }
+  function renderPreview(){
+    if (!previewEl) return;
+    let html = window.marked ? window.marked.parse(ta.value||'') : (ta.value||'').replace(/\n/g,'<br>');
+    if (window.DOMPurify) html = window.DOMPurify.sanitize(html);
+    previewEl.innerHTML = html;
+  }
+  if (togglePreview && previewWrap){
+    togglePreview.addEventListener('click', () => {
+      if (previewWrap.classList.contains('hidden')){ ensureLibs(()=>{ previewWrap.classList.remove('hidden'); renderPreview(); }); }
+      else { previewWrap.classList.add('hidden'); }
+    });
+    ta.addEventListener('input', () => { if (!previewWrap.classList.contains('hidden')) renderPreview(); });
+  }
+})();
+</script>
+
+{% endblock %}

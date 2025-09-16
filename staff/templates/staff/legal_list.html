@@ -1,0 +1,56 @@
+{% extends "staff/base_staff.html" %}
+{% block staff_title %}Mentions légales (dynamiques){% endblock %}
+{% block staff_content %}
+<header class="mb-4 flex items-center justify-between">
+  <h1 class="text-2xl font-extrabold text-blue-700">Documents légaux</h1>
+  <a href="{% url 'staff:legal_new' %}" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Nouveau</a>
+ </header>
+
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow overflow-hidden">
+  <table class="min-w-full text-sm">
+    <thead class="bg-slate-50 dark:bg-white/5">
+      <tr>
+        <th class="px-4 py-2 text-left">Titre</th>
+        <th class="px-4 py-2">Type</th>
+        <th class="px-4 py-2">Locale</th>
+        <th class="px-4 py-2">Version</th>
+        <th class="px-4 py-2">Statut</th>
+        <th class="px-4 py-2">Entrée en vigueur</th>
+        <th class="px-4 py-2"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+        {% with d=row.doc cur=row.current %}
+        <tr class="border-t border-slate-200/60 dark:border-white/10">
+          <td class="px-4 py-2">{{ d.title }}</td>
+          <td class="px-4 py-2">{{ d.get_key_display }}</td>
+          <td class="px-4 py-2 text-center">{{ d.locale }}</td>
+          <td class="px-4 py-2 text-center">{{ cur.version|default:"—" }}</td>
+          <td class="px-4 py-2 text-center">
+            {% if cur %}
+              <span class="px-2 py-1 rounded text-xs {% if cur.status == 'published' %}bg-green-600 text-white{% else %}bg-slate-300 text-slate-800{% endif %}">
+                {{ cur.get_status_display }}
+              </span>
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td class="px-4 py-2 text-center">{{ cur.effective_date|default:"—" }}</td>
+          <td class="px-4 py-2 text-right">
+            <a href="{% url 'staff:legal_edit' d.pk %}" class="text-blue-600 hover:underline">Modifier</a>
+            {% if cur %}
+              <span class="mx-2 text-slate-400">|</span>
+              <a href="{% url 'legal:history' d.key d.locale %}" target="_blank" class="text-slate-600 hover:underline">Historique</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endwith %}
+      {% empty %}
+        <tr><td colspan="7" class="px-4 py-6 text-center text-slate-500">Aucun document pour le moment.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+

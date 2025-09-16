@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Merci — Don confirmé" %}{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-2xl px-4 py-12">
+  <div class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-8 text-center">
+    <!-- Icône check -->
+    <div class="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">
+      <svg viewBox="0 0 24 24" class="h-7 w-7" aria-hidden="true">
+        <path fill="currentColor" d="M9 16.17l-3.88-3.88a1 1 0 10-1.41 1.41l4.59 4.59a1 1 0 001.41 0l10-10a1 1 0 10-1.41-1.41L9 16.17z"/>
+      </svg>
+    </div>
+
+    <h1 class="text-2xl font-extrabold text-green-700 dark:text-green-300">
+      {% trans "Merci pour votre soutien" %} 💙
+    </h1>
+    <p class="mt-2 text-slate-600 dark:text-slate-300" role="status" aria-live="polite">
+      {% trans "Votre don a bien été enregistré." %}
+    </p>
+
+    {# Résumé du don si disponible #}
+    {% if donation %}
+      <dl class="mt-6 grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
+        <div class="rounded-lg bg-slate-50 dark:bg-slate-800/60 p-3">
+          <dt class="text-slate-500 dark:text-slate-400">{% trans "Montant" %}</dt>
+          <dd class="font-semibold text-slate-900 dark:text-slate-100">
+            {% if donation.amount %}{{ donation.amount|floatformat:"-2" }} €{% else %}—{% endif %}
+          </dd>
+        </div>
+        <div class="rounded-lg bg-slate-50 dark:bg-slate-800/60 p-3">
+          <dt class="text-slate-500 dark:text-slate-400">{% trans "Référence" %}</dt>
+          <dd class="font-semibold text-slate-900 dark:text-slate-100">
+            {% if donation.reference %}{{ donation.reference }}{% else %}—{% endif %}
+          </dd>
+        </div>
+        <div class="rounded-lg bg-slate-50 dark:bg-slate-800/60 p-3">
+          <dt class="text-slate-500 dark:text-slate-400">{% trans "Date" %}</dt>
+          <dd class="font-semibold text-slate-900 dark:text-slate-100">
+            {% if donation.created_at %}{{ donation.created_at|date:"d/m/Y H:i" }}{% else %}—{% endif %}
+          </dd>
+        </div>
+      </dl>
+    {% endif %}
+
+    <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+      <a href="{% url 'core:accueil' %}"
+         class="inline-flex items-center justify-center rounded-lg px-5 py-2.5 bg-blue-600 text-white font-semibold hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60">
+        {% trans "Retour à l’accueil" %}
+      </a>
+
+      <a href="{% url 'core:coming_soon' %}"
+         class="inline-flex items-center justify-center rounded-lg px-5 py-2.5 ring-1 ring-inset ring-slate-300 dark:ring-white/10 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-white/5 font-semibold">
+        {% trans "Faire un autre don" %}
+      </a>
+
+      {% if donation and donation.receipt_url %}
+        <a href="{{ donation.receipt_url }}"
+           class="inline-flex items-center justify-center rounded-lg px-5 py-2.5 ring-1 ring-inset ring-slate-300 dark:ring-white/10 hover:bg-blue-50 dark:hover:bg-white/5 font-semibold"
+           target="_blank" rel="noopener">
+          {% trans "Télécharger le reçu" %}
+        </a>
+      {% else %}
+        <button type="button"
+                class="inline-flex items-center justify-center rounded-lg px-5 py-2.5 ring-1 ring-inset ring-slate-300 dark:ring-white/10 hover:bg-blue-50 dark:hover:bg-white/5 font-semibold"
+                onclick="window.print()">
+          {% trans "Imprimer cette page" %}
+        </button>
+      {% endif %}
+    </div>
+
+    <p class="mt-6 text-xs text-slate-500 dark:text-slate-400">
+      {% trans "Un e-mail de confirmation peut vous être envoyé si vous avez indiqué une adresse valide." %}
+    </p>
+  </div>
+</section>
+{% endblock %}

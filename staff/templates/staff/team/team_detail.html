@@ -1,0 +1,182 @@
+﻿{% extends "staff/base_staff.html" %}
+{% block staff_title %}Staff · {{ member.name }}{% endblock %}
+
+{% block staff_content %}
+<section class="space-y-6">
+  <header class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-extrabold text-blue-700 dark:text-blue-300">{{ member.name }}</h1>
+      <p class="text-slate-600 dark:text-slate-300">
+        {{ member.role }}{% if member.department %} · {{ member.department }}{% endif %}
+        {% if not member.is_active %}
+          <span class="ml-2 px-2 py-0.5 rounded-full text-xs bg-slate-100 text-slate-700 border">Inactif</span>
+        {% endif %}
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <form method="post" class="js-auth-managed"
+            data-auth-message="Action protégée — niveau requis : moyen"
+            data-superuser="{{ request.user.is_superuser|yesno:'true,false' }}"
+            action="{% url 'staff:team_member_toggle_active' member.slug %}"
+            onsubmit="return confirm('Confirmer le basculement du statut actif ?');">
+        {% csrf_token %}
+        <button class="px-3 py-2 rounded-lg ring-1 ring-slate-200 hover:bg-slate-50 dark:ring-white/10 dark:hover:bg-white/5 {% if member.is_active %}text-red-700{% else %}text-emerald-700{% endif %}">
+          {% if member.is_active %}Désactiver{% else %}Réactiver{% endif %}
+        </button>
+      </form>
+      {% if can_approve %}
+      <form method="post" class="js-auth-managed"
+            data-auth-message="Action protégée — niveau requis : élevé"
+            data-superuser="{{ request.user.is_superuser|yesno:'true,false' }}"
+            action="{% url 'staff:team_member_approve_access' member.slug %}"
+            onsubmit="return confirm('Accorder l’accès staff à ce membre ?');">
+        {% csrf_token %}
+        <button class="px-3 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">Accorder l’accès staff</button>
+      </form>
+      {% endif %}
+      {% if request.user.is_superuser %}
+      <a href="{% url 'staff:team_update' member.slug %}"
+         class="px-3 py-2 rounded-lg ring-1 ring-slate-200 hover:bg-slate-50 dark:ring-white/10 dark:hover:bg-white/5">Éditer</a>
+      {% endif %}
+    </div>
+  </header>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <article class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+      <h2 class="text-lg font-semibold mb-3 text-slate-900 dark:text-slate-100">Bio</h2>
+      <p class="whitespace-pre-line text-slate-800 dark:text-slate-200">{{ member.bio|default:"(Aucune bio)" }}</p>
+    </article>
+
+    <aside class="space-y-3">
+      <div class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4">
+        {% if member.image %}
+          <img src="{{ member.image.url }}" class="w-full rounded-xl" alt="">
+        {% else %}
+          <div class="text-sm text-slate-500 dark:text-slate-400">Pas de photo</div>
+        {% endif %}
+      </div>
+      <div class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4 text-sm">
+        <div>
+          <span class="font-medium">Email :</span>
+          {% if request.user.is_superuser or is_owner %}
+            {{ member.email|default:"-" }}
+          {% else %}
+            <span class="text-slate-500">Confidentiel</span>
+          {% endif %}
+        </div>
+        <div>
+          <span class="font-medium">Téléphone :</span>
+          {% if request.user.is_superuser or is_owner %}
+            {{ member.phone|default:"-" }}
+          {% else %}
+            <span class="text-slate-500">Confidentiel</span>
+          {% endif %}
+        </div>
+        <div>
+          <span class="font-medium">Site :</span>
+          {% if member.website %}
+            <a class="text-blue-600 dark:text-blue-300 hover:underline" href="{{ member.website }}" target="_blank">Ouvrir</a>
+          {% else %}-{% endif %}
+        </div>
+        <div>
+          <span class="font-medium">Réseaux :</span>
+          {% if member.linkedin %}<a class="text-blue-600 dark:text-blue-300 hover:underline" href="{{ member.linkedin }}" target="_blank">LinkedIn</a>{% endif %}
+          {% if member.twitter %} · <a class="text-blue-600 dark:text-blue-300 hover:underline" href="{{ member.twitter }}" target="_blank">Twitter</a>{% endif %}
+          {% if member.github %} · <a class="text-blue-600 dark:text-blue-300 hover:underline" href="{{ member.github }}" target="_blank">GitHub</a>{% endif %}
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  {% if can_manage_invites %}
+  <!-- Invitations (superutilisateurs) -->
+  <section class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-semibold">Invitations</h2>
+      <form method="post" class="js-auth-managed"
+            data-auth-message="Action protégée — niveau requis : moyen"
+            data-superuser="{{ request.user.is_superuser|yesno:'true,false' }}"
+            action="{% url 'staff:staff_team_send_invite' member.slug %}"
+            onsubmit="return confirm('Envoyer une invitation à ce membre ?');">
+        {% csrf_token %}
+        <button class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Nouvelle invitation</button>
+      </form>
+    </div>
+    {% with invites=member.invites.all %}
+      {% if invites %}
+        <div class="mt-3 overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="text-left text-slate-500">
+              <tr>
+                <th class="py-2 pr-4">Créée</th>
+                <th class="py-2 pr-4">Expire</th>
+                <th class="py-2 pr-4">Utilisée</th>
+                <th class="py-2 pr-4">Réponse</th>
+                <th class="py-2 pr-4">Statut</th>
+                <th class="py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+              {% for inv in invites %}
+                <tr>
+                  <td class="py-2 pr-4">{{ inv.created_at|date:'d/m/Y H:i' }}</td>
+                  <td class="py-2 pr-4">{{ inv.expires_at|date:'d/m/Y H:i' }}</td>
+                  <td class="py-2 pr-4">{% if inv.used_at %}{{ inv.used_at|date:'d/m/Y H:i' }}{% else %}-{% endif %}</td>
+                  <td class="py-2 pr-4">
+                    {% if inv.response == 'accepted' %}
+                      <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Acceptée</span>
+                    {% elif inv.response == 'declined' %}
+                      <span class="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">Refusée</span>
+                    {% else %}-{% endif %}
+                  </td>
+                  <td class="py-2 pr-4">
+                    {% if inv.used_at %}
+                      <span class="px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">Utilisée</span>
+                    {% elif inv.is_valid %}
+                      <span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">Valide</span>
+                    {% else %}
+                      <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border">Expirée</span>
+                    {% endif %}
+                  </td>
+                  <td class="py-2">
+                    <div class="flex items-center gap-2">
+                      {% if not inv.used_at %}
+                        {% if inv.is_valid %}
+                          <form method="post" class="js-auth-managed"
+                                data-auth-message="Action protégée — niveau requis : moyen"
+                                data-superuser="{{ request.user.is_superuser|yesno:'true,false' }}"
+                                action="{% url 'staff:team_invite_revoke' invite_id=inv.id %}"
+                                onsubmit="return confirm('Révoquer cette invitation ?');">
+                            {% csrf_token %}
+                            <button class="text-red-600 hover:underline">Révoquer</button>
+                          </form>
+                        {% endif %}
+                        <form method="post" class="js-auth-managed"
+                              data-auth-message="Action protégée — niveau requis : moyen"
+                              data-superuser="{{ request.user.is_superuser|yesno:'true,false' }}"
+                              action="{% url 'staff:team_invite_resend' invite_id=inv.id %}"
+                              onsubmit="return confirm('Renvoyer une nouvelle invitation ?');">
+                          {% csrf_token %}
+                          <button class="text-blue-600 hover:underline">Renvoyer</button>
+                        </form>
+                      {% endif %}
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="mt-2 text-sm text-slate-500">Aucune invitation pour ce membre.</p>
+      {% endif %}
+    {% endwith %}
+  </section>
+  {% else %}
+  <section class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+    <h2 class="text-lg font-semibold">Invitations</h2>
+    <p class="mt-2 text-sm text-slate-500">Les détails des invitations sont visibles par les superutilisateurs.</p>
+  </section>
+  {% endif %}
+</section>
+{% endblock %}

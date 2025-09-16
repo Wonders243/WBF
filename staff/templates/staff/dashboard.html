@@ -1,0 +1,291 @@
+{% extends "staff/base_staff.html" %}
+{% load static %}
+{% block staff_title %}Staff — Dashboard{% endblock %}
+
+{% block staff_content %}
+<div class="space-y-6">
+
+  <!-- Raccourcis -->
+  <section class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4">
+    <div class="flex flex-wrap gap-2">
+      <a href="{% url 'staff:mission_create' %}" class="px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700">+ Mission</a>
+      <a href="{% url 'staff:event_create' %}" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">+ Événement</a>
+      <a href="{% url 'staff:project_create' %}" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">+ Projet</a>
+
+      
+      <a href="{% url 'staff:signups_list' %}" class="px-3 py-1.5 rounded-lg bg-amber-500 text-white hover:bg-amber-600">Modérer inscriptions</a>
+      <a href="{% url 'staff:documents_review' %}" class="px-3 py-1.5 rounded-lg bg-amber-400 text-gray-900 hover:bg-amber-300">Vérifier documents</a>
+      <a href="{% url 'notifications:list' %}" class="px-3 py-1.5 rounded-lg bg-purple-500 text-white hover:bg-purple-600">Notifications{% if unread_count %} ({{ unread_count }}){% endif %}</a>
+      <a href="{% url 'staff:hours_list' %}" class="px-3 py-1.5 rounded-lg bg-sky-500 text-white hover:bg-sky-600">Heures</a>
+
+      <a href="{% url 'staff:team_list' %}" class="px-3 py-1.5 rounded-lg bg-teal-600 text-white hover:bg-teal-700">Équipe</a>
+      <a href="{% url 'staff:partner_list' %}" class="px-3 py-1.5 rounded-lg bg-fuchsia-600 text-white hover:bg-fuchsia-700">Partenaires</a>
+
+      {% if request.user.is_superuser %}
+        <a href="{% url 'staff:key_list' %}" class="px-3 py-1.5 rounded-lg bg-zinc-200 dark:bg-zinc-700 dark:text-slate-100">Clés API</a>
+        <a href="{% url 'staff:legal_list' %}" class="px-3 py-1.5 rounded-lg bg-zinc-200 dark:bg-zinc-700 dark:text-slate-100">Pages légales</a>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- KPIs -->
+  <section class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+    <div class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4">
+      <div class="text-sm text-slate-500 dark:text-slate-400">Missions</div>
+      <div class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ stats.missions|default:0 }}</div>
+      <div class="text-xs text-slate-500 dark:text-slate-400">Publiées : {{ stats.missions_published|default:0 }}</div>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4">
+      <div class="text-sm text-slate-500 dark:text-slate-400">Inscriptions</div>
+      <div class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ stats.signups|default:0 }}</div>
+      <div class="text-xs text-slate-500 dark:text-slate-400">En attente : {{ stats.signups_pending|default:0 }}</div>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4">
+      <div class="text-sm text-slate-500 dark:text-slate-400">Événements à venir</div>
+      <div class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ stats.events_upcoming|default:0 }}</div>
+      <div class="text-xs text-slate-500 dark:text-slate-400">Projets : {{ stats.projects|default:0 }}</div>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4">
+      <div class="text-sm text-slate-500 dark:text-slate-400">Bénévoles</div>
+      <div class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ stats.volunteers|default:0 }}</div>
+      <div class="text-xs text-slate-500 dark:text-slate-400">Candidatures : {{ stats.applications_pending|default:0 }}</div>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4">
+      <div class="text-sm text-slate-500 dark:text-slate-400">Documents</div>
+      <div class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ stats.docs_total|default:0 }}</div>
+      <div class="text-xs text-slate-500 dark:text-slate-400">À vérifier : {{ stats.docs_submitted|default:0 }}</div>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4">
+      <div class="text-sm text-slate-500 dark:text-slate-400">Heures (7j)</div>
+      <div class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ stats.hours_7d|default:"0" }} h</div>
+      <div class="text-xs text-slate-500 dark:text-slate-400">Déclarations : {{ stats.hours_entries_7d|default:0 }}</div>
+    </div>
+
+    {% if payments %}
+    <div class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4 md:col-span-2">
+      <div class="text-sm text-slate-500 dark:text-slate-400">Paiements (7j)</div>
+      <div class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ stats.payments_7d_count|default:0 }}</div>
+      <div class="text-xs text-slate-500 dark:text-slate-400">Acceptés : {{ stats.payments_7d_amount|default:0 }} (unité min)</div>
+    </div>
+    {% endif %}
+  </section>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Colonne principale (2/3) -->
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- Prochaines missions -->
+      <section class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Prochaines missions</h2>
+          <a href="{% url 'staff:mission_list' %}" class="text-blue-600 dark:text-blue-300 hover:underline text-sm">Tout voir</a>
+        </div>
+        {% if upcoming %}
+          <ul class="divide-y divide-slate-200 dark:divide-white/10">
+            {% for m in upcoming %}
+              <li class="py-3 flex items-center justify-between">
+                <div class="min-w-0">
+                  <p class="font-medium text-slate-900 dark:text-slate-100 truncate">{{ m.title }}</p>
+                  <p class="text-sm text-slate-500 dark:text-slate-400">
+                    {{ m.date|default:"Date à confirmer" }} · {{ m.location|default:"Lieu à confirmer" }}
+                  </p>
+                </div>
+                <div class="flex items-center gap-3">
+                  {% if m.capacity %}
+                    <span class="text-xs px-2 py-0.5 rounded-full border
+                      {% if m.fill_pct >= 100 %} bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-900/40
+                      {% elif m.fill_pct >= 50 %} bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-900/40
+                      {% else %} bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-800/70 dark:text-slate-200 dark:border-slate-700 {% endif %}">
+                      {{ m.accepted }}/{{ m.capacity }}{% if m.fill_pct is not None %} - {{ m.fill_pct }}%{% endif %}
+                    </span>
+                  {% endif %}
+                  <a href="{% url 'staff:mission_detail' pk=m.mission_id %}"
+                     class="text-blue-600 dark:text-blue-300 hover:underline text-sm">Détails</a>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-slate-500 dark:text-slate-400 text-sm">Rien à venir.</p>
+        {% endif %}
+      </section>
+
+      <!-- Inscriptions en attente -->
+      <section class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Inscriptions en attente</h2>
+          <a href="{% url 'staff:signups_list' %}" class="text-blue-600 dark:text-blue-300 hover:underline text-sm">Gérer</a>
+        </div>
+        {% if pending %}
+          <ul class="divide-y divide-slate-200 dark:divide-white/10">
+            {% for s in pending %}
+              <li class="py-3 flex items-center justify-between">
+                <div class="min-w-0">
+                  <p class="font-medium text-slate-900 dark:text-slate-100 truncate">{{ s.volunteer_name }}</p>
+                  <p class="text-sm text-slate-500 dark:text-slate-400">
+                    {{ s.mission_title }} · {{ s.created_at|date:"d/m/Y H:i" }}
+                  </p>
+                </div>
+                <div class="flex gap-2">
+                  <form method="post" action="{% url 'staff:staff_signup_accept' s.signup_id %}" class="inline">
+                    {% csrf_token %}
+                    <button class="px-3 py-1 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/60">
+                      Accepter
+                    </button>
+                  </form>
+                  <form method="post" action="{% url 'staff:staff_signup_decline' s.signup_id %}"
+                        class="inline" onsubmit="return confirm('Refuser cette inscription ?');">
+                    {% csrf_token %}
+                    <button class="px-3 py-1 rounded-lg bg-rose-600 text-white hover:bg-rose-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600/60">
+                      Refuser
+                    </button>
+                  </form>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-slate-500 dark:text-slate-400 text-sm">Aucune demande en attente.</p>
+        {% endif %}
+      </section>
+
+      <!-- Documents à vérifier -->
+      <section class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Documents à vérifier</h2>
+          <a href="{% url 'staff:documents_review' %}" class="text-blue-600 dark:text-blue-300 hover:underline text-sm">Ouvrir</a>
+        </div>
+        {% if documents_review %}
+          <ul class="divide-y divide-slate-200 dark:divide-white/10">
+            {% for d in documents_review %}
+              <li class="py-3 flex items-center justify-between">
+                <div class="min-w-0">
+                  <p class="font-medium text-slate-900 dark:text-slate-100 truncate">{{ d.name }}</p>
+                  <p class="text-sm text-slate-500 dark:text-slate-400">Par {{ d.user }} à {{ d.uploaded_at|date:"d/m/Y H:i" }}</p>
+                </div>
+                <span class="text-xs px-2 py-0.5 rounded-full
+                             {% if d.status == 'verified' or d.status == 'verifie' or d.status == 'approuve' or d.status == 'approved' or d.status == 'valide' %}
+                               bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-900/40
+                             {% elif d.status == 'submitted' or d.status == 'under_review' or d.status == 'en_verification' %}
+                               bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-900/40
+                             {% else %}
+                               bg-slate-50 text-slate-700 border border-slate-200 dark:bg-slate-800/70 dark:text-slate-200 dark:border-slate-700
+                             {% endif %}">
+                  {{ d.status }}
+                </span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-slate-500 dark:text-slate-400 text-sm">Aucun document en attente.</p>
+        {% endif %}
+      </section>
+
+    </div>
+
+    <!-- Colonne droite (1/3) -->
+    <aside class="space-y-6">
+      <!-- Top bénévoles (mois) -->
+      <section class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Top bénévoles (mois)</h2>
+          <a href="{% url 'staff:volunteers_list' %}" class="text-blue-600 dark:text-blue-300 hover:underline text-sm">Tous</a>
+        </div>
+        {% if top_volunteers %}
+          <ul class="space-y-2">
+            {% for v in top_volunteers %}
+              <li class="flex items-center justify-between rounded-lg border border-slate-200 dark:border-white/10 px-3 py-2">
+                <a href="{% url 'staff:volunteer_detail' v.volunteer_id %}"
+                   class="font-medium text-slate-900 dark:text-slate-100 hover:underline">{{ v.name }}</a>
+                <span class="text-sm text-slate-600 dark:text-slate-300">{{ v.hours }} h</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-slate-500 dark:text-slate-400 text-sm">Pas encore d'heures ce mois-ci.</p>
+        {% endif %}
+      </section>
+
+      <!-- Heures (30j) -->
+      <section class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+        <h2 class="text-lg font-semibold mb-3 text-slate-900 dark:text-slate-100">Heures (30j)</h2>
+        {% if hours %}
+          <div class="flex items-end gap-1 h-24">
+            {% for h in hours %}
+              <div class="w-2 rounded-t bg-blue-600 dark:bg-blue-400/80" style="height: {{ h.height }}%;"></div>
+            {% endfor %}
+          </div>
+          <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Chaque barre = total d'heures (échelle relative)</p>
+        {% else %}
+          <p class="text-slate-500 dark:text-slate-400 text-sm">Aucune donnée.</p>
+        {% endif %}
+      </section>
+
+      <!-- Projets actifs -->
+      <section class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Projets actifs</h2>
+          <a href="{% url 'staff:projects_list' %}" class="text-blue-600 dark:text-blue-300 hover:underline text-sm">Tous</a>
+        </div>
+        {% if projects_rows %}
+          <ul class="space-y-2">
+            {% for p in projects_rows %}
+              <li class="flex items-center justify-between rounded-lg border border-slate-200 dark:border-white/10 px-3 py-2">
+                <a href="{% url 'staff:project_detail' p.id %}" class="font-medium hover:underline">{{ p.title }}</a>
+                <span class="text-sm text-slate-600 dark:text-slate-300">{{ p.upcoming_missions }} missions · {{ p.events_count }} évts</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-slate-500 dark:text-slate-400 text-sm">Aucun projet actif.</p>
+        {% endif %}
+      </section>
+
+      <!-- Notifications récentes -->
+      <section class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100">Notifications</h2>
+          <a href="{% url 'notifications:list' %}" class="text-blue-600 dark:text-blue-300 hover:underline text-sm">Tout voir</a>
+        </div>
+        {% if notifications %}
+          <ul class="space-y-2">
+            {% for n in notifications %}
+              <li class="rounded-lg border border-slate-200 dark:border-white/10 px-3 py-2">
+                <a href="{{ n.url|default:'#' }}" class="font-medium hover:underline">{{ n.title }}</a>
+                <p class="text-xs text-slate-600 dark:text-slate-300">{{ n.created_at|date:"d/m/Y H:i" }}</p>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-slate-500 dark:text-slate-400 text-sm">Pas de notification.</p>
+        {% endif %}
+      </section>
+
+      {% if payments %}
+      <!-- Paiements récents -->
+      <section class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+        <h2 class="text-lg font-semibold mb-3 text-slate-900 dark:text-slate-100">Paiements récents</h2>
+        <ul class="space-y-2">
+          {% for p in payments %}
+            <li class="flex items-center justify-between rounded-lg border border-slate-200 dark:border-white/10 px-3 py-2">
+              <span class="font-medium">{{ p.amount }} {{ p.currency }}</span>
+              <span class="text-xs px-2 py-0.5 rounded-full border
+                {% if p.status == 'ACCEPTED' %} bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-900/40
+                {% elif p.status == 'PENDING' %} bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-900/40
+                {% else %} bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-800/70 dark:text-slate-200 dark:border-slate-700 {% endif %}">
+                {{ p.status }}
+              </span>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+      {% endif %}
+    </aside>
+  </div>
+</div>
+{% endblock %}

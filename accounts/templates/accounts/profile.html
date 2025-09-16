@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Mon profil — BAMU WELLBEING Foundation{% endblock %}
+
+{% block content %}
+<section id="profile-root"
+         class="group/density max-w-7xl mx-auto text-slate-800 dark:text-slate-100">
+
+  {# ───── Bandeau ───── #}
+   
+
+  <div class="relative rounded-2xl overflow-hidden bg-gradient-to-r from-blue-800 via-blue-600 to-blue-400 text-white p-6 mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+      <div class="flex items-center gap-4">
+        <div class="relative">
+          <img
+            src="{% if volunteer and volunteer.avatar %}{{ volunteer.avatar.url }}{% else %}{% static 'img/avatar-placeholder.png' %}{% endif %}"
+            alt="Avatar du bénévole"
+            class="w-20 h-20 md:w-24 md:h-24 rounded-full ring-4 ring-white/30 object-cover">
+        </div>
+        <div>
+          <h1 class="text-2xl md:text-3xl font-extrabold drop-shadow group-[.is-dense]/density:text-xl">
+            {{ volunteer.name|default:request.user.get_username }}
+          </h1>
+          <p class="text-white/90 group-[.is-dense]/density:text-sm">
+            {% if volunteer and volunteer.motivation %}
+              {{ volunteer.motivation|truncatechars:120 }}
+            {% else %}
+              Bienvenue ! Complétez votre profil pour que l’équipe puisse mieux vous affecter aux missions.
+            {% endif %}
+          </p>
+           {# --- ADD: chip localisation --- #}
+  {% if volunteer and volunteer.city %}
+    <div class="mt-2 inline-flex items-center gap-2 rounded-full bg-white/12 border border-white/25 text-white/90
+                px-3 py-1 text-sm group-[.is-dense]/density:text-xs">
+      <span aria-hidden="true">📍</span>
+      <span class="truncate">
+        {{ volunteer.city.name|default:volunteer.city }}
+        {% if volunteer.city.province %} · {{ volunteer.city.province }}{% endif %}
+      </span>
+    </div>
+  {% endif %}
+        </div>
+      </div>
+
+      {# Stats "glass" #}
+      <div class="grid grid-cols-3 gap-4">
+        <div class="rounded-xl px-4 py-3 text-center bg-white/10 backdrop-blur-md border border-white/20 shadow-sm">
+          <div class="text-2xl font-extrabold group-[.is-dense]/density:text-xl">{{ stats.hours|default:0 }}</div>
+          <div class="text-white/90 text-sm group-[.is-dense]/density:text-xs">Heures</div>
+        </div>
+        <div class="rounded-xl px-4 py-3 text-center bg-white/10 backdrop-blur-md border border-white/20 shadow-sm">
+          <div class="text-2xl font-extrabold group-[.is-dense]/density:text-xl">{{ stats.missions|default:0 }}</div>
+          <div class="text-white/90 text-sm group-[.is-dense]/density:text-xs">Missions</div>
+        </div>
+        <div class="rounded-xl px-4 py-3 text-center bg-white/10 backdrop-blur-md border border-white/20 shadow-sm">
+          <div class="text-2xl font-extrabold group-[.is-dense]/density:text-xl">{{ stats.events|default:0 }}</div>
+          <div class="text-white/90 text-sm group-[.is-dense]/density:text-xs">Événements</div>
+        </div>
+      </div>
+    </div>
+
+
+
+    {# Toggle densité (compact/confort) #}
+    <div class="mt-4 flex md:justify-end">
+      <button type="button" data-density-toggle aria-pressed="false"
+              class="inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-md border border-white/30
+                     px-3 py-1.5 text-sm hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/60">
+        <span aria-hidden="true">↔️</span>
+        <span class="group-[.is-dense]/density:hidden">Mode compact</span>
+        <span class="hidden group-[.is-dense]/density:inline">Mode confortable</span>
+      </button>
+    </div>
+  </div>
+
+  {% if profile_missing and profile_missing|length > 0 %}
+  <div class="mb-6 rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 p-4
+              group-[.is-dense]/density:p-3 group-[.is-dense]/density:text-sm">
+    <div class="flex items-center justify-between gap-3 flex-wrap">
+      <p>
+        Profil incomplet ({{ profile_completeness|default:0 }}%). Éléments manquants :
+        <strong>{{ profile_missing|join:", " }}</strong>
+      </p>
+      <a href="{% url 'benevoles:profile_edit' %}"
+         class="px-4 py-2 rounded-lg bg-amber-400 text-gray-900 hover:bg-amber-300 dark:bg-amber-500 dark:hover:bg-amber-400
+                group-[.is-dense]/density:px-3 group-[.is-dense]/density:py-1.5">
+        Compléter maintenant
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+  {# ───── Grille principale ───── #}
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 group-[.is-dense]/density:gap-4">
+    {# Colonne gauche #}
+    <div class="lg:col-span-2 space-y-6 group-[.is-dense]/density:space-y-4">
+
+      {# Informations #}
+      <section class="bg-white dark:bg-slate-900 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 p-6
+                      group-[.is-dense]/density:p-4">
+        <div class="flex items-center justify-between mb-4 group-[.is-dense]/density:mb-3">
+          <h2 class="text-lg font-semibold group-[.is-dense]/density:text-base">Informations</h2>
+          <a href="{% url 'benevoles:profile_edit' %}" class="text-blue-600 dark:text-blue-300 hover:underline text-sm">Modifier</a>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4 text-sm group-[.is-dense]/density:gap-3">
+          <div>
+            <div class="text-gray-500 dark:text-slate-400">Nom</div>
+            <div class="font-medium">{{ volunteer.name|default:"-" }}</div>
+          </div>
+          <div>
+            <div class="text-gray-500 dark:text-slate-400">Email</div>
+            <div class="font-medium">{{ volunteer.email|default:request.user.email|default:"-" }}</div>
+          </div>
+          <div>
+            <div class="text-gray-500 dark:text-slate-400">Téléphone</div>
+            <div class="font-medium">{{ volunteer.phone|default:"-" }}</div>
+          </div>
+          <div>
+            <div class="text-gray-500 dark:text-slate-400">Rôle</div>
+            <div class="font-medium">Bénévole</div>
+          </div>
+        </div>
+        {# --- ADD: ligne Ville --- #}
+        <div>
+          <div class="text-gray-500 dark:text-slate-400">Ville</div>
+          <div class="font-medium">
+            {% if volunteer and volunteer.city %}
+              {{ volunteer.city.name|default:volunteer.city }}
+              {% if volunteer.city.province %} · {{ volunteer.city.province }}{% endif %}
+            {% else %}
+              <span class="text-gray-500 dark:text-slate-400"><a href="{% url 'benevoles:profile_edit' %}" class="text-blue-600 dark:text-blue-300 hover:underline text-sm">📍</a>
+        </span>
+            {% endif %}
+          </div>
+        </div>
+
+      </section>
+
+      {# Disponibilités #}
+      <section class="bg-white dark:bg-slate-900 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 p-6
+                      group-[.is-dense]/density:p-4">
+        <div class="flex items-center justify-between mb-4 group-[.is-dense]/density:mb-3">
+          <h2 class="text-lg font-semibold group-[.is-dense]/density:text-base">Disponibilités</h2>
+          <a href="{% url 'benevoles:profile_edit' %}#availability" class="text-blue-600 dark:text-blue-300 hover:underline text-sm">Mettre à jour</a>
+        </div>
+        {% if availability %}
+          <ul class="grid sm:grid-cols-2 gap-2 group-[.is-dense]/density:gap-1.5">
+            {% for a in availability %}
+              <li class="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 bg-white/70 dark:bg-slate-950/30
+                         group-[.is-dense]/density:px-2 group-[.is-dense]/density:py-1.5 group-[.is-dense]/density:text-sm">
+                <span class="font-medium">{{ a.get_day_display|default:a.day }}</span>
+                <span class="text-gray-600 dark:text-slate-300">{{ a.get_slot_display|default:a.slot }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-gray-500 dark:text-slate-400 text-sm">Aucune disponibilité renseignée.</p>
+        {% endif %}
+      </section>
+
+      {# Activité récente #}
+      <section class="bg-white dark:bg-slate-900 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 p-6
+                      group-[.is-dense]/density:p-4">
+        <div class="flex items-center justify-between mb-4 group-[.is-dense]/density:mb-3">
+          <h2 class="text-lg font-semibold group-[.is-dense]/density:text-base">Activité récente</h2>
+          <a href="{% url 'benevoles:historique_benevole' %}" class="text-blue-600 dark:text-blue-300 hover:underline text-sm">Tout voir</a>
+        </div>
+        {% if activity %}
+          <ul class="divide-y divide-slate-200 dark:divide-slate-800">
+            {% for item in activity %}
+              <li class="py-3 group-[.is-dense]/density:py-2 flex items-center justify-between">
+                <span class="group-[.is-dense]/density:text-sm">{{ item.title }}</span>
+                <time class="text-gray-500 dark:text-slate-400 text-sm group-[.is-dense]/density:text-xs"
+                      datetime="{{ item.date|date:'c' }}">{{ item.date|date:"d/m/Y H:i" }}</time>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-gray-500 dark:text-slate-400 text-sm">Aucune activité récente.</p>
+        {% endif %}
+      </section>
+    </div>
+
+    {# Colonne droite #}
+    <aside class="space-y-6 group-[.is-dense]/density:space-y-4">
+      {# À venir (missions) — avec badges #}
+      <section class="bg-white dark:bg-slate-900 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 p-6
+                      group-[.is-dense]/density:p-4">
+        <div class="flex items-center justify-between mb-4 group-[.is-dense]/density:mb-3">
+          <h2 class="text-lg font-semibold group-[.is-dense]/density:text-base">Missions à venir</h2>
+          <a href="{% url 'benevoles:missions_browse' %}" class="text-blue-600 dark:text-blue-300 hover:underline text-sm">Voir les missions</a>
+        </div>
+
+        {% if upcoming %}
+          <ul class="space-y-2 group-[.is-dense]/density:space-y-1.5">
+            {% for it in upcoming %}
+              <li class="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 bg-white/70 dark:bg-slate-950/30
+                         group-[.is-dense]/density:px-2 group-[.is-dense]/density:py-1.5 group-[.is-dense]/density:text-sm">
+                <div class="min-w-0">
+                  <p class="font-medium truncate flex items-center gap-2">
+                    <span class="truncate">{{ it.title }}</span>
+                    {% if it.state == "En cours" %}
+                      <span class="shrink-0 inline-flex items-center text-[11px] px-2 py-0.5 rounded-full
+                                  bg-emerald-100 text-emerald-700 border border-emerald-200
+                                  dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-900/40">
+                        En cours
+                      </span>
+                    {% elif it.state == "À venir" %}
+                      <span class="shrink-0 inline-flex items-center text-[11px] px-2 py-0.5 rounded-full
+                                  bg-blue-100 text-blue-700 border border-blue-200
+                                  dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-900/40">
+                        À venir
+                      </span>
+                    {% endif %}
+                  </p>
+                  <p class="text-xs text-gray-600 dark:text-slate-400 mt-0.5">
+                  {{ it.date_display|default:it.date|default:"Dates à confirmer" }}
+                  — 
+                  {% if it.city %}
+                    {{ it.city }}  {# Mission.city (affichera "Ville · Province" si __str__ configuré) #}
+                  {% else %}
+                    {{ it.location|default:"Lieu à confirmer" }}
+                  {% endif %}
+  
+                  </p>
+                </div>
+
+                <div class="flex items-center gap-3 shrink-0">
+                  <a href="{{ it.detail_url|default:'#' }}"
+                     class="text-blue-600 dark:text-blue-300 hover:underline text-xs">Détails</a>
+
+                  {% if it.signup_id %}
+                    <form method="post" action="{% url 'staff:mission_cancel' it.signup_id %}">
+                      {% csrf_token %}
+                      <button class="text-xs text-red-600 hover:underline" title="Se désinscrire de cette mission">
+                        Annuler
+                      </button>
+                    </form>
+                  {% endif %}
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-gray-500 dark:text-slate-400 text-sm">Aucune mission en cours ni à venir.</p>
+        {% endif %}
+      </section>
+
+      {# Compétences #}
+      <section class="bg-white dark:bg-slate-900 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 p-6
+                      group-[.is-dense]/density:p-4">
+        <div class="flex items-center justify-between mb-4 group-[.is-dense]/density:mb-3">
+          <h2 class="text-lg font-semibold group-[.is-dense]/density:text-base">Compétences</h2>
+          <a href="{% url 'benevoles:profile_edit' %}#skills" class="text-blue-600 dark:text-blue-300 hover:underline text-sm">Éditer</a>
+        </div>
+        {% if skills %}
+          <div class="flex flex-wrap gap-2 group-[.is-dense]/density:gap-1.5">
+            {% for s in skills %}
+              <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm border border-blue-100
+                           dark:bg-blue-950/30 dark:text-blue-300 dark:border-blue-900/40
+                           group-[.is-dense]/density:text-xs group-[.is-dense]/density:px-2.5">
+                {{ s.skill.name }}
+                {% if s.level %}
+                  <span class="ml-2 text-xs text-blue-700/80 dark:text-blue-300/80">— {{ s.get_level_display }}</span>
+                {% endif %}
+              </span>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-gray-500 dark:text-slate-400 text-sm">Ajoutez vos compétences pour de meilleures affectations.</p>
+        {% endif %}
+      </section>
+
+      {# Documents récents #}
+      <section class="bg-white dark:bg-slate-900 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 p-6
+                      group-[.is-dense]/density:p-4">
+        <div class="flex items-center justify-between mb-4 group-[.is-dense]/density:mb-3">
+          <h2 class="text-lg font-semibold group-[.is-dense]/density:text-base">Documents</h2>
+          <a href="{% url 'benevoles:UserDocuments_list' %}" class="text-blue-600 dark:text-blue-300 hover:underline text-sm">Gérer</a>
+        </div>
+
+        {% with protected="verified verifie approuve approved valide verification under_review pending en_verification en_attente_verification" %}
+        {% if documents %}
+          <ul class="space-y-2 group-[.is-dense]/density:space-y-1.5">
+            {% for d in documents %}
+              {% with stat=d.status|default_if_none:"" %}
+              <li class="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 bg-white/70 dark:bg-slate-950/30
+                         group-[.is-dense]/density:px-2 group-[.is-dense]/density:py-1.5 group-[.is-dense]/density:text-sm">
+                <div class="min-w-0">
+                  <span class="truncate mr-3 block">
+                    {{ d.name|default:d.file.name }}
+                    {% if stat %}
+                      <span class="ml-2 text-[11px] px-2 py-0.5 rounded-full align-middle
+                        {% if stat|lower in protected %}
+                          bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-900/40
+                        {% else %}
+                          bg-gray-50 text-gray-700 border border-gray-200 dark:bg-slate-800/70 dark:text-slate-200 dark:border-slate-700
+                        {% endif %}">
+                        {{ stat }}
+                      </span>
+                    {% endif %}
+                  </span>
+                  <span class="text-xs text-gray-500 dark:text-slate-400">{{ d.uploaded_at|date:"d/m/Y H:i" }} • {{ d.size|filesizeformat }}</span>
+                </div>
+                <div class="flex items-center gap-3 shrink-0">
+                  {% if d.file %}
+                    <a href="{{ d.file.url }}" target="_blank" rel="noopener"
+                       class="text-blue-600 dark:text-blue-300 hover:underline text-sm">Ouvrir</a>
+                  {% endif %}
+                </div>
+              </li>
+              {% endwith %}
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-gray-500 dark:text-slate-400 text-sm">Aucun document.</p>
+        {% endif %}
+        {% endwith %}
+      </section>
+
+      {# Actions rapides #}
+      <section class="bg-white dark:bg-slate-900 rounded-xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-800 p-6
+                      group-[.is-dense]/density:p-4">
+        <div class="flex items-center justify-between mb-4 group-[.is-dense]/density:mb-3">
+          <h2 class="text-lg font-semibold group-[.is-dense]/density:text-base">Actions rapides</h2>
+          <div class="text-sm text-gray-500 dark:text-slate-400">Profil : {{ profile_completeness|default:0 }}%</div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 group-[.is-dense]/density:gap-2">
+          <a href="{% url 'benevoles:profile_edit' %}"
+             class="text-center px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700
+                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 transition
+                    group-[.is-dense]/density:px-3 group-[.is-dense]/density:py-1.5 group-[.is-dense]/density:text-sm">
+            Éditer mon profil
+          </a>
+          <a href="{% url 'benevoles:UserDocuments_list' %}"
+             class="text-center px-4 py-2 rounded-lg bg-amber-400 text-gray-900 hover:bg-amber-300 dark:bg-amber-500 dark:hover:bg-amber-400
+                    group-[.is-dense]/density:px-3 group-[.is-dense]/density:py-1.5 group-[.is-dense]/density:text-sm">
+            Téléverser document
+          </a>
+          <a href="{% url 'benevoles:hours_entry_create' %}"
+             class="text-center px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700
+                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 transition
+                    group-[.is-dense]/density:px-3 group-[.is-dense]/density:py-1.5 group-[.is-dense]/density:text-sm">
+            Déclarer des heures
+          </a>
+          <a href="{% url 'core:don' %}"
+             class="text-center px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700
+                    focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 transition
+                    group-[.is-dense]/density:px-3 group-[.is-dense]/density:py-1.5 group-[.is-dense]/density:text-sm">
+            Soutenir
+          </a>
+        </div>
+      </section>
+    </aside>
+  </div>
+</section>
+
+<script>
+/* Toggle densité (compact/confort) + persistance localStorage */
+(function(){
+  var root = document.getElementById('profile-root');
+  var key = 'profile:density';
+  try {
+    if (localStorage.getItem(key) === 'dense') {
+      root.classList.add('is-dense');
+    }
+  } catch(e){}
+
+  document.querySelectorAll('[data-density-toggle]').forEach(function(btn){
+    var sync = function(){
+      var dense = root.classList.contains('is-dense');
+      btn.setAttribute('aria-pressed', dense ? 'true' : 'false');
+    };
+    sync();
+    btn.addEventListener('click', function(){
+      root.classList.toggle('is-dense');
+      try {
+        localStorage.setItem('profile:density', root.classList.contains('is-dense') ? 'dense' : 'comfy');
+      } catch(e){}
+      sync();
+    });
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "staff/base_staff.html" %}
+{% block staff_title %}Candidatures bénévoles{% endblock %}
+
+{% block staff_content %}
+<header class="mb-4 flex items-center justify-between">
+  <h1 class="text-2xl font-extrabold text-blue-700 dark:text-blue-300">Candidatures</h1>
+
+  <form method="get" class="flex gap-2">
+    <select name="status"
+            class="px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                   bg-white dark:bg-slate-900/60
+                   text-slate-900 dark:text-slate-100
+                   focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-500/20">
+      <option value="">Tous statuts</option>
+      <option value="pending" {% if status == 'pending' %}selected{% endif %}>En attente</option>
+      <option value="needs_changes" {% if status == 'needs_changes' %}selected{% endif %}>À corriger</option>
+      <option value="approved" {% if status == 'approved' %}selected{% endif %}>Approuvée</option>
+      <option value="rejected" {% if status == 'rejected' %}selected{% endif %}>Refusée</option>
+    </select>
+
+    <button class="px-3 py-2 rounded-lg
+                   bg-slate-200 hover:bg-slate-300
+                   text-slate-900
+                   dark:bg-slate-800/70 dark:text-slate-100 dark:hover:bg-slate-700
+                   ring-1 ring-slate-300 dark:ring-white/10">
+      Filtrer
+    </button>
+  </form>
+</header>
+
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow
+            ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-slate-50 dark:bg-slate-800/60">
+      <tr class="text-slate-700 dark:text-slate-200">
+        <th class="text-left p-3">#</th>
+        <th class="text-left p-3">Utilisateur</th>
+        <th class="text-left p-3">Nom</th>
+        <th class="text-left p-3">Statut</th>
+        <th class="text-left p-3">Soumise</th>
+        <th class="text-right p-3">Action</th>
+      </tr>
+    </thead>
+
+    <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+      {% for a in apps %}
+      <tr class="text-slate-800 dark:text-slate-200">
+        <td class="p-3">{{ a.id }}</td>
+        <td class="p-3">{{ a.user }}</td>
+        <td class="p-3">{{ a.full_name }}</td>
+        <td class="p-3">
+          {{ a.get_status_display }}
+        </td>
+        <td class="p-3">{{ a.submitted_at|date:"d/m/Y H:i" }}</td>
+        <td class="p-3 text-right">
+          <a href="{% url 'staff:application_review' a.id %}"
+             class="inline-flex items-center px-3 py-1 rounded-lg
+                    bg-blue-600 text-white hover:bg-blue-700
+                    focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500/40">
+            Examiner
+          </a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td class="p-6 text-center text-slate-600 dark:text-slate-400" colspan="6">
+          Aucune candidature.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

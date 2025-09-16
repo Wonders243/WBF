@@ -1,0 +1,123 @@
+{# templates/staff/partners/partner_form.html #}
+{% extends "staff/base_staff.html" %}
+{% block staff_title %}Staff — {% if partner %}Modifier{% else %}Créer{% endif %} un partenaire{% endblock %}
+
+{% block staff_content %}
+<section class="max-w-4xl space-y-4">
+  <header class="flex items-center justify-between">
+    <h1 class="text-2xl font-extrabold text-blue-700 dark:text-blue-300">
+      {% if partner %}Modifier{% else %}Créer{% endif %} un partenaire
+    </h1>
+    <a href="{% url 'staff:partner_list' %}"
+       class="px-3 py-2 rounded-lg ring-1 ring-slate-200 hover:bg-slate-50 dark:ring-white/10 dark:hover:bg-white/5 text-sm">
+      ← Retour
+    </a>
+  </header>
+
+  <form method="post" enctype="multipart/form-data"
+        class="auth-key-form js-auth-managed bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6 space-y-6"
+        data-auth-message="Clé requise pour créer ou modifier un partenaire."
+        data-superuser="{{ request.user.is_superuser|yesno:'true,false' }}">
+    {% csrf_token %}
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <label class="block">
+        <span class="text-sm">Nom</span>
+        {{ form.name }}
+      </label>
+      <label class="block">
+        <span class="text-sm">Catégorie</span>
+        {{ form.category }}
+      </label>
+      <label class="block">
+        <span class="text-sm">Niveau</span>
+        {{ form.tier }}
+      </label>
+      <label class="block">
+        <span class="text-sm">Site web</span>
+        {{ form.website }}
+      </label>
+
+      <label class="block md:col-span-2">
+        <span class="text-sm">Description</span>
+        {{ form.description }}
+      </label>
+
+      <label class="block">
+        <span class="text-sm">Logo</span>
+        {{ form.logo }}
+      </label>
+      <div>
+        {% if partner and partner.logo %}
+          <img src="{{ partner.logo.url }}" class="h-24 rounded-lg ring-1 ring-black/5 dark:ring-white/10" alt="">
+        {% endif %}
+      </div>
+
+      <label class="block">
+        <span class="text-sm">Contact — nom</span>
+        {{ form.contact_name }}
+      </label>
+      <label class="block">
+        <span class="text-sm">Contact — email</span>
+        {{ form.contact_email }}
+      </label>
+      <label class="block">
+        <span class="text-sm">Contact — téléphone</span>
+        {{ form.contact_phone }}
+      </label>
+
+      <label class="block md:col-span-2">
+        <span class="text-sm">Adresse</span>
+        {{ form.address }}
+      </label>
+
+      <label class="block">
+        <span class="text-sm">LinkedIn</span>
+        {{ form.linkedin }}
+      </label>
+      <label class="block">
+        <span class="text-sm">Twitter</span>
+        {{ form.twitter }}
+      </label>
+      <label class="block">
+        <span class="text-sm">Facebook</span>
+        {{ form.facebook }}
+      </label>
+      <label class="block">
+        <span class="text-sm">Instagram</span>
+        {{ form.instagram }}
+      </label>
+
+      <label class="block">
+        <span class="text-sm">Début partenariat</span>
+        {{ form.start_date }}
+      </label>
+      <label class="block">
+        <span class="text-sm">Fin partenariat</span>
+        {{ form.end_date }}
+      </label>
+
+      <label class="block md:col-span-2">
+        <span class="text-sm">Contribution</span>
+        {{ form.contribution }}
+      </label>
+
+      <label class="inline-flex items-center gap-2">
+        {{ form.is_active }} <span>Actif</span>
+      </label>
+      <label class="block">
+        <span class="text-sm">Ordre</span>
+        {{ form.sort_order }}
+      </label>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+        {% if partner %}Enregistrer{% else %}Créer{% endif %}
+      </button>
+      <a href="{% url 'staff:partner_list' %}"
+         class="px-4 py-2 rounded-lg ring-1 ring-slate-200 hover:bg-slate-50 dark:ring-white/10 dark:hover:bg-white/5">Annuler</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

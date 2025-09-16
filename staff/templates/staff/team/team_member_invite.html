@@ -1,0 +1,61 @@
+{% load tz %}{% load static %}
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <title>Invitation à rejoindre l’équipe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      .container { max-width: 600px; margin: 0 auto; padding: 24px; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: #0f172a; background: #ffffff; }
+      .h1 { font-size: 20px; font-weight: 700; margin: 0 0 12px; }
+      .p { font-size: 16px; line-height: 1.55; margin: 0 0 12px; color: #334155; }
+      .small { font-size: 13px; color: #64748b; }
+      .card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; background: #f8fafc; margin: 16px 0; }
+      .btn { display: inline-block; padding: 12px 18px; border-radius: 10px; text-decoration: none; background: #2563eb; color: #ffffff !important; font-weight: 600; }
+      .muted { color: #64748b; }
+      .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; background: #0f172a0d; padding: 2px 6px; border-radius: 6px; }
+    </style>
+  </head>
+  <body style="background:#f1f5f9; padding:24px;">
+    <div class="container">
+      <h1 class="h1">Invitation à rejoindre l’équipe</h1>
+
+      <p class="p">
+        Bonjour <strong>{{ volunteer.display_name|default:member.display_name|default:"" }}</strong>,
+      </p>
+
+      <p class="p">
+        Vous êtes invité(e) à rejoindre l’espace Équipe. Merci de compléter votre fiche membre afin d’activer votre accès.
+      </p>
+
+      <div class="card">
+        <p class="p" style="margin-bottom:16px;">Finaliser votre inscription :</p>
+        <p style="margin:0 0 16px;">
+          <a class="btn" href="{{ url }}" target="_blank" rel="noopener">Compléter ma fiche</a>
+        </p>
+        <p class="small muted" style="margin:0;">Valide jusqu’au
+          <strong>{{ expires_at|date:"d F Y à H:i" }}</strong>.
+        </p>
+      </div>
+
+      <p class="p">
+        <strong>Ce que vous allez faire :</strong><br>
+        • Vérifier vos informations (nom, email, téléphone, etc.)<br>
+        • Certaines données liées à votre compte peuvent être verrouillées pour garantir la cohérence<br>
+        • Une fois validé, votre accès à l’espace Équipe sera activé
+      </p>
+
+      <div class="card">
+        <p class="small muted" style="margin-bottom:8px;">Si le bouton ne fonctionne pas, copiez/collez ce lien dans votre navigateur :</p>
+        <p class="small"><a href="{{ url }}" target="_blank" rel="noopener">{{ url }}</a></p>
+        <p class="small muted" style="margin-top:8px;">Identifiant d’invitation : <span class="code">{{ invite.token }}</span></p>
+      </div>
+
+      <p class="p">Si vous n’êtes pas à l’origine de cette demande, vous pouvez ignorer cet email.</p>
+
+      <p class="p" style="margin-top:24px;">Merci,</p>
+      <p class="small muted">L’équipe</p>
+    </div>
+  </body>
+  </html>
+

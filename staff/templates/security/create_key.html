@@ -1,0 +1,150 @@
+{% extends "staff/base_staff.html" %}
+{% block staff_title %}Créer une clé d’autorisation{% endblock %}
+
+{% block staff_content %}
+<section class="max-w-5xl mx-auto space-y-6">
+  <header class="flex items-center justify-between">
+    <h1 class="text-2xl font-extrabold text-blue-700 dark:text-blue-300">Créer une clé d’autorisation</h1>
+    <a href="{% url 'staff:key_list' %}"
+       class="px-3 py-2 rounded-lg ring-1 ring-slate-200 hover:bg-slate-50 dark:ring-white/10 dark:hover:bg-white/5">
+      Voir les clés
+    </a>
+  </header>
+
+  <form method="post"
+        class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6 space-y-6">
+    {% csrf_token %}
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <label class="block">
+        <span class="text-sm text-slate-700 dark:text-slate-200">Libellé</span>
+        <input type="text" name="label"
+               class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                      bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100
+                      focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+               placeholder="Ex : Invites missions août">
+      </label>
+
+      <label class="block">
+        <span class="text-sm text-slate-700 dark:text-slate-200">Niveau</span>
+        <select name="level"
+                class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                       bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100
+                       focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+          {% for val,label in levels %}
+            <option value="{{ val }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label class="block">
+        <span class="text-sm text-slate-700 dark:text-slate-200">Quota d’utilisations</span>
+        <input type="number" name="max_uses" min="1"
+               class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                      bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100
+                      focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+               placeholder="Vide = illimité">
+      </label>
+
+      <label class="block">
+        <span class="text-sm text-slate-700 dark:text-slate-200">Expiration</span>
+        <input type="datetime-local" name="expires_at"
+               class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                      bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100
+                      focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+      </label>
+    </div>
+
+    <div>
+      <span class="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-2">Actions autorisées</span>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+        <label class="inline-flex items-center gap-2">
+          <input type="checkbox" name="actions" value="*">
+          <span class="text-sm">Tout (*)</span>
+        </label>
+        {% for a in known_actions %}
+          <label class="inline-flex items-center gap-2">
+            <input type="checkbox" name="actions" value="{{ a }}">
+            <span class="text-sm">{{ a }}</span>
+          </label>
+        {% endfor %}
+      </div>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Coche “*” pour tout autoriser, sinon coche les actions précises.</p>
+    </div>
+
+    <label class="block">
+      <span class="text-sm text-slate-700 dark:text-slate-200">Note (interne)</span>
+      <textarea name="note" rows="3"
+                class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                       bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100
+                       focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                placeholder="Contexte d’utilisation…"></textarea>
+    </label>
+
+    <div class="rounded-xl ring-1 ring-slate-200 dark:ring-white/10 p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <input id="send_now" type="checkbox" name="send_now">
+        <label for="send_now" class="text-sm font-medium text-slate-700 dark:text-slate-200">Envoyer la clé à des membres du staff</label>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <label class="block">
+          <span class="text-sm text-slate-700 dark:text-slate-200">Sujet</span>
+          <input type="text" name="email_subject" placeholder="Clé d’autorisation"
+                 class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                        bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100
+                        focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+        </label>
+        <div></div>
+        <label class="block md:col-span-2">
+          <span class="text-sm text-slate-700 dark:text-slate-200">Message</span>
+          <textarea name="email_body" rows="4"
+                    class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                           bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100
+                           focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    placeholder="Bonjour, voici une clé d’autorisation. Elle est sensible : ne la partagez pas."></textarea>
+          <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Le <strong>token</strong> sera automatiquement inséré par le serveur lors de l’envoi.</p>
+        </label>
+      </div>
+
+      <div class="mt-3">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-medium text-slate-700 dark:text-slate-200">Destinataires (staff)</span>
+          <label class="text-xs text-blue-700 dark:text-blue-300 cursor-pointer">
+            <input id="toggle-all" type="checkbox" class="mr-1"> Tout cocher/décocher
+          </label>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-56 overflow-auto pr-1">
+          {% for u in staff_users %}
+            <label class="inline-flex items-center gap-2">
+              <input type="checkbox" name="recipients" value="{{ u.id }}" class="recipient">
+              <span class="text-sm">{{ u.get_full_name|default:u.username }} — {{ u.email }}</span>
+            </label>
+          {% empty %}
+            <p class="text-sm text-slate-500 dark:text-slate-400">Aucun membre du staff trouvé.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Créer la clé</button>
+      <a href="{% url 'staff:key_list' %}"
+         class="px-4 py-2 rounded-lg ring-1 ring-slate-200 hover:bg-slate-50 dark:ring-white/10 dark:hover:bg-white/5">
+        Annuler
+      </a>
+    </div>
+  </form>
+</section>
+
+<script>
+  (function(){
+    const tgl = document.getElementById('toggle-all');
+    if (!tgl) return;
+    const boxes = () => Array.from(document.querySelectorAll('.recipient'));
+    tgl.addEventListener('change', e => {
+      boxes().forEach(cb => cb.checked = e.target.checked);
+    });
+  })();
+</script>
+{% endblock %}

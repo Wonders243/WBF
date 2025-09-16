@@ -1,0 +1,150 @@
+{# templates/partials/messages.html — Premium, slide-down, auto-close, Alpine + fallback #}
+{% if messages %}
+{# Wrapper centré sous l’en-tête (plus bas) #}
+<div class="fixed left-1/2 -translate-x-1/2 z-[60] w-full max-w-md px-4 space-y-2 pointer-events-none"
+     style="top: calc(var(--header-h) + 1.2rem);"
+     role="region" aria-label="Notifications">
+
+  {% for message in messages %}
+    {% with tag=message.tags|default:'info' %}
+      <div
+        {# --- Alpine (si présent) --- #}
+        x-data="{
+          show: true,
+          t: null,
+          duration: 5000,
+          start(){ this.t = setTimeout(()=> this.show = false, this.duration) },
+          pause(){ if(this.t){ clearTimeout(this.t); this.t = null } },
+          resume(){ if(!this.t){ this.start() } }
+        }"
+        x-init="start()"
+        x-show="show"
+        @keydown.escape.window="show = false"
+        @mouseenter="pause()" @mouseleave="resume()"
+
+        x-transition:enter="transform ease-out duration-250"
+        x-transition:enter-start="-translate-y-4 opacity-0"
+        x-transition:enter-end="translate-y-0 opacity-100"
+        x-transition:leave="transform ease-in duration-150"
+        x-transition:leave-start="translate-y-0 opacity-100"
+        x-transition:leave-end="-translate-y-2 opacity-0"
+
+        {# --- Fallback (si Alpine absent) --- #}
+        data-toast
+        data-autoclose="5000"
+
+        class="pointer-events-auto will-change-transform rounded-xl border p-3 text-sm shadow
+               bg-white/95 dark:bg-slate-900/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:supports-[backdrop-filter]:bg-slate-900/80
+               ring-1 ring-black/5 dark:ring-white/10 animate-toast-in
+               {% if 'success' in tag %} border-emerald-200 dark:border-emerald-900/40 text-emerald-800 dark:text-emerald-200
+               {% elif 'warning' in tag %} border-amber-200 dark:border-amber-900/40 text-amber-800 dark:text-amber-200
+               {% elif 'error' in tag %} border-rose-200 dark:border-rose-900/40 text-rose-800 dark:text-rose-200
+               {% elif 'debug' in tag %} border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200
+               {% else %} border-blue-200 dark:border-blue-900/40 text-slate-800 dark:text-slate-100 {% endif %}"
+        role="{% if 'error' in tag or 'warning' in tag %}alert{% else %}status{% endif %}"
+        aria-live="{% if 'error' in tag or 'warning' in tag %}assertive{% else %}polite{% endif %}"
+      >
+        <div class="flex items-start gap-2">
+          <div class="mt-0.5 select-none">
+            {% if 'success' in tag %}✅
+            {% elif 'warning' in tag %}⚠️
+            {% elif 'error' in tag %}❌
+            {% elif 'debug' in tag %}🛠️
+            {% else %}ℹ️{% endif %}
+          </div>
+
+          <div class="flex-1">
+            <p class="font-semibold">
+              {% if 'success' in tag %}Succès
+              {% elif 'warning' in tag %}Attention
+              {% elif 'error' in tag %}Erreur
+              {% elif 'debug' in tag %}Debug
+              {% else %}Info{% endif %}
+            </p>
+            <p class="text-slate-700 dark:text-slate-300">{{ message }}</p>
+          </div>
+
+          <button type="button"
+                  class="ml-2 inline-flex items-center justify-center h-6 w-6 rounded-md
+                         text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200
+                         hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                  aria-label="Fermer"
+                  @click.stop.prevent="show = false"
+                  data-toast-close>
+            <svg class="w-4 h-4 block" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+            <span class="sr-only">Fermer</span>
+          </button>
+        </div>
+      </div>
+    {% endwith %}
+  {% endfor %}
+</div>
+
+{# Animations CSS (utilisées par le fallback et comme “bonus” au mount) #}
+<style>
+@keyframes toast-in {
+  from { opacity:.0; transform: translateY(-0.75rem) }
+  to   { opacity:1;  transform: translateY(0) }
+}
+@keyframes toast-out {
+  from { opacity:1;  transform: translateY(0) }
+  to   { opacity:.0; transform: translateY(-0.5rem) }
+}
+.animate-toast-in  { animation: toast-in .22s ease-out both }
+.animate-toast-out { animation: toast-out .16s ease-in both }
+</style>
+
+{# Fallback pur JS : auto-close + pause survol + bouton fermer #}
+<script>
+(function(){
+  const supportsAlpine = !!window.Alpine;
+
+  // Auto-close + hover pause pour tous les toasts, même sans Alpine
+  document.querySelectorAll('[data-toast]').forEach((toast) => {
+    let timer = null;
+    const duration = parseInt(toast.getAttribute('data-autoclose') || '5000', 10);
+
+    function closeNow(){
+      toast.classList.remove('animate-toast-in');
+      toast.classList.add('animate-toast-out');
+      setTimeout(()=> { toast.style.display = 'none'; }, 170);
+    }
+
+    function start(){
+      if (timer) return;
+      timer = setTimeout(closeNow, duration);
+    }
+    function pause(){
+      if (timer){ clearTimeout(timer); timer = null; }
+    }
+
+    // Si Alpine gère déjà, on laisse, mais ce fallback ne gêne pas.
+    start();
+    toast.addEventListener('mouseenter', pause);
+    toast.addEventListener('mouseleave', start);
+
+    const btn = toast.querySelector('[data-toast-close]');
+    if (btn) btn.addEventListener('click', (e)=>{ e.preventDefault(); pause(); closeNow(); });
+
+    // ESC global (utile si Alpine n’est pas là)
+    document.addEventListener('keydown', (e)=>{
+      if (e.key === 'Escape') { pause(); closeNow(); }
+    }, { once: true });
+  });
+
+  // Click délégué pour toute croix (si toasts ajoutés dynamiquement)
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest('[data-toast-close]');
+    if(!btn) return;
+    const toast = btn.closest('[data-toast]');
+    if (toast){
+      toast.classList.remove('animate-toast-in');
+      toast.classList.add('animate-toast-out');
+      setTimeout(()=> { toast.style.display = 'none'; }, 170);
+    }
+  }, {capture: true});
+})();
+</script>
+{% endif %}

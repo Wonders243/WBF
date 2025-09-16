@@ -1,0 +1,337 @@
+{% extends "account/base.html" %}
+{% load i18n static socialaccount %}
+
+{% block auth_width %}w-full max-w-lg px-3{% endblock %}
+{% block title %}{% trans "Inscription —  BAMU WELLBEING Foundation" %}{% endblock %}
+
+{% block auth_heading %}
+  <h1 id="page-title" class="text-xl sm:text-2xl font-extrabold tracking-tight text-blue-700 dark:text-blue-300 text-center">
+    {% trans "Créer un compte" %}
+  </h1>
+  <p class="mt-1 text-xs text-slate-600 dark:text-slate-300/80 text-center">
+    {% trans "Veuillez renseigner vos informations." %}
+  </p>
+{% endblock %}
+
+{% block account_content %}
+
+  {# Erreurs globales #}
+  {% if form.non_field_errors %}
+    <div class="mb-3 text-sm rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-red-700 dark:bg-red-950/40 dark:text-red-200 dark:border-red-900/40 text-center">
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+
+  <form id="signup-form" method="post" action="{% url 'account_signup' %}" class="grid grid-cols-1 md:grid-cols-2 gap-3" novalidate>
+    {% csrf_token %}
+    {% for h in form.hidden_fields %}{{ h }}{% endfor %}
+
+    {% if redirect_field_value %}
+      <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+    {% endif %}
+
+    {# Prénom #}
+    {% if form.first_name %}
+      <div>
+        <label for="id_first_name" class="mb-0.5 block text-[13px] font-medium text-slate-700 dark:text-slate-200">
+          {{ form.first_name.label }}{% if form.first_name.field.required %}<span class="text-red-600">*</span>{% endif %}
+        </label>
+        <input type="text" name="first_name" id="id_first_name"
+               value="{{ form.first_name.value|default_if_none:'' }}"
+               autocomplete="given-name" spellcheck="false"
+               class="w-full rounded-lg border border-slate-300 bg-white/80 px-3 py-2 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:bg-white/10 dark:border-white/10 dark:focus:ring-blue-500/20"
+               aria-invalid="{% if form.first_name.errors %}true{% else %}false{% endif %}"
+               aria-describedby="{% if form.first_name.errors %}id_first_name_error{% endif %}">
+        {% if form.first_name.errors %}
+          <p id="id_first_name_error" class="mt-1 text-xs text-red-600">{{ form.first_name.errors|striptags }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {# Nom #}
+    {% if form.last_name %}
+      <div>
+        <label for="id_last_name" class="mb-0.5 block text-[13px] font-medium text-slate-700 dark:text-slate-200">
+          {{ form.last_name.label }}{% if form.last_name.field.required %}<span class="text-red-600">*</span>{% endif %}
+        </label>
+        <input type="text" name="last_name" id="id_last_name"
+               value="{{ form.last_name.value|default_if_none:'' }}"
+               autocomplete="family-name" spellcheck="false"
+               class="w-full rounded-lg border border-slate-300 bg-white/80 px-3 py-2 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:bg-white/10 dark:border-white/10 dark:focus:ring-blue-500/20"
+               aria-invalid="{% if form.last_name.errors %}true{% else %}false{% endif %}"
+               aria-describedby="{% if form.last_name.errors %}id_last_name_error{% endif %}">
+        {% if form.last_name.errors %}
+          <p id="id_last_name_error" class="mt-1 text-xs text-red-600">{{ form.last_name.errors|striptags }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {# Nom d’utilisateur (selon config) #}
+    {% if form.username %}
+      <div>
+        <label for="id_username" class="mb-0.5 block text-[13px] font-medium text-slate-700 dark:text-slate-200">
+          {{ form.username.label }}{% if form.username.field.required %}<span class="text-red-600">*</span>{% endif %}
+        </label>
+        <input type="text" name="username" id="id_username"
+               value="{{ form.username.value|default_if_none:'' }}"
+               autocomplete="username" spellcheck="false"
+               class="w-full rounded-lg border border-slate-300 bg-white/80 px-3 py-2 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:bg-white/10 dark:border-white/10 dark:focus:ring-blue-500/20"
+               aria-invalid="{% if form.username.errors %}true{% else %}false{% endif %}"
+               aria-describedby="{% if form.username.errors %}id_username_error{% endif %}">
+        {% if form.username.errors %}
+          <p id="id_username_error" class="mt-1 text-xs text-red-600">{{ form.username.errors|striptags }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {# Email #}
+    {% if form.email %}
+      <div>
+        <label for="id_email" class="mb-0.5 block text-[13px] font-medium text-slate-700 dark:text-slate-200">
+          {{ form.email.label }}{% if form.email.field.required %}<span class="text-red-600">*</span>{% endif %}
+        </label>
+        <input type="email" name="email" id="id_email"
+               value="{{ form.email.value|default_if_none:'' }}"
+               autocomplete="email" inputmode="email"
+               class="w-full rounded-lg border border-slate-300 bg-white/80 px-3 py-2 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:bg-white/10 dark:border-white/10 dark:focus:ring-blue-500/20"
+               aria-invalid="{% if form.email.errors %}true{% else %}false{% endif %}"
+               aria-describedby="{% if form.email.errors %}id_email_error{% endif %}">
+        {% if form.email.errors %}
+          <p id="id_email_error" class="mt-1 text-xs text-red-600">{{ form.email.errors|striptags }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {# Mot de passe #}
+{# Mot de passe (aide en tooltip, collée à gauche en md+) #}
+{% if form.password1 %}
+  <div>
+    <label for="id_password1" class="mb-0.5 block text-[13px] font-medium text-slate-700 dark:text-slate-200">
+      {{ form.password1.label }}{% if form.password1.field.required %}<span class="text-red-600">*</span>{% endif %}
+    </label>
+
+    <div class="relative overflow-visible">
+      <input
+        type="password" name="password1" id="id_password1"
+        autocomplete="new-password"
+        class="w-full rounded-lg border border-slate-300 bg-white/80 px-3 py-2 pr-10 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:bg-white/10 dark:border-white/10 dark:focus:ring-blue-500/20"
+        aria-invalid="{% if form.password1.errors %}true{% else %}false{% endif %}"
+        aria-describedby="{% if form.password1.errors %}id_password1_error id_password1_help{% endif %}"
+      />
+
+      <button type="button"
+              class="pw-toggle absolute right-2 top-1/2 -translate-y-1/2 inline-flex items-center rounded-md px-1.5 py-1 text-xs text-slate-600 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60 dark:text-slate-300"
+              data-target="id_password1"
+              aria-label="{% trans 'Afficher/masquer le mot de passe' %}">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+
+      {# AIDE flottante : seulement en cas d’erreur #}
+      {% if form.password1.errors and form.password1.help_text %}
+        <div id="id_password1_help"
+             role="tooltip" aria-live="polite"
+             class="absolute z-30 left-0 top-full mt-1 w-[min(85vw,22rem)] rounded-lg border border-slate-200 bg-white p-2 text-[11px] leading-snug text-slate-700 shadow-xl
+                    dark:border-white/10 dark:bg-slate-900 dark:text-slate-200
+                    md:left-auto md:top-1/2 md:-translate-y-1/2 md:right-full md:mr-2 md:mt-0 md:w-80">
+          {# Flèche pour mobile (sous le champ) #}
+          <div class="absolute -top-1.5 left-4 h-3 w-3 rotate-45 border-l border-t border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 md:hidden"></div>
+          {# Flèche pour desktop (sur le côté droit du tooltip, pointant vers le champ) #}
+          <div class="absolute top-1/2 -translate-y-1/2 -right-1.5 hidden h-3 w-3 rotate-45 border-r border-t border-slate-200 bg-white dark:border-white/10 dark:bg-slate-900 md:block"></div>
+
+          {{ form.password1.help_text|safe }}
+        </div>
+      {% endif %}
+    </div>
+
+    {# Erreur (fine, inline) #}
+    {% if form.password1.errors %}
+      <p id="id_password1_error" class="mt-1 text-xs text-red-600">
+        {{ form.password1.errors|striptags }}
+      </p>
+    {% endif %}
+  </div>
+{% endif %}
+
+    {# Confirmation #}
+    {% if form.password2 %}
+      <div>
+        <label for="id_password2" class="mb-0.5 block text-[13px] font-medium text-slate-700 dark:text-slate-200">
+          {{ form.password2.label }}{% if form.password2.field.required %}<span class="text-red-600">*</span>{% endif %}
+        </label>
+        <div class="relative">
+          <input type="password" name="password2" id="id_password2"
+                 autocomplete="new-password"
+                 class="w-full rounded-lg border border-slate-300 bg-white/80 px-3 py-2 pr-10 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:bg-white/10 dark:border-white/10 dark:focus:ring-blue-500/20"
+                 aria-invalid="{% if form.password2.errors %}true{% else %}false{% endif %}"
+                 aria-describedby="{% if form.password2.errors %}id_password2_error{% endif %}">
+          <button type="button" class="pw-toggle absolute right-2 top-1/2 -translate-y-1/2 inline-flex items-center rounded-md px-1.5 py-1 text-xs text-slate-600 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60 dark:text-slate-300" data-target="id_password2" aria-label="{% trans 'Afficher/masquer le mot de passe' %}">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        {% if form.password2.errors %}
+          <p id="id_password2_error" class="mt-1 text-xs text-red-600">{{ form.password2.errors|striptags }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {# Conditions (pleine largeur) #}
+    {% if form.accept_terms %}
+      <div class="md:col-span-2">
+        <label class="inline-flex items-start gap-2 select-none">
+          <input type="checkbox" name="accept_terms" id="{{ form.accept_terms.id_for_label }}"
+                 class="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                 {% if form.accept_terms.value %}checked{% endif %} required>
+          <span class="text-[13px] leading-5 text-slate-700 dark:text-slate-300/90">
+            {% url 'legal:terms' as terms_url %}
+            {% url 'legal:privacy' as privacy_url %}
+            {% blocktrans trimmed with terms_url=terms_url privacy_url=privacy_url %}
+              J’accepte les <a href="{{ terms_url }}" class="text-blue-700 dark:text-blue-300 underline">conditions d’utilisation</a>
+              et la <a href="{{ privacy_url }}" class="text-blue-700 dark:text-blue-300 underline">politique de confidentialité</a>.
+            {% endblocktrans %}
+          </span>
+        </label>
+        {% if form.accept_terms.errors %}
+          <p id="{{ form.accept_terms.id_for_label }}-error" class="mt-1 text-xs text-red-600">{{ form.accept_terms.errors|striptags }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {# Submit (pleine largeur) #}
+    <div class="md:col-span-2">
+      <button id="signup-submit" type="submit"
+              class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60">
+        <svg id="signup-spinner" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 hidden" aria-hidden="true">
+          <path fill-rule="evenodd" d="M12 2a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm7.071 2.929a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 1 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0ZM21 11a1 1 0 1 1 0 2h-2a1 1 0 1 1 0-2h2ZM7.757 6.343A1 1 0 0 1 9.17 7.757L7.757 9.17A1 1 0 1 1 6.343 7.757L7.757 6.343ZM5 12a1 1 0 0 1-1 1H2a1 1 0 1 1 0-2h2a1 1 0 0 1 1 1Zm2.929 7.071a1 1 0 0 1 1.414 0l1.414 1.414a1 1 0 1 1-1.414 1.414l-1.414-1.414a1 1 0 0 1 0-1.414ZM12 19a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1Zm7.071-2.929a1 1 0 0 1 0 1.414l-1.414 1.414a1 1 0 1 1-1.414-1.414l1.414-1.414a1 1 0 0 1 1.414 0Z" clip-rule="evenodd"/>
+        </svg>
+        <span>{% trans "S’inscrire" %}</span>
+      </button>
+    </div>
+  </form>
+
+  {# Social compact #}
+  {% get_providers as socialaccount_providers %}
+  {% if socialaccount_providers %}
+    <div class="my-4 flex items-center gap-3">
+      <div class="h-px w-full bg-slate-200 dark:bg-white/10"></div>
+      <span class="shrink-0 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">{% trans "ou" %}</span>
+      <div class="h-px w-full bg-slate-200 dark:bg-white/10"></div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-2">
+      {% for provider in socialaccount_providers %}
+        <a href="{% provider_login_url provider.id process='signup' %}"
+           class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60 dark:bg-white/10 dark:text-slate-100 dark:border-white/10">
+          {% if provider.id == "google" %}
+            <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.9 32.6 29.4 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c10 0 19-7.3 19-20 0-1.1-.1-2.2-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.9 16.2 19.1 14 24 14c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16 4 9.1 8.5 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.3 0 10.2-2 13.8-5.2l-6.4-5.2C29.3 35.7 26.8 36.7 24 36c-5.3 0-9.8-3.4-11.5-8.1l-6.5 5C8.8 39.4 15.9 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1.3 3.7-4.8 6.5-9.3 6.5-5.3 0-9.8-3.4-11.5-8.1l-6.5 5C10.2 38.6 17.3 44 24 44c10 0 19-7.3 19-20 0-1.1-.1-2.2-.4-3.5z"/></svg>
+          {% elif provider.id == "github" %}
+            <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.2.8-.5v-2c-3.3.7-4-1.6-4-1.6-.6-1.5-1.4-1.9-1.4-1.9-1.1-.8.1-.8.1-.8 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.2-1.3-5.2-5.9 0-1.3.5-2.3 1.2-3.2-.1-.3-.5-1.6.1-3.3 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0C18.3 6.3 19.4 6.6 19.4 6.6c.6 1.7.2 3 .1 3.3.8.9 1.2 1.9 1.2 3.2 0 4.6-2.7 5.6-5.2 5.9.4.3.8 1 .8 2v3c0 .3.2.6.8.5A12 12 0 0 0 12 .5z"/></svg>
+          {% else %}
+            <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+          {% endif %}
+          <span class="text-sm">{% blocktrans %}Continuer avec {{ provider.name }}{% endblocktrans %}</span>
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <p class="mt-4 text-center text-[13px] text-slate-600 dark:text-slate-300/90">
+    {% trans "Déjà un compte ?" %}
+    <a href="{% url 'account_login' %}" class="font-medium text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200">
+      {% trans "Se connecter" %}
+    </a>
+  </p>
+
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    // Toggle passwords
+    document.querySelectorAll('.pw-toggle').forEach(function(btn){
+      var id = btn.getAttribute('data-target');
+      var input = document.getElementById(id);
+      if(!input) return;
+      btn.addEventListener('click', function(){
+        var isPwd = input.getAttribute('type') === 'password';
+        input.setAttribute('type', isPwd ? 'text' : 'password');
+      });
+    });
+
+    // Spinner submit
+    (function(){
+      var form = document.getElementById('signup-form');
+      var btn  = document.getElementById('signup-submit');
+      var spin = document.getElementById('signup-spinner');
+      if(form && btn && spin){
+        form.addEventListener('submit', function(){
+          btn.setAttribute('disabled', 'disabled');
+          spin.classList.remove('hidden');
+          spin.classList.add('animate-spin');
+        });
+      }
+    })();
+
+    // Focus auto: premier champ en erreur, sinon email/username
+    (function(){
+      var err = document.querySelector('[id$="_error"]');
+      if (err) {
+        var forId = err.id.replace('_error','');
+        var input = document.getElementById(forId);
+        if (input) { input.focus(); return; }
+      }
+      var fallback = document.getElementById('id_email') || document.getElementById('id_username') || document.getElementById('id_first_name');
+      if (fallback) fallback.focus();
+    })();
+  </script>
+  <script>
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function hide(el){ if(el) el.classList.add('hidden'); }
+  function show(el){ if(el) el.classList.remove('hidden'); }
+
+  const p1   = $('id_password1');
+  const p2   = $('id_password2');
+  const tip1 = $('id_password1_help');   // existe uniquement si erreur serveur
+  const tip2 = $('id_password2_help');   // idem
+  const err1 = $('id_password1_error');  // présent si erreur serveur initiale
+  const err2 = $('id_password2_error');
+
+  // Critère "OK" (simple et modifiable) :
+  // - password1: >= 8 caractères (ou respecte minlength si défini)
+  // - password2: non vide ET identique à password1
+  function validP1(){
+    if(!p1) return true;
+    const min = p1.minLength > 0 ? p1.minLength : 8;
+    return p1.value.length >= min;
+  }
+  function validP2(){
+    if(!p1 || !p2) return true;
+    return p2.value.length > 0 && p2.value === p1.value;
+  }
+
+  function updateTip1(){
+    if(!tip1) return;           // pas de tooltip si pas d'erreur serveur initiale
+    if (validP1()) hide(tip1);  // masque si correct
+    else if (err1) show(tip1);  // sinon n'affiche que s'il y avait une erreur serveur
+  }
+  function updateTip2(){
+    if(!tip2) return;
+    if (validP2()) hide(tip2);
+    else if (err2) show(tip2);
+  }
+
+  if (p1){
+    ['input','change','blur'].forEach(e => p1.addEventListener(e, updateTip1));
+    updateTip1();
+  }
+  if (p2){
+    ['input','change','blur'].forEach(e => p2.addEventListener(e, updateTip2));
+    // si password1 change, on re-valide la confirmation
+    if (p1) ['input','change'].forEach(e => p1.addEventListener(e, updateTip2));
+    updateTip2();
+  }
+})();
+</script>
+
+{% endblock %}

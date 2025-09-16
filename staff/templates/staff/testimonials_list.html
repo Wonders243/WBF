@@ -1,0 +1,60 @@
+{% extends "staff/base_staff.html" %}
+{% block staff_title %}Staff — Témoignages{% endblock %}
+
+{% block staff_content %}
+<header class="mb-4 flex items-center justify-between">
+  <h1 class="text-2xl font-extrabold text-blue-700 dark:text-blue-300">Témoignages</h1>
+  <a href="{% url 'staff:testimonial_create' %}"
+     class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+    Ajouter un témoignage
+  </a>
+</header>
+
+<form method="get" role="search" class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4 mb-4 grid grid-cols-1 md:grid-cols-4 gap-3">
+  <label class="sr-only" for="q">Recherche</label>
+  <input id="q" type="search" name="q" value="{{ request.GET.q|default_if_none:'' }}" placeholder="Auteur, contenu…"
+         class="px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/60 md:col-span-3">
+  <div>
+    <button class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">Filtrer</button>
+    {% if request.GET %}
+      <a href="{{ request.path }}" class="ml-2 text-sm text-slate-600 dark:text-slate-400 hover:underline">Réinitialiser</a>
+    {% endif %}
+  </div>
+</form>
+
+<section class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 dark:bg-slate-900/60 sticky top-0 z-10">
+        <tr class="text-left text-slate-600 dark:text-slate-300">
+          <th class="p-3 font-medium">Auteur</th>
+          <th class="p-3 font-medium">Extrait</th>
+          <th class="p-3 font-medium">Image</th>
+          <th class="p-3 font-medium text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+        {% for t in page_obj.object_list %}
+        <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition">
+          <td class="p-3 font-medium text-slate-900 dark:text-slate-100">{{ t.author }}</td>
+          <td class="p-3 text-slate-700 dark:text-slate-300">{{ t.content|truncatechars:80 }}</td>
+          <td class="p-3">
+            {% if t.image %}<img src="{{ t.image.url }}" alt="" class="h-10 w-10 object-cover rounded">{% else %}<span class="text-slate-400">—</span>{% endif %}
+          </td>
+          <td class="p-3 text-right whitespace-nowrap">
+            <a href="{% url 'staff:testimonial_update' t.id %}" class="text-blue-600 dark:text-blue-300 hover:underline">Éditer</a>
+            <a href="{% url 'staff:testimonial_delete' t.id %}" class="ml-3 text-rose-600 hover:underline">Supprimer</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="p-6 text-center text-slate-500 dark:text-slate-400">Aucun témoignage.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% include "staff/partials/_pagination.html" with page_obj=page_obj %}
+{% endblock %}

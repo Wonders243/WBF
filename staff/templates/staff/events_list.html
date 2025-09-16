@@ -1,0 +1,116 @@
+{% extends "staff/base_staff.html" %}
+{% block staff_title %}Staff — Événements{% endblock %}
+
+{% block staff_content %}
+<header class="mb-4 flex items-center justify-between">
+  <h1 class="text-2xl font-extrabold text-blue-700 dark:text-blue-300">Événements</h1>
+  <a href="{% url 'staff:event_create' %}"
+     class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60">
+    Créer un événement
+  </a>
+</header>
+
+<form method="get" role="search"
+      class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4 mb-4
+             grid grid-cols-1 md:grid-cols-5 gap-3">
+  <label class="sr-only" for="q">Recherche</label>
+  <input id="q" type="search" name="q" value="{{ request.GET.q|default_if_none:'' }}"
+         placeholder="Rechercher (titre, lieu, description…)"
+         class="px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder-slate-400
+                focus:outline-none focus:ring-2 focus:ring-blue-600/60 md:col-span-2">
+
+  <label class="sr-only" for="from">Du</label>
+  <input id="from" type="date" name="from" value="{{ request.GET.from }}"
+         class="px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100
+                focus:outline-none focus:ring-2 focus:ring-blue-600/60">
+
+  <label class="sr-only" for="to">Au</label>
+  <input id="to" type="date" name="to" value="{{ request.GET.to }}"
+         class="px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100
+                focus:outline-none focus:ring-2 focus:ring-blue-600/60">
+
+  <label class="sr-only" for="project">Projet</label>
+  <select id="project" name="project"
+          class="px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100
+                 focus:outline-none focus:ring-2 focus:ring-blue-600/60">
+    <option value="">Tous projets</option>
+    {% for p in projects %}
+      <option value="{{ p.id }}" {% if request.GET.project == p.id|stringformat:"s" %}selected{% endif %}>
+        {{ p.title }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <div class="md:col-span-5">
+    <button class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700
+                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60">
+      Filtrer
+    </button>
+    {% if request.GET %}
+      <a href="{{ request.path }}" class="ml-2 text-sm text-slate-600 dark:text-slate-400 hover:underline">Réinitialiser</a>
+    {% endif %}
+  </div>
+</form>
+
+<section class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 dark:bg-slate-900/60 sticky top-0 z-10">
+        <tr class="text-left text-slate-600 dark:text-slate-300">
+          <th class="p-3 font-medium">Titre</th>
+          <th class="p-3 font-medium">Date</th>
+          <th class="p-3 font-medium">Lieu</th>
+          <th class="p-3 font-medium">Projets</th>
+          <th class="p-3 font-medium">Missions</th>
+          <th class="p-3 font-medium text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+        {% for e in rows %}
+        <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition">
+          <td class="p-3 font-medium text-slate-900 dark:text-slate-100">
+            {{ e.title }}
+          </td>
+          <td class="p-3 text-slate-700 dark:text-slate-300">
+            {{ e.date|date:"Y-m-d" }}
+          </td>
+          <td class="p-3 text-slate-700 dark:text-slate-300">
+            {{ e.location|default:"—" }}
+          </td>
+          <td class="p-3 text-slate-700 dark:text-slate-300">
+            {{ e.projects }}
+          </td>
+          <td class="p-3">
+            <span class="inline-flex items-center rounded-full bg-slate-100 text-slate-800 px-2.5 py-0.5
+                         dark:bg-slate-800/70 dark:text-slate-200">
+              {{ e.missions_count }}
+            </span>
+          </td>
+          <td class="p-3 text-right whitespace-nowrap">
+            <a href="{% url 'staff:event_detail' e.id %}"
+               class="mr-2 inline-flex items-center gap-1 text-blue-600 dark:text-blue-300 hover:underline">
+              Détails
+            </a>
+            <a href="{% url 'staff:event_update' e.id %}"
+               class="inline-flex items-center gap-1 text-slate-600 dark:text-slate-300 hover:underline">
+              Éditer
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="p-6 text-center text-slate-500 dark:text-slate-400">Aucun événement.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% include "staff/partials/_pagination.html" with page_obj=page_obj %}
+{% endblock %}

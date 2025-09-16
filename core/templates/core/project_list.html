@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Projets — BAMU WELLBEING Foundation" %}{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-7xl px-4 py-8">
+  <!-- Header -->
+  <header class="mb-8 space-y-4 md:space-y-0 md:flex md:items-end md:justify-between">
+    <div>
+      <h1 class="text-3xl font-extrabold text-blue-700 dark:text-blue-300">{% trans "Projets" %}</h1>
+      <p class="text-slate-600 dark:text-slate-300 mt-2">
+        {% trans "Découvrez l’ensemble de nos projets en cours et à venir." %}
+      </p>
+
+      {# ✅ total fiable : utilise le paginator si paginé, sinon length de projects #}
+      {% if is_paginated %}
+        {% with total=page_obj.paginator.count %}
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{% blocktrans %}{{ total }} résultat(s){% endblocktrans %}</p>
+        {% endwith %}
+      {% else %}
+        {% with total=projects|length %}
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{% blocktrans %}{{ total }} résultat(s){% endblocktrans %}</p>
+        {% endwith %}
+      {% endif %}
+    </div>
+
+    <!-- Recherche + Tri -->
+    <form method="get" action="" class="w-full md:w-auto">
+      <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
+        <label for="q" class="sr-only">{% trans "Rechercher un projet" %}</label>
+        <input
+          id="q" name="q" type="search" value="{{ request.GET.q }}"
+          placeholder="{% trans 'Rechercher…' %}"
+          class="w-full sm:w-72 rounded-xl border border-slate-300 bg-white/90 px-3 py-2.5 shadow-sm outline-none transition
+                 focus:border-blue-500 focus:ring-4 focus:ring-blue-100
+                 dark:bg-slate-900/40 dark:border-white/10 dark:focus:ring-blue-500/20" />
+
+        <label for="order" class="sr-only">{% trans "Trier" %}</label>
+        <select id="order" name="order"
+          class="rounded-xl border border-slate-300 bg-white/90 px-3 py-2.5 shadow-sm outline-none
+                 focus:border-blue-500 focus:ring-4 focus:ring-blue-100
+                 dark:bg-slate-900/40 dark:border-white/10 dark:focus:ring-blue-500/20">
+          <option value="recent" {% if request.GET.order == "recent" or not request.GET.order %}selected{% endif %}>{% trans "Plus récents" %}</option>
+          <option value="oldest" {% if request.GET.order == "oldest" %}selected{% endif %}>{% trans "Plus anciens" %}</option>
+          <option value="title"  {% if request.GET.order == "title"  %}selected{% endif %}>{% trans "Titre (A→Z)" %}</option>
+        </select>
+
+        <button class="rounded-xl bg-blue-600 text-white px-4 py-2.5 font-semibold shadow hover:bg-blue-700 transition
+                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60">
+          {% trans "Appliquer" %}
+        </button>
+      </div>
+    </form>
+  </header>
+
+  {% if projects %}
+    <!-- Grille de cartes -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for project in projects %}
+        <article class="group bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden transition hover:shadow-xl">
+          <div class="aspect-[16/9] bg-slate-100 dark:bg-slate-800/50">
+            {% if project.image %}
+              <img src="{{ project.image.url }}" alt="{{ project.title }}"
+                   class="w-full h-full object-cover transition duration-300 group-hover:scale-[1.01]"
+                   loading="lazy" decoding="async">
+            {% else %}
+              <img src="{% static 'img/placeholder-16x9.png' %}" alt="{% trans 'Image indisponible' %}"
+                   class="w-full h-full object-cover" loading="lazy" decoding="async">
+            {% endif %}
+          </div>
+
+          <div class="p-5 flex flex-col gap-3">
+            <!-- Badges optionnels -->
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+              {% if project.category %}
+                <span class="inline-flex items-center rounded-full bg-blue-50 text-blue-700 px-2.5 py-0.5 dark:bg-blue-950/40 dark:text-blue-300">
+                  {{ project.category }}
+                </span>
+              {% endif %}
+              {% if project.status %}
+                <span class="inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 px-2.5 py-0.5 dark:bg-emerald-900/30 dark:text-emerald-300">
+                  {{ project.status }}
+                </span>
+              {% endif %}
+              {% if project.start_date %}
+                <span class="inline-flex items-center rounded-full bg-slate-100 text-slate-700 px-2.5 py-0.5 dark:bg-slate-800/70 dark:text-slate-300">
+                  📅 {{ project.start_date|date:"d M Y" }}
+                </span>
+              {% endif %}
+            </div>
+
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-100 line-clamp-2">
+              {{ project.title }}
+            </h2>
+
+            <p class="text-sm text-slate-600 dark:text-slate-300 line-clamp-3">
+              {{ project.description }}
+            </p>
+
+            <div class="mt-2 flex flex-wrap gap-3">
+              <a href="{% url 'core:project_detail' project.slug %}"
+                 class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-semibold shadow
+                        hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60">
+                {% trans "Voir le projet" %}
+              </a>
+
+              {% if project.link %}
+                <a href="{{ project.link }}" target="_blank" rel="noopener"
+                   class="inline-flex items-center gap-2 px-3 py-2.5 rounded-xl ring-1 ring-slate-200 hover:bg-slate-50 dark:ring-white/10 dark:hover:bg-white/5">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3z"/><path d="M5 5h7v2H7v10h10v-5h2v7H5z"/></svg>
+                  <span>{% trans "Site du projet" %}</span>
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+      <nav class="mt-10 flex items-center justify-center gap-1 sm:gap-2" aria-label="{% trans 'Pagination' %}">
+        {% if page_obj.has_previous %}
+          <a href="?q={{ request.GET.q|urlencode }}&order={{ request.GET.order }}&page={{ page_obj.previous_page_number }}"
+             class="px-3 py-2 rounded-lg ring-1 ring-slate-200 hover:bg-slate-50 dark:ring-white/10 dark:hover:bg:white/5 dark:hover:bg-white/5">
+            {% trans "Précédent" %}
+          </a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+          {% if num == page_obj.number %}
+            <span class="px-3 py-2 rounded-lg bg-blue-600 text-white font-semibold dark:bg-blue-500">{{ num }}</span>
+          {% elif num <= page_obj.number|add:'2' and num >= page_obj.number|add:'-2' or num == 1 or num == page_obj.paginator.num_pages %}
+            <a href="?q={{ request.GET.q|urlencode }}&order={{ request.GET.order }}&page={{ num }}"
+               class="px-3 py-2 rounded-lg ring-1 ring-slate-200 hover:bg-slate-50 dark:ring-white/10 dark:hover:bg-white/5">{{ num }}</a>
+          {% elif forloop.first or forloop.last %}
+            <span class="px-3 py-2 text-slate-400">…</span>
+          {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+          <a href="?q={{ request.GET.q|urlencode }}&order={{ request.GET.order }}&page={{ page_obj.next_page_number }}"
+             class="px-3 py-2 rounded-lg ring-1 ring-slate-200 hover:bg-slate-50 dark:ring-white/10 dark:hover:bg-white/5">
+            {% trans "Suivant" %}
+          </a>
+        {% endif %}
+      </nav>
+    {% endif %}
+  {% else %}
+    <!-- État vide -->
+    <div class="mx-auto max-w-3xl bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-8 text-center">
+      <div class="mx-auto w-16 h-16 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-300 mb-4">
+        <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5h18v2H3V5zm0 6h12v2H3v-2zm0 6h18v2H3v-2z"/></svg>
+      </div>
+      <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100">{% trans "Aucun projet pour le moment." %}</h3>
+      <p class="mt-2 text-slate-600 dark:text-slate-300">{% trans "Revenez bientôt ou affinez votre recherche." %}</p>
+      <form method="get" action="" class="mt-5 flex justify-center">
+        <input type="hidden" name="q" value="">
+        <button class="rounded-xl bg-blue-600 text-white px-5 py-2.5 font-semibold shadow hover:bg-blue-700 transition
+                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60">
+          {% trans "Réinitialiser la recherche" %}
+        </button>
+      </form>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

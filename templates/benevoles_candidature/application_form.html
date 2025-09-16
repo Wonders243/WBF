@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Devenir bénévole — BAMU WELLBEING{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <header class="mb-6">
+    <h1 class="text-2xl md:text-3xl font-extrabold text-blue-700 dark:text-blue-300">Devenir bénévole</h1>
+    <p class="mt-2 text-slate-600 dark:text-slate-300">
+      Merci pour votre engagement. Remplissez ces informations et, si possible, joignez vos documents.
+    </p>
+  </header>
+
+  <form method="post" enctype="multipart/form-data" class="grid gap-6">
+    {% csrf_token %}
+
+    <section aria-labelledby="infos_benevole" class="rounded-xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-900/50 p-4 md:p-6 shadow-sm">
+      <h2 id="infos_benevole" class="text-lg font-semibold mb-4 text-slate-900 dark:text-white">Vos informations</h2>
+      {{ form.non_field_errors }}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {{ form.full_name.errors }}
+        <div class="md:col-span-2">{{ form.full_name.label_tag }} {{ form.full_name }}</div>
+
+        {{ form.phone.errors }}
+        <div>{{ form.phone.label_tag }} {{ form.phone }}</div>
+
+        {{ form.birth_date.errors }}
+        <div>{{ form.birth_date.label_tag }} {{ form.birth_date }}</div>
+
+        <div class="md:col-span-2"></div>
+
+        {{ form.address_line1.errors }}
+        <div class="md:col-span-2">{{ form.address_line1.label_tag }} {{ form.address_line1 }}</div>
+
+        {{ form.address_line2.errors }}
+        <div class="md:col-span-2">{{ form.address_line2.label_tag }} {{ form.address_line2 }}</div>
+
+        {{ form.postal_code.errors }}
+        <div>{{ form.postal_code.label_tag }} {{ form.postal_code }}</div>
+
+        {{ form.city.errors }}
+        <div>{{ form.city.label_tag }} {{ form.city }}</div>
+
+        {{ form.state.errors }}
+        <div>{{ form.state.label_tag }} {{ form.state }}</div>
+
+        {{ form.country.errors }}
+        <div>{{ form.country.label_tag }} {{ form.country }}</div>
+
+        <div class="md:col-span-2"></div>
+
+        {{ form.id_type.errors }}
+        <div>{{ form.id_type.label_tag }} {{ form.id_type }}</div>
+
+        {{ form.id_number.errors }}
+        <div>{{ form.id_number.label_tag }} {{ form.id_number }}</div>
+
+        {{ form.id_expiry.errors }}
+        <div>{{ form.id_expiry.label_tag }} {{ form.id_expiry }}</div>
+      </div>
+
+      {{ form.emergency_contact.errors }}
+      <div class="mt-4">{{ form.emergency_contact.label_tag }} {{ form.emergency_contact }}</div>
+
+      {{ form.motivation.errors }}
+      <div class="mt-4">{{ form.motivation.label_tag }} {{ form.motivation }}</div>
+    </section>
+
+    <section aria-labelledby="docs_benevole" class="rounded-xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-900/50 p-4 md:p-6 shadow-sm">
+      <h2 id="docs_benevole" class="text-lg font-semibold mb-4 text-slate-900 dark:text-white">Documents (optionnel)</h2>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Vous pourrez les ajouter plus tard si besoin.</p>
+
+      {{ formset.management_form }}
+      <div class="space-y-4">
+        {% for f in formset.forms %}
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+            <div class="md:col-span-1">{{ f.doc_type.errors }} {{ f.doc_type.label_tag }} {{ f.doc_type }}</div>
+            <div class="md:col-span-2">{{ f.file.errors }} {{ f.file.label_tag }} {{ f.file }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <div class="flex items-center justify-end gap-3">
+      <a href="{% url 'core:accueil' %}" class="px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10">Annuler</a>
+      <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">Envoyer ma candidature</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+

@@ -1,0 +1,56 @@
+{# templates/staff/partners/partner_detail.html #}
+{% extends "staff/base_staff.html" %}
+{% block staff_title %}Staff — {{ partner.name }}{% endblock %}
+
+{% block staff_content %}
+<section class="space-y-6">
+  <header class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-extrabold text-blue-700 dark:text-blue-300">{{ partner.name }}</h1>
+      <p class="text-slate-600 dark:text-slate-300">
+        {{ partner.get_category_display }}{% if partner.tier %} — {{ partner.get_tier_display }}{% endif %}
+      </p>
+    </div>
+    <a href="{% url 'staff:partner_update' partner.slug %}"
+       class="px-3 py-2 rounded-lg ring-1 ring-slate-200 hover:bg-slate-50 dark:ring-white/10 dark:hover:bg-white/5">Éditer</a>
+  </header>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <article class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+      <h2 class="text-lg font-semibold mb-3 text-slate-900 dark:text-slate-100">Description</h2>
+      <p class="whitespace-pre-line text-slate-800 dark:text-slate-200">{{ partner.description|default:"(Aucune description)" }}</p>
+      {% if partner.contribution %}
+        <h3 class="mt-4 font-semibold">Contribution</h3>
+        <p class="whitespace-pre-line text-slate-800 dark:text-slate-200">{{ partner.contribution }}</p>
+      {% endif %}
+    </article>
+
+    <aside class="space-y-3">
+      <div class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4">
+        {% if partner.logo %}
+          <img src="{{ partner.logo.url }}" class="w-full rounded-xl" alt="">
+        {% else %}
+          <div class="text-sm text-slate-500 dark:text-slate-400">Pas de logo</div>
+        {% endif %}
+      </div>
+      <div class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4 text-sm space-y-1">
+        <div><span class="font-medium">Site :</span> {% if partner.website %}<a href="{{ partner.website }}" class="text-blue-600 dark:text-blue-300 hover:underline" target="_blank">Ouvrir</a>{% else %}—{% endif %}</div>
+        <div><span class="font-medium">Contact :</span> {{ partner.contact_name|default:"—" }}</div>
+        <div><span class="font-medium">Email :</span> {{ partner.contact_email|default:"—" }}</div>
+        <div><span class="font-medium">Téléphone :</span> {{ partner.contact_phone|default:"—" }}</div>
+        <div><span class="font-medium">Réseaux :</span>
+          {% if partner.linkedin %}<a class="text-blue-600 dark:text-blue-300 hover:underline" href="{{ partner.linkedin }}" target="_blank">LinkedIn</a>{% endif %}
+          {% if partner.twitter %} · <a class="text-blue-600 dark:text-blue-300 hover:underline" href="{{ partner.twitter }}" target="_blank">Twitter</a>{% endif %}
+          {% if partner.facebook %} · <a class="text-blue-600 dark:text-blue-300 hover:underline" href="{{ partner.facebook }}" target="_blank">Facebook</a>{% endif %}
+          {% if partner.instagram %} · <a class="text-blue-600 dark:text-blue-300 hover:underline" href="{{ partner.instagram }}" target="_blank">Instagram</a>{% endif %}
+        </div>
+        <div><span class="font-medium">Période :</span>
+          {% if partner.start_date %}{{ partner.start_date }}{% else %}—{% endif %}
+          {% if partner.end_date %} → {{ partner.end_date }}{% endif %}
+        </div>
+        <div><span class="font-medium">Actif :</span> {{ partner.is_active|yesno:"Oui,Non" }}</div>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

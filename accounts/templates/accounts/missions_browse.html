@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<section class="max-w-7xl mx-auto space-y-8">
+
+  <!-- En-tête + recherche -->
+  <header class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-extrabold text-blue-700 dark:text-blue-300">Missions</h1>
+      <p class="text-gray-600 dark:text-slate-300/80">Invitations du staff, vos demandes en attente et les missions publiées.</p>
+    </div>
+
+    <form method="get"
+          class="bg-white dark:bg-slate-900 dark:ring-1 dark:ring-white/10 rounded-xl shadow px-4 py-3 flex flex-wrap items-center gap-3">
+      <input type="date" name="start" value="{{ start|date:'Y-m-d' }}"
+             class="px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500
+                    dark:bg-white/10 dark:border-white/10 dark:text-slate-100 dark:placeholder-slate-400 dark:focus:ring-blue-500/30 dark:focus:border-blue-400"
+             aria-label="Date de début">
+      <input type="date" name="end" value="{{ end|date:'Y-m-d' }}"
+             class="px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500
+                    dark:bg-white/10 dark:border-white/10 dark:text-slate-100 dark:placeholder-slate-400 dark:focus:ring-blue-500/30 dark:focus:border-blue-400"
+             aria-label="Date de fin">
+      <input type="search" name="q" value="{{ q|default:'' }}" placeholder="Rechercher une mission, un événement, un lieu…"
+             class="w-72 max-w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500
+                    dark:bg-white/10 dark:border-white/10 dark:text-slate-100 dark:placeholder-slate-400 dark:focus:ring-blue-500/30 dark:focus:border-blue-400">
+      <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60
+                     dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus-visible:ring-blue-400/60">
+        Filtrer
+      </button>
+      {% if request.GET.q or request.GET.start or request.GET.end %}
+        <a href="{{ request.path }}" class="text-sm text-gray-600 hover:underline dark:text-slate-300/90">Réinitialiser</a>
+      {% endif %}
+    </form>
+  </header>
+
+  <!-- 1) Invitations du staff -->
+  <section class="bg-white dark:bg-slate-900 rounded-xl shadow dark:shadow-none dark:ring-1 dark:ring-white/10 p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold dark:text-white">Invitations du staff</h2>
+      <a href="{% url 'benevoles:dashboard' %}" class="text-blue-600 hover:underline text-sm dark:text-blue-400">Retour au tableau de bord</a>
+    </div>
+
+    {% if invitations %}
+      <ul class="divide-y divide-gray-200 dark:divide-white/10">
+        {% for s in invitations %}
+          <li class="py-3 flex items-center justify-between">
+            <div class="min-w-0">
+              <p class="font-medium truncate dark:text-white">{{ s.title }}</p>
+              <p class="text-sm text-gray-500 dark:text-slate-400">
+                {{ s.date|default:"Date à confirmer" }} · {{ s.location|default:"Lieu à confirmer" }}
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="text-xs px-2 py-1 rounded border
+                {% if s.status == 'invited' %}bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/25 dark:text-amber-200 dark:border-amber-800
+                {% elif s.status == 'pending' %}bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/25 dark:text-blue-200 dark:border-blue-800
+                {% elif s.status == 'accepted' %}bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/25 dark:text-emerald-200 dark:border-emerald-800
+                {% elif s.status == 'declined' %}bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/25 dark:text-rose-200 dark:border-rose-800
+                {% else %}bg-gray-50 text-gray-700 border-gray-200 dark:bg-slate-800/50 dark:text-slate-200 dark:border-slate-700{% endif %}">
+                {{ s.status|title }}
+              </span>
+
+              {% if not s.is_past %}
+                <form method="post" action="{% url 'staff:mission_accept' s.signup_id %}" class="inline">{% csrf_token %}
+                  <button class="px-3 py-1 rounded bg-green-600 text-white text-sm hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600/60
+                                 dark:bg-emerald-600 dark:hover:bg-emerald-700 dark:focus-visible:ring-emerald-500/60">
+                    Accepter
+                  </button>
+                </form>
+                <form method="post" action="{% url 'staff:mission_decline' s.signup_id %}" class="inline">{% csrf_token %}
+                  <button class="px-3 py-1 rounded bg-gray-200 text-gray-800 text-sm hover:bg-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60
+                                 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600 dark:focus-visible:ring-slate-500/60">
+                    Refuser
+                  </button>
+                </form>
+              {% else %}
+                <span class="text-xs px-2 py-1 rounded bg-gray-100 text-gray-600 border border-gray-200
+                             dark:bg-slate-800/60 dark:text-slate-300 dark:border-slate-700">
+                  Invitation expirée
+                </span>
+              {% endif %}
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-gray-500 dark:text-slate-400 text-sm">Aucune invitation en attente.</p>
+    {% endif %}
+  </section>
+
+  <!-- 2) Mes demandes envoyées -->
+  <section class="bg-white dark:bg-slate-900 rounded-xl shadow dark:shadow-none dark:ring-1 dark:ring-white/10 p-6">
+    <h2 class="text-lg font-semibold mb-4 dark:text-white">Mes demandes envoyées</h2>
+
+    {% if applications %}
+      <ul class="divide-y divide-gray-200 dark:divide-white/10">
+        {% for a in applications %}
+          <li class="py-3 flex items-center justify-between">
+            <div class="min-w-0">
+              <p class="font-medium truncate dark:text-white">{{ a.title }}</p>
+              <p class="text-sm text-gray-500 dark:text-slate-400">
+                {{ a.date|default:"Date à confirmer" }} · {{ a.location|default:"Lieu à confirmer" }}
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="text-xs px-2 py-1 rounded border
+                {% if a.status == 'pending' %}bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/25 dark:text-blue-200 dark:border-blue-800
+                {% elif a.status == 'accepted' %}bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/25 dark:text-emerald-200 dark:border-emerald-800
+                {% elif a.status == 'declined' %}bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/25 dark:text-rose-200 dark:border-rose-800
+                {% else %}bg-gray-50 text-gray-700 border-gray-200 dark:bg-slate-800/50 dark:text-slate-200 dark:border-slate-700{% endif %}">
+                {% if a.status == 'pending' %}En attente de validation du staff{% else %}{{ a.status|title }}{% endif %}
+              </span>
+
+              {% if a.can_cancel %}
+                <form method="post" action="{% url 'staff:mission_cancel' a.signup_id %}" class="inline">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                  <button type="submit"
+                          class="px-3 py-1 rounded bg-rose-50 text-rose-700 text-sm border border-rose-200 hover:bg-rose-100
+                                 dark:bg-rose-900/20 dark:text-rose-200 dark:border-rose-800 dark:hover:bg-rose-900/30">
+                    Annuler ma demande
+                  </button>
+                </form>
+              {% endif %}
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-gray-500 dark:text-slate-400 text-sm">Vous n’avez pas encore de demandes en attente.</p>
+    {% endif %}
+  </section>
+
+  <!-- 3) Missions disponibles -->
+  <section>
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-semibold mb-4 dark:text-white">Missions disponibles</h2>
+      {% if start or end %}
+        <span class="text-xs text-gray-500 dark:text-slate-400">Filtre : {{ start|date:"Y-m-d"|default:"…" }} → {{ end|date:"Y-m-d"|default:"…" }}</span>
+      {% endif %}
+    </div>
+
+    {% if available %}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for m in available %}
+          <article class="bg-white dark:bg-slate-900 rounded-xl shadow dark:shadow-none dark:ring-1 dark:ring-white/10 p-4 flex flex-col">
+            <div class="flex items-start justify-between gap-3">
+              <h3 class="font-semibold text-gray-900 dark:text-white">{{ m.title }}</h3>
+              {% if m.is_past %}
+                <span class="text-xs px-2 py-1 rounded bg-gray-100 text-gray-600 border border-gray-200
+                             dark:bg-slate-800/60 dark:text-slate-300 dark:border-slate-700">Passée</span>
+              {% endif %}
+            </div>
+
+            {% if m.event %}
+              <p class="text-sm text-gray-600 dark:text-slate-300/80 mt-0.5">Événement : {{ m.event }}</p>
+            {% endif %}
+            <p class="text-sm text-gray-600 dark:text-slate-300/80 mt-0.5">
+              {{ m.date|default:"Date à confirmer" }} · {{ m.location|default:"Lieu à confirmer" }}
+            </p>
+            {% if m.capacity %}
+              <p class="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Capacité : {{ m.capacity }}</p>
+            {% endif %}
+
+            <div class="mt-3">
+              {% if not m.is_past %}
+                <form method="post" action="{% url 'staff:mission_apply' m.mission_id %}">
+                  {% csrf_token %}
+                  <button class="w-full px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60
+                                 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus-visible:ring-blue-400/60">
+                    Je participe
+                  </button>
+                </form>
+              {% else %}
+                <p class="text-xs text-gray-500 dark:text-slate-400 italic">Mission passée — inscriptions fermées</p>
+              {% endif %}
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      <div class="mt-6 flex items-center justify-between">
+        <div class="text-sm text-gray-600 dark:text-slate-400">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</div>
+        <div class="flex gap-2">
+          {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if start %}&start={{ start|date:'Y-m-d' }}{% endif %}{% if end %}&end={{ end|date:'Y-m-d' }}{% endif %}"
+               class="px-3 py-2 rounded border hover:bg-gray-50 dark:hover:bg-white/10 border-gray-300 dark:border-white/10 dark:text-slate-100">
+              Précédent
+            </a>
+          {% else %}
+            <span class="px-3 py-2 rounded border text-gray-400 dark:text-slate-500 border-gray-300 dark:border-white/10">Précédent</span>
+          {% endif %}
+
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if start %}&start={{ start|date:'Y-m-d' }}{% endif %}{% if end %}&end={{ end|date:'Y-m-d' }}{% endif %}"
+               class="px-3 py-2 rounded border hover:bg-gray-50 dark:hover:bg-white/10 border-gray-300 dark:border-white/10 dark:text-slate-100">
+              Suivant
+            </a>
+          {% else %}
+            <span class="px-3 py-2 rounded border text-gray-400 dark:text-slate-500 border-gray-300 dark:border-white/10">Suivant</span>
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+      <p class="text-gray-500 dark:text-slate-400 text-sm">Aucune mission disponible pour le moment.</p>
+    {% endif %}
+  </section>
+</section>
+{% endblock %}

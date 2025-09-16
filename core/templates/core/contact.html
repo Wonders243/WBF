@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load static widget_tweaks %}
+{% block title %}Contact – — BAMU WELLBEING Foundation{% endblock %}
+
+{% block content %}
+<section class="mx-auto max-w-3xl px-4 py-10">
+  <h1 class="text-3xl font-extrabold text-blue-700 dark:text-blue-300 mb-6">Contact</h1>
+
+  {% if form.non_field_errors %}
+    <div class="mb-6 rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 p-4" role="alert">
+      <p class="font-semibold mb-2">Veuillez corriger les erreurs ci-dessous :</p>
+      <ul class="list-disc pl-5 space-y-1">
+        {% for err in form.non_field_errors %}<li>{{ err }}</li>{% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <form action="" method="post"
+        class="space-y-6 bg-white dark:bg-slate-900 p-6 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10"
+        novalidate>
+    {% csrf_token %}
+
+    <!-- Nom -->
+    <div>
+      <label for="{{ form.name.id_for_label }}" class="block font-medium text-gray-700 dark:text-slate-200">
+        Nom <span class="text-red-600">*</span>
+      </label>
+      {% if form.name.errors %}
+        {{ form.name
+           |add_class:"mt-1 block w-full rounded-lg bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder-slate-400 shadow-sm ring-1 ring-inset ring-red-400 focus:ring-2 focus:ring-red-500 px-3 py-2"
+           |attr:"aria-invalid:true"
+           |attr:"aria-describedby:id_name_error"
+           |attr:"autocomplete:name"
+           |attr:"placeholder:Votre nom complet" }}
+        <p id="id_name_error" class="mt-1 text-sm text-red-600">{{ form.name.errors|striptags }}</p>
+      {% else %}
+        {{ form.name
+           |add_class:"mt-1 block w-full rounded-lg bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder-slate-400 shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-white/10 focus:ring-2 focus:ring-blue-600/60 px-3 py-2"
+           |attr:"autocomplete:name"
+           |attr:"placeholder:Votre nom complet" }}
+      {% endif %}
+    </div>
+
+    <!-- Email -->
+    <div>
+      <label for="{{ form.email.id_for_label }}" class="block font-medium text-gray-700 dark:text-slate-200">
+        Email <span class="text-red-600">*</span>
+      </label>
+      {% if form.email.errors %}
+        {{ form.email
+           |add_class:"mt-1 block w-full rounded-lg bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder-slate-400 shadow-sm ring-1 ring-inset ring-red-400 focus:ring-2 focus:ring-red-500 px-3 py-2"
+           |attr:"aria-invalid:true"
+           |attr:"aria-describedby:id_email_error"
+           |attr:"autocomplete:email"
+           |attr:"inputmode:email"
+           |attr:"placeholder:vous@example.org" }}
+        <p id="id_email_error" class="mt-1 text-sm text-red-600">{{ form.email.errors|striptags }}</p>
+      {% else %}
+        {{ form.email
+           |add_class:"mt-1 block w-full rounded-lg bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder-slate-400 shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-white/10 focus:ring-2 focus:ring-blue-600/60 px-3 py-2"
+           |attr:"autocomplete:email"
+           |attr:"inputmode:email"
+           |attr:"placeholder:vous@example.org" }}
+      {% endif %}
+    </div>
+
+    <!-- Sujet -->
+    <div>
+      <label for="{{ form.subject.id_for_label }}" class="block font-medium text-gray-700 dark:text-slate-200">
+        Sujet <span class="text-red-600">*</span>
+      </label>
+      {% if form.subject.errors %}
+        {{ form.subject
+           |add_class:"mt-1 block w-full rounded-lg bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder-slate-400 shadow-sm ring-1 ring-inset ring-red-400 focus:ring-2 focus:ring-red-500 px-3 py-2"
+           |attr:"aria-invalid:true"
+           |attr:"aria-describedby:id_subject_error"
+           |attr:"placeholder:Quel est l’objet de votre message ?" }}
+        <p id="id_subject_error" class="mt-1 text-sm text-red-600">{{ form.subject.errors|striptags }}</p>
+      {% else %}
+        {{ form.subject
+           |add_class:"mt-1 block w-full rounded-lg bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder-slate-400 shadow-sm ring-1 ring-inset ring-slate-300 dark:ring:white/10 focus:ring-2 focus:ring-blue-600/60 px-3 py-2"
+           |attr:"placeholder:Quel est l’objet de votre message ?" }}
+      {% endif %}
+    </div>
+
+    <!-- Message -->
+    <div>
+      <label for="{{ form.message.id_for_label }}" class="block font-medium text-gray-700 dark:text-slate-200">
+        Message <span class="text-red-600">*</span>
+      </label>
+      {% if form.message.errors %}
+        {{ form.message
+           |add_class:"mt-1 block w-full rounded-lg bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder-slate-400 shadow-sm ring-1 ring-inset ring-red-400 focus:ring-2 focus:ring-red-500 px-3 py-2"
+           |attr:"rows:6"
+           |attr:"aria-invalid:true"
+           |attr:"aria-describedby:id_message_error"
+           |attr:"placeholder:Expliquez votre demande en quelques lignes…" }}
+        <p id="id_message_error" class="mt-1 text-sm text-red-600">{{ form.message.errors|striptags }}</p>
+      {% else %}
+        {{ form.message
+           |add_class:"mt-1 block w-full rounded-lg bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder-slate-400 shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-white/10 focus:ring-2 focus:ring-blue-600/60 px-3 py-2"
+           |attr:"rows:6"
+           |attr:"placeholder:Expliquez votre demande en quelques lignes…" }}
+      {% endif %}
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Réponse sous 2–3 jours ouvrés.</p>
+    </div>
+
+    <div class="flex items-center justify-between">
+      <p class="text-sm text-slate-500 dark:text-slate-400">
+        Les champs marqués d’un <span class="text-red-600">*</span> sont obligatoires.
+      </p>
+      <button type="submit"
+        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60 disabled:opacity-60 disabled:cursor-not-allowed">
+        Envoyer
+      </button>
+    </div>
+  </form>
+
+  <div class="mt-8 text-sm text-slate-600 dark:text-slate-300">
+    <p>Ou écrivez-nous à <a href="mailto:contact@bwf.org" class="text-blue-700 dark:text-blue-300 hover:underline">contact@bwf.org</a>.</p>
+  </div>
+</section>
+
+<script>
+  // Empêche les doubles envois
+  document.addEventListener('submit', function(e){
+    const btn = e.target?.querySelector('button[type="submit"], button:not([type])');
+    if(btn){ btn.disabled = true; }
+  });
+</script>
+{% endblock %}

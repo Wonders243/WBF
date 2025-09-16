@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Historique — Mon compte{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto space-y-6 text-slate-800 dark:text-slate-100">
+  <!-- En-tête -->
+  <header class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-extrabold text-blue-700 dark:text-blue-400">Historique</h1>
+      <p class="text-gray-600 dark:text-slate-400">
+        Consultez vos activités passées : missions, événements, documents et heures déclarées.
+      </p>
+    </div>
+
+    <!-- Filtres -->
+    <form method="get" action="" class="bg-white dark:bg-slate-900 rounded-xl shadow px-4 py-3 flex flex-wrap items-center gap-3">
+      <label for="search_q" class="sr-only">Rechercher</label>
+      <input id="search_q" type="search" name="q" value="{{ request.GET.q|default_if_none:'' }}"
+             placeholder="Rechercher (titre, projet…)"
+             class="w-64 max-w-full px-3 py-2 border-2 border-gray-300 dark:border-slate-700 rounded-lg
+                    bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100
+                    focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800
+                    focus:border-blue-500 dark:focus:border-blue-400">
+
+      <label for="type" class="sr-only">Type</label>
+      <select id="type" name="type"
+              class="px-3 py-2 border-2 border-gray-300 dark:border-slate-700 rounded-lg
+                     bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100">
+        <option value="">Tous les types</option>
+        <option value="mission"  {% if request.GET.type == "mission" %}selected{% endif %}>Missions</option>
+        <option value="evenement"{% if request.GET.type == "evenement" %}selected{% endif %}>Événements</option>
+        <option value="document" {% if request.GET.type == "document" %}selected{% endif %}>Documents</option>
+        <option value="heures"   {% if request.GET.type == "heures" %}selected{% endif %}>Heures</option>
+      </select>
+
+      <label for="periode" class="sr-only">Période</label>
+      <select id="periode" name="periode"
+              class="px-3 py-2 border-2 border-gray-300 dark:border-slate-700 rounded-lg
+                     bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100">
+        <option value="">Toute période</option>
+        <option value="7"   {% if request.GET.periode == "7" %}selected{% endif %}>7 derniers jours</option>
+        <option value="30"  {% if request.GET.periode == "30" %}selected{% endif %}>30 jours</option>
+        <option value="90"  {% if request.GET.periode == "90" %}selected{% endif %}>3 mois</option>
+        <option value="365" {% if request.GET.periode == "365" %}selected{% endif %}>1 an</option>
+      </select>
+
+      <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Filtrer</button>
+      {% if request.GET %}
+        <a href="{{ request.path }}" class="text-sm text-gray-600 dark:text-slate-400 hover:underline">Réinitialiser</a>
+      {% endif %}
+    </form>
+  </header>
+
+  <!-- Résumé -->
+  <section class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <div class="bg-white dark:bg-slate-900 rounded-xl shadow p-4">
+      <div class="text-xs uppercase text-gray-500 dark:text-slate-400">Total</div>
+      <div class="text-2xl font-bold">{{ total_count|default:0 }}</div>
+    </div>
+    <div class="bg-white dark:bg-slate-900 rounded-xl shadow p-4">
+      <div class="text-xs uppercase text-gray-500 dark:text-slate-400">Missions</div>
+      <div class="text-2xl font-bold">{{ stats.missions|default:0 }}</div>
+    </div>
+    <div class="bg-white dark:bg-slate-900 rounded-xl shadow p-4">
+      <div class="text-xs uppercase text-gray-500 dark:text-slate-400">Événements</div>
+      <div class="text-2xl font-bold">{{ stats.evenements|default:0 }}</div>
+    </div>
+    <div class="bg-white dark:bg-slate-900 rounded-xl shadow p-4">
+      <div class="text-xs uppercase text-gray-500 dark:text-slate-400">Heures</div>
+      <div class="text-2xl font-bold">{{ stats.heures|default:"0h" }}</div>
+    </div>
+  </section>
+
+  <!-- Timeline -->
+  <section class="bg-white dark:bg-slate-900 rounded-xl shadow p-6">
+    <h2 class="text-lg font-semibold mb-4">Activités</h2>
+
+    {% if page_obj and page_obj.object_list %}
+      <ol class="relative border-s border-gray-200 dark:border-slate-700">
+        {% for item in page_obj.object_list %}
+          <li class="mb-6 ms-6">
+            <!-- Point -->
+            <span class="absolute -start-2.5 flex h-5 w-5 items-center justify-center rounded-full ring-4 ring-white dark:ring-slate-900
+                         {% if item.type == 'mission' %}bg-green-500
+                         {% elif item.type == 'evenement' %}bg-indigo-500
+                         {% elif item.type == 'document' %}bg-amber-500
+                         {% else %}bg-blue-500{% endif %}">
+            </span>
+
+            <!-- En-tête -->
+            <div class="flex flex-wrap items-center gap-2">
+              <time class="text-sm text-gray-500 dark:text-slate-400" datetime="{{ item.date|date:'c' }}">{{ item.date|date:"d/m/Y H:i" }}</time>
+              {% if item.type %}
+                <span class="text-xs px-2 py-0.5 rounded-full
+                  {% if item.type == 'mission' %}bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800
+                  {% elif item.type == 'evenement' %}bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800
+                  {% elif item.type == 'document' %}bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800
+                  {% else %}bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800{% endif %}">
+                  {{ item.type|title }}
+                </span>
+              {% endif %}
+              {% if item.status %}
+                <span class="text-xs px-2 py-0.5 rounded border
+                  {% if item.status|lower in 'valide, validé, approuvé, approved' %}text-emerald-700 bg-emerald-50 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800
+                  {% elif item.status|lower in 'refusé, refuse, rejected' %}text-red-700 bg-red-50 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800
+                  {% else %}text-gray-700 bg-gray-50 border-gray-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700{% endif %}">
+                  {{ item.status|title }}
+                </span>
+              {% endif %}
+            </div>
+
+            <!-- Justificatifs -->
+            {% if item.proof_urls and item.proof_urls|length > 0 %}
+              <div class="mt-1 space-x-2">
+                {% for u in item.proof_urls %}
+                  <a href="{{ u }}" target="_blank" rel="noopener" class="underline text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+                    Justificatif {{ forloop.counter }}
+                  </a>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            <!-- Contenu -->
+            <h3 class="mt-1 font-semibold text-gray-900 dark:text-slate-100">{{ item.title }}</h3>
+            {% if item.description %}
+              <p class="text-gray-600 dark:text-slate-400 text-sm mt-1">{{ item.description }}</p>
+            {% endif %}
+
+            <!-- Métadonnées -->
+            <div class="mt-2 flex flex-wrap gap-3 text-sm text-gray-500 dark:text-slate-400">
+              {% if item.projet %}<span>Projet : <span class="font-medium text-gray-700 dark:text-slate-200">{{ item.projet }}</span></span>{% endif %}
+              {% if item.heures %}<span>Heures : <span class="font-medium text-gray-700 dark:text-slate-200">{{ item.heures }}</span></span>{% endif %}
+              {% if item.lieu %}<span>Lieu : <span class="font-medium text-gray-700 dark:text-slate-200">{{ item.lieu }}</span></span>{% endif %}
+              {% if item.fichier_url %}
+                <a class="text-blue-600 dark:text-blue-400 hover:underline" href="{{ item.fichier_url }}" target="_blank" rel="noopener">
+                  Voir le document
+                </a>
+              {% endif %}
+            </div>
+          </li>
+        {% endfor %}
+      </ol>
+
+      <!-- Pagination -->
+      <div class="mt-6 flex items-center justify-between">
+        <div class="text-sm text-gray-600 dark:text-slate-400">
+          Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+        </div>
+        <div class="flex gap-2">
+          {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.periode %}&periode={{ request.GET.periode }}{% endif %}"
+               class="px-3 py-2 rounded border hover:bg-gray-50 dark:border-slate-700 dark:hover:bg-slate-800" aria-label="Page précédente">Précédent</a>
+          {% else %}
+            <span class="px-3 py-2 rounded border text-gray-400 dark:text-slate-600">Précédent</span>
+          {% endif %}
+
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.periode %}&periode={{ request.GET.periode }}{% endif %}"
+               class="px-3 py-2 rounded border hover:bg-gray-50 dark:border-slate-700 dark:hover:bg-slate-800" aria-label="Page suivante">Suivant</a>
+          {% else %}
+            <span class="px-3 py-2 rounded border text-gray-400 dark:text-slate-600">Suivant</span>
+          {% endif %}
+        </div>
+      </div>
+
+    {% else %}
+      <!-- État vide -->
+      <div class="text-center py-16">
+        <img src="{% static 'img/empty-state.svg' %}" alt="" class="mx-auto w-40 h-40 opacity-70 dark:opacity-50">
+        <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-slate-100">Aucune activité trouvée</h3>
+        <p class="text-gray-600 dark:text-slate-400">Essayez d’élargir la période ou de retirer un filtre.</p>
+      </div>
+    {% endif %}
+  </section>
+
+  <!-- Export -->
+  <section class="flex items-center justify-between">
+    <p class="text-sm text-gray-500 dark:text-slate-400">Besoin d’un relevé ? Exportez votre historique.</p>
+    <div class="flex gap-2">
+      <a href="{{ request.path }}?{{ request.GET.urlencode }}{% if request.GET %}&{% endif %}format=csv"
+         class="px-4 py-2 rounded bg-white dark:bg-slate-900 border dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800">Export CSV</a>
+      <a href="{{ request.path }}?{{ request.GET.urlencode }}{% if request.GET %}&{% endif %}format=pdf"
+         class="px-4 py-2 rounded bg-white dark:bg-slate-900 border dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800">Export PDF</a>
+    </div>
+  </section>
+</section>
+{% endblock %}

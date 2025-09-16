@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Empty files — no documents yet</title>
+  <desc id="desc">Use this illustration when a Files section has no content.</desc>
+
+  <defs>
+    <linearGradient id="bgGrad2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef2ff"/>
+      <stop offset="1" stop-color="#f8fafc"/>
+    </linearGradient>
+
+    <filter id="shadow2" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.08"/>
+    </filter>
+
+    <clipPath id="folderClip">
+      <rect x="80" y="78" width="240" height="140" rx="14"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background blob -->
+  <ellipse cx="200" cy="110" rx="135" ry="95" fill="url(#bgGrad2)"/>
+
+  <!-- Folder -->
+  <g filter="url(#shadow2)">
+    <!-- Folder back -->
+    <path d="M84 96 h120 a12 12 0 0 1 12 12 v6 h84 a14 14 0 0 1 14 14 v78 a14 14 0 0 1 -14 14 H98 a14 14 0 0 1 -14 -14 V110 a14 14 0 0 1 14 -14z"
+          fill="#bfdbfe" />
+    <!-- Tab -->
+    <path d="M98 78 h64 a12 12 0 0 1 9 4 l14 14 h103 a14 14 0 0 1 14 14 v8 H84 v-20 a12 12 0 0 1 12 -12z"
+          fill="#93c5fd"/>
+    <!-- Folder front -->
+    <rect x="84" y="110" width="232" height="108" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+  </g>
+
+  <!-- Content area (dashed box inside folder) -->
+  <g clip-path="url(#folderClip)">
+    <rect x="110" y="130" width="180" height="70" rx="10" fill="none" stroke="#c7d2fe" stroke-width="2" stroke-dasharray="6 6"/>
+    <!-- Paper sheet -->
+    <g transform="translate(180,120)">
+      <path d="M0 0 h40 a4 4 0 0 1 4 4 v36 l-10 10 h-34 a4 4 0 0 1 -4 -4 V4 a4 4 0 0 1 4 -4z" fill="#e0e7ff"/>
+      <path d="M44 40 h-6 a4 4 0 0 0 -4 4 v6" stroke="#a5b4fc" stroke-width="2" fill="none"/>
+      <line x1="8" y1="12" x2="32" y2="12" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+      <line x1="8" y1="20" x2="32" y2="20" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+      <line x1="8" y1="28" x2="28" y2="28" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+    </g>
+    <!-- Upload arrow (hint to add files) -->
+    <g transform="translate(200,165)">
+      <circle r="18" fill="#eff6ff" stroke="#bfdbfe"/>
+      <path d="M0 -8 v16" stroke="#3b82f6" stroke-width="3" stroke-linecap="round"/>
+      <path d="M-6 -2 l6 -6 l6 6" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" fill="none"/>
+    </g>
+  </g>
+
+  <!-- Decorative stars/plus -->
+  <g stroke="#93c5fd" stroke-width="2" stroke-linecap="round">
+    <line x1="96" y1="86" x2="96" y2="96"/>
+    <line x1="91" y1="91" x2="101" y2="91"/>
+    <line x1="306" y1="86" x2="306" y2="96"/>
+    <line x1="301" y1="91" x2="311" y2="91"/>
+    <line x1="84" y1="196" x2="89" y2="196"/>
+    <line x1="311" y1="196" x2="316" y2="196"/>
+  </g>
+
+  <!-- Dots -->
+  <g fill="#cfe3ff">
+    <circle cx="140" cy="64" r="3"/>
+    <circle cx="268" cy="60" r="3"/>
+    <circle cx="324" cy="150" r="2.5"/>
+    <circle cx="76"  cy="150" r="2.5"/>
+  </g>
+
+  <!-- Shadow -->
+  <ellipse cx="200" cy="250" rx="110" ry="14" fill="#e5e7eb" opacity="0.6"/>
+</svg>

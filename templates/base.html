@@ -1,0 +1,447 @@
+﻿{% load static i18n widget_tweaks %}
+{% load notifications_tags %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% block title %}BAMU WELLBEING Foundation{% endblock %}</title>
+
+  <link rel="stylesheet" href="{% static 'css/dist/styles.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+
+  <meta name="color-scheme" content="light dark">
+  <style>
+    :root{
+      --font-ui: "Inter", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
+      --font-brand: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      --header-h: 4.25rem; /* fallback compact */
+      color-scheme: light dark;
+    }
+    html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+    .font-ui{ font-family:var(--font-ui); letter-spacing:.01em; font-feature-settings:"cv05","cv11","zero","tnum","ss01" }
+    .font-brand{ font-family:var(--font-brand); letter-spacing:-.01em }
+    .h-tight{ letter-spacing:-.02em }
+  </style>
+
+  <!-- Fallback si Tailwind darkMode: 'class' -->
+  <script>
+  (function(){
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const root = document.documentElement;
+    function apply(){ root.classList.toggle('dark', mq.matches); }
+    apply();
+    mq.addEventListener ? mq.addEventListener('change', apply) : mq.addListener(apply);
+  })();
+  </script>
+</head>
+
+<body class="min-h-screen flex flex-col antialiased font-ui bg-white text-gray-800 dark:bg-slate-950 dark:text-slate-100">
+
+<!-- HEADER -->
+<header id="site-header" class="fixed inset-x-0 top-0 z-50 text-white/95 shadow-lg
+  bg-gradient-to-r from-blue-800 via-blue-600 to-blue-500
+  dark:from-blue-900 dark:via-blue-800 dark:to-blue-700
+  backdrop-blur supports-[backdrop-filter]:bg-blue-700/80">
+
+  {% include "partials/messages.html" %}
+
+  {% if PAYMENT_MAINTENANCE %}
+  <div id="banner-maintenance" role="status" aria-live="polite"
+       class="w-full text-center text-[11px] md:text-xs py-1.5 border-b
+              bg-amber-50 border-amber-200 text-amber-900
+              dark:bg-amber-900/30 dark:border-amber-800 dark:text-amber-100">
+    {% trans "Les paiements sont temporairement indisponibles." %}
+    {% if SUPPORT_EMAIL %} — <a class="underline underline-offset-2 hover:no-underline"
+      href="mailto:{% firstof SUPPORT_EMAIL '' %}">{{ SUPPORT_EMAIL }}</a>{% endif %}
+  </div>
+  {% endif %}
+
+  <nav class="w-full max-w-none mx-auto px-2 sm:px-3 h-14 md:h-16 flex items-center justify-between">
+    <!-- Logo -->
+    <a href="{% url 'core:accueil' %}" class="flex items-center gap-2 sm:gap-3 min-w-0">
+      <img src="{% static 'img/logo1.png' %}" alt="BAMU WELLBEING"
+           class="h-9 w-9 md:h-10 md:w-10 rounded-full ring-2 ring-white/70">
+      <span class="hidden sm:block text-base md:text-xl font-extrabold drop-shadow truncate max-w-[40vw] font-brand h-tight">
+        BAMU WELLBEING Foundation
+      </span>
+    </a>
+
+    <!-- Desktop nav -->
+    <div class="hidden lg:flex items-center gap-0.5 xl:gap-1">
+      <a href="{% url 'core:accueil' %}"
+         class="px-2.5 py-1.5 rounded-md font-semibold hover:bg-white/10 focus:bg-white/10 focus:outline-none">
+        Accueil
+      </a>
+
+      <a href="{% url 'core:events_list' %}"
+         class="px-2.5 py-1.5 rounded-md font-semibold hover:bg-white/10 focus:bg-white/10 focus:outline-none">
+        Evenements
+      </a>
+
+      <!-- Services -->
+      <div class="relative">
+        <button type="button" data-menu-button="services"
+                class="px-2.5 py-1.5 rounded-md font-semibold hover:bg-white/10 focus:bg-white/10 focus:outline-none"
+                aria-expanded="false" aria-haspopup="true" aria-controls="menu-services">
+          Nos Services
+        </button>
+        <div id="menu-services" data-menu-panel
+             class="hidden pointer-events-none opacity-0 scale-95 translate-y-1
+                    absolute left-0 mt-2 w-56 rounded-xl bg-white text-gray-900 shadow-lg ring-1 ring-black/5 overflow-hidden
+                    dark:bg-slate-800 dark:text-slate-100 dark:ring-white/10 transition duration-150 ease-out origin-top-left">
+          <a href="{% url 'core:service_education_orphelins'%}" class="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/10">Éducation</a>
+          <a href="{% url 'core:service_sante' %}" class="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/10">Santé</a>
+          <a href="{% url 'core:service_psy' %}" class="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/10">Support psychologique</a>
+        </div>
+      </div>
+
+      <a href="{% url 'core:don' %}"
+         class="ml-1 px-3 py-1.5 rounded-md font-semibold bg-amber-400 text-gray-900 hover:bg-amber-300
+                focus:outline-none focus:ring-2 focus:ring-white/50 dark:focus:ring-white/30">
+        Faire un don
+      </a>
+
+      {% if volunteer_cta %}
+        <a href="{{ volunteer_cta.href }}"
+           class="ml-1 px-3 py-1.5 rounded-md font-semibold focus:outline-none focus:ring-2 focus:ring-white/50 dark:focus:ring-white/30
+                  {% if volunteer_cta.variant == 'primary' %} bg-white text-blue-700 hover:bg-blue-50 {% else %} ring-1 ring-white/70 hover:bg-white/10 {% endif %}">
+          {{ volunteer_cta.label }}
+          {% if volunteer_cta.badge %}
+            <span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-amber-300 text-gray-900">{{ volunteer_cta.badge }}</span>
+          {% endif %}
+        </a>
+      {% endif %}
+
+      <!-- Zone notif + profil -->
+      <div class="flex items-center gap-1 shrink-0">
+        {% if user.is_authenticated %}
+          {% notifications_menu 8 %}
+        {% endif %}
+
+        <!-- User (desktop) -->
+        <div class="relative">
+          <button type="button" data-menu-button="user"
+                  class="inline-flex h-10 w-10 items-center justify-center rounded-full
+                        bg-white/90 text-blue-700 hover:bg-white focus:outline-none
+                        focus:ring-2 focus:ring-white/60 dark:bg-white/80"
+                  aria-expanded="false" aria-haspopup="true" aria-controls="menu-user">
+            <svg class="w-6 h-6 block" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M10 2a5 5 0 100 10 5 5 0 000-10zm-7 16a7 7 0 0114 0H3z" clip-rule="evenodd"/>
+            </svg>
+            <span class="sr-only">Menu utilisateur</span>
+          </button>
+          <div id="menu-user" data-menu-panel
+               class="hidden pointer-events-none opacity-0 scale-95 translate-y-1
+                      absolute right-0 mt-2 w-64 rounded-xl bg-white text-gray-900 shadow-lg ring-1 ring-black/5 overflow-hidden
+                      dark:bg-slate-800 dark:text-slate-100 dark:ring-white/10 transition duration-150 ease-out origin-top-right">
+            {% if user.is_authenticated %}
+              {% if user.is_staff %}
+                <a href="{% url 'staff:profil_staff' %}" class="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/10">Mon profil</a>
+                <a href="{% url 'admin:index' %}" class="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/10">Admin Panel</a>
+                <a href="{% url 'staff:dashboard' %}" class="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/10">Dashboard Staff</a>
+                <a href="{% url 'notifications:list' %}" class="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/10">Notifications</a>
+              {% else %}
+                <a href="{% url 'benevoles:profile_benevole' %}?next={{ request.get_full_path|urlencode }}" class="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/10">Mon profil</a>
+                <a href="{% url 'benevoles:dashboard' %}?next={{ request.get_full_path|urlencode }}" class="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/10">Dashboard Bénévole</a>
+                <a href="{% url 'benevoles:UserDocuments_list' %}?next={{ request.get_full_path|urlencode }}" class="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/10">Mes documents</a>
+                <a href="{% url 'notifications:list' %}" class="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/10">Notifications</a>
+                <a href="{% url 'benevoles:historique_benevole' %}?next={{ request.get_full_path|urlencode }}" class="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/10">Mon historique</a>
+              {% endif %}
+              <a href="{% url 'account_logout' %}" class="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/10">Déconnexion</a>
+            {% else %}
+              <a href="{% url 'account_login' %}" class="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/10">Connexion</a>
+              <a href="{% url 'account_signup' %}" class="block px-4 py-2 hover:bg-gray-50 dark:hover:bg-white/10">Inscription</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile toggler -->
+    <button type="button" id="drawer-open"
+            class="lg:hidden p-2 rounded-full bg-white/90 text-blue-700 focus:outline-none focus:ring-2 focus:ring-white/60 dark:bg-white/80"
+            aria-controls="drawer" aria-expanded="false" aria-label="Ouvrir le menu">
+      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+  </nav>
+
+  <!-- Drawer mobile -->
+  <div id="drawer-overlay"
+       class="fixed inset-0 bg-black/40 backdrop-blur-sm opacity-0 pointer-events-none hidden z-40 transition"></div>
+
+  <aside id="drawer"
+         class="fixed top-0 left-0 h-svh w-4/5 max-w-xs bg-white text-gray-900 dark:bg-slate-900 dark:text-slate-100 shadow-2xl p-4
+                -translate-x-full transition-transform duration-200 ease-out z-50 flex flex-col"
+         role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+    <div class="flex items-center justify-between mb-3">
+      <span id="drawer-title" class="font-bold font-brand h-tight">Menu</span>
+      <button type="button" id="drawer-close"
+              class="p-2 text-gray-500 hover:text-gray-800 dark:text-slate-400 dark:hover:text-slate-200"
+              aria-label="Fermer">?</button>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto space-y-1">
+      <a href="{% url 'core:accueil' %}" class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-white/10">Accueil</a>
+      <a href="{% url 'core:events_list' %}" class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-white/10">Evenements</a>
+
+      <details class="group">
+        <summary class="px-3 py-2 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-white/10 list-none">
+          <span class="font-semibold">Nos Services</span>
+        </summary>
+        <div class="pl-4 mt-1 space-y-1">
+          <a href="{% url 'core:service_education_orphelins' %}" class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-white/10">Éducation</a>
+          <a href="{% url 'core:service_sante' %}" class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-white/10">Santé</a>
+          <a href="{% url 'core:service_psy' %}" class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-white/10">Support psychologique</a>
+        </div>
+      </details>
+
+      <a href="{% url 'core:don' %}" class="block px-3 py-2 rounded bg-amber-400 text-gray-900 font-semibold hover:bg-amber-300">
+        Faire un Don
+      </a>
+
+      {% if volunteer_cta %}
+      <a href="{{ volunteer_cta.href }}"
+         class="mt-2 block px-3 py-2 rounded font-semibold
+                {% if volunteer_cta.variant == 'primary' %} bg-blue-600 text-white hover:bg-blue-700 {% else %} ring-1 ring-white/20 hover:bg-white/10 {% endif %}">
+        {{ volunteer_cta.label }}
+        {% if volunteer_cta.badge %}
+        <span class="ml-2 text-[11px] px-2 py-0.5 rounded-full bg-amber-300 text-gray-900">{{ volunteer_cta.badge }}</span>
+        {% endif %}
+      </a>
+      {% endif %}
+
+      {% if user.is_authenticated %}
+      <hr class="my-3 border-gray-200 dark:border-white/10">
+      {% if user.is_staff %}
+        <a href="{% url 'staff:profil_staff' %}" class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-white/10">Mon profil</a>
+        <a href="{% url 'admin:index' %}" class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-white/10">Admin Panel</a>
+        <a href="{% url 'staff:dashboard' %}" class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-white/10">Dashboard Staff</a>
+      {% else %}
+        <a href="{% url 'benevoles:profile_benevole' %}?next={{ request.get_full_path|urlencode }}" class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-white/10">Mon profil</a>
+        <a href="{% url 'benevoles:dashboard' %}?next={{ request.get_full_path|urlencode }}" class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-white/10">Dashboard Bénévole</a>
+        <a href="{% url 'benevoles:UserDocuments_list' %}?next={{ request.get_full_path|urlencode }}" class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-white/10">Mes documents</a>
+        <a href="{% url 'benevoles:historique_benevole' %}?next={{ request.get_full_path|urlencode }}" class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-white/10">Mon historique</a>
+      {% endif %}
+      <a href="{% url 'notifications:list' %}" class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-white/10">Notifications</a>
+      {% endif %}
+    </nav>
+
+    <div class="pt-3 border-t border-gray-200 dark:border-white/10">
+      {% if user.is_authenticated %}
+        <a href="{% url 'account_logout' %}"
+           class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-white/10 text-red-600 font-semibold">
+          Déconnexion
+        </a>
+      {% else %}
+        <a href="{% url 'account_login' %}"
+           class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-white/10 font-semibold">
+          Connexion
+        </a>
+      {% endif %}
+    </div>
+  </aside>
+</header>
+
+<!-- MAIN -->
+<main id="site-main" class="flex-1 w-full max-w-none mx-auto px-2 sm:px-3 pb-10"
+      style="padding-top: calc(var(--header-h) + env(safe-area-inset-top));">
+
+  {% block content %}{% endblock %}{% block modals %}{% endblock %}
+</main>
+
+<!-- FOOTER PREMIUM & COMPACT -->
+<footer class="relative">
+  <!-- top gradient border -->
+  <div class="h-[3px] bg-gradient-to-r from-blue-500 via-cyan-400 to-violet-500"></div>
+
+  <div class="bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-300">
+    <div class="w-full max-w-none mx-auto px-3 sm:px-4 py-8 sm:py-10 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+      <div>
+        <h4 class="font-semibold mb-3 text-base font-brand h-tight text-slate-900 dark:text-white">Contact</h4>
+        <ul class="space-y-1.5 text-sm">
+          <li><a href="mailto:contact@Fondation.bamu.org" class="text-blue-600 hover:underline dark:text-blue-400">contact@bwf.org</a></li>
+          <li>123 Rue de l'Association, Kinshasa, RDC</li>
+          <li>+33 6 05 65 81 13</li>
+          <li>Lun–Ven, 9h–18h</li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-semibold mb-3 text-base font-brand h-tight text-slate-900 dark:text-white">Suivez-nous</h4>
+        <ul class="space-y-1.5 text-sm">
+          <li><a href="#" class="inline-flex items-center gap-2 hover:underline">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22 12a10 10 0 10-11.5 9.9v-7H7.1V12h3.4V9.8c0-3.3 2-5.1 5-5.1 1.5 0 3 .27 3 .27v3.3h-1.7c-1.7 0-2.2 1.1-2.2 2.2V12h3.7l-.6 2.9h-3.1v7A10 10 0 0022 12z"/></svg>Facebook</a></li>
+          <li><a href="#" class="inline-flex items-center gap-2 hover:underline">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22.46 6c-.77.35-1.6.58-2.46.69a4.3 4.3 0 001.9-2.38 8.6 8.6 0 01-2.72 1.04 4.28 4.28 0 00-7.3 3.9A12.14 12.14 0 013 4.89a4.28 4.28 0 001.33 5.71 4.24 4.24 0 01-1.94-.54v.05a4.28 4.28 0 003.44 4.2 4.28 4.28 0 01-1.93.07 4.29 4.29 0 004 2.97A8.58 8.58 0 012 19.54 12.1 12.1 0 008.56 21c7.27 0 11.25-6.02 11.25-11.24 0-.17 0-.35-.01-.52A8 8 0 0022.46 6z"/></svg>Twitter</a></li>
+          <li><a href="#" class="inline-flex items-center gap-2 hover:underline">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm10 2c1.66 0 3 1.34 3 3v10c0 1.66-1.34 3-3 3H7c-1.66 0-3-1.34-3-3V7c0-1.66 1.34-3 3-3h10zm-5 4a5 5 0 100 10 5 5 0 000-10zm0 2.2a2.8 2.8 0 110 5.6 2.8 2.8 0 010-5.6z"/></svg>Instagram</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-semibold mb-3 text-base font-brand h-tight text-slate-900 dark:text-white">Liens utiles</h4>
+        <ul class="space-y-1.5 text-sm">
+          <li><a href="#" class="hover:underline">FAQ</a></li>
+          <li><a href="{% url 'core:don' %}" class="hover:underline">Faire un don</a></li>
+          <li><a href="{% url 'account_signup' %}" class="hover:underline">Devenir bénévole</a></li>
+          <li><a href="#" class="hover:underline">Blog</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-semibold mb-3 text-base font-brand h-tight text-slate-900 dark:text-white">Légal</h4>
+        <ul class="space-y-1.5 text-sm">
+          <li><a href="{% url 'legal:privacy' %}" class="hover:underline">Politique de confidentialité</a></li>
+          <li><a href="{% url 'legal:terms' %}" class="hover:underline">Conditions d’utilisation</a></li>
+          <li><a href="{% url 'legal:cookies' %}" class="hover:underline">Politique cookies</a></li>
+          <li><a href="{% url 'legal:imprint' %}" class="hover:underline">Mentions légales</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="border-t border-slate-200/70 dark:border-white/10 text-center py-3 text-xs">
+      © {{ now|date:'Y' }} BAMU Fondation — Site conçu par Merveilles_ks
+    </div>
+  </div>
+</footer>
+<script>
+(function () {
+  // --- Dropdowns (desktop) with animation ---
+  const btns = document.querySelectorAll('[data-menu-button]');
+  const panels = document.querySelectorAll('[data-menu-panel]');
+
+  function closeAll(exceptId) {
+    panels.forEach(p => {
+      if (!exceptId || p.id !== exceptId) {
+        p.style.pointerEvents = 'none';
+        p.classList.add('opacity-0','scale-95','translate-y-1');
+        p.classList.remove('opacity-100','scale-100','translate-y-0');
+        setTimeout(() => p.classList.add('hidden'), 140);
+      }
+    });
+    btns.forEach(b => b.setAttribute('aria-expanded','false'));
+  }
+
+  btns.forEach(btn => {
+    const id = 'menu-' + btn.getAttribute('data-menu-button');
+    const panel = document.getElementById(id);
+    if (!panel) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const willOpen = panel.classList.contains('hidden');
+      closeAll(willOpen ? id : null);
+      if (willOpen) {
+        panel.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          panel.style.pointerEvents = 'auto';
+          panel.classList.remove('opacity-0','scale-95','translate-y-1');
+          panel.classList.add('opacity-100','scale-100','translate-y-0');
+          btn.setAttribute('aria-expanded','true');
+        });
+      } else {
+        panel.style.pointerEvents = 'none';
+        panel.classList.add('opacity-0','scale-95','translate-y-1');
+        panel.classList.remove('opacity-100','scale-100','translate-y-0');
+        setTimeout(() => panel.classList.add('hidden'), 140);
+        btn.setAttribute('aria-expanded','false');
+      }
+    });
+  });
+
+  // Fermer uniquement si le clic N'EST PAS dans un bouton ou un panel
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('[data-menu-button]') || e.target.closest('[data-menu-panel]')) return;
+    closeAll(null);
+  }); // <-- pas de "true" ici (pas de capture)
+
+  document.addEventListener('keydown', (e)=>{ if (e.key==='Escape') closeAll(null); });
+  ['scroll','resize','orientationchange'].forEach(evt =>
+    window.addEventListener(evt, () => closeAll(null), {passive:true})
+  );
+
+  // --- Mobile drawer (inchangé) ---
+  const drawer   = document.getElementById('drawer');
+  const overlay  = document.getElementById('drawer-overlay');
+  const openBtn  = document.getElementById('drawer-open');
+  const closeBtn = document.getElementById('drawer-close');
+
+  function openDrawer() {
+    overlay.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      overlay.classList.remove('pointer-events-none');
+      overlay.classList.add('opacity-100');
+      drawer.classList.remove('-translate-x-full');
+      openBtn?.setAttribute('aria-expanded','true');
+      document.body.classList.add('overflow-hidden');
+    });
+  }
+  function closeDrawer() {
+    overlay.classList.add('pointer-events-none');
+    overlay.classList.remove('opacity-100');
+    drawer.classList.add('-translate-x-full');
+    openBtn?.setAttribute('aria-expanded','false');
+    document.body.classList.remove('overflow-hidden');
+    setTimeout(()=>overlay.classList.add('hidden'), 180);
+  }
+  openBtn?.addEventListener('click', (e)=>{ e.stopPropagation(); openDrawer(); });
+  closeBtn?.addEventListener('click', closeDrawer);
+  overlay?.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', (e)=>{ if (e.key==='Escape') closeDrawer(); });
+  window.addEventListener('click', (e) => {
+    if (overlay.classList.contains('hidden')) return;
+    const clickInDrawer = drawer.contains(e.target);
+    const clickOpenBtn  = openBtn && openBtn.contains(e.target);
+    if (!clickInDrawer && !clickOpenBtn) closeDrawer();
+  }, {passive:true});
+})();
+</script>
+<script>
+(function(){
+  const root   = document.documentElement;
+  const header = document.getElementById('site-header');
+  if (!header) return;
+
+  let rafId = null;
+  function setHeaderOffset(){
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(() => {
+      // +1px pour éviter les sauts de pixel selon le zoom/dpi
+      const h = Math.ceil(header.getBoundingClientRect().height) + 1;
+      root.style.setProperty('--header-h', h + 'px');
+    });
+  }
+
+  // 1) Premier calcul très tôt
+  setHeaderOffset();
+
+  // 2) Recalculs sûrs
+  window.addEventListener('load', setHeaderOffset);
+  window.addEventListener('resize', setHeaderOffset, {passive:true});
+  window.addEventListener('orientationchange', setHeaderOffset);
+
+  // 3) Si le header change de contenu/hauteur (bandeaux, toasts fixés, etc.)
+  if ('ResizeObserver' in window) {
+    const ro = new ResizeObserver(setHeaderOffset);
+    ro.observe(header);
+  }
+  const mo = new MutationObserver(setHeaderOffset);
+  mo.observe(header, {childList: true, subtree: true, attributes: true});
+
+  // 4) Petits recalculs différés (polices web, layout)
+  setTimeout(setHeaderOffset, 100);
+  setTimeout(setHeaderOffset, 300);
+  setTimeout(setHeaderOffset, 800);
+})();
+</script>
+
+
+
+</body>
+</html>
+

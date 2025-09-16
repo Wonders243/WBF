@@ -1,0 +1,81 @@
+{% extends "staff/base_staff.html" %}
+{% block staff_title %}Staff — Inscriptions{% endblock %}
+
+{% block staff_content %}
+<h1 class="text-2xl font-extrabold text-blue-700 dark:text-blue-300 mb-4">Inscriptions</h1>
+
+<form method="get" action=""
+      class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4 mb-4 grid grid-cols-1 md:grid-cols-4 gap-3">
+  <input type="search" name="q" value="{{ request.GET.q|default_if_none:'' }}" placeholder="Bénévole, mission…"
+         class="px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder-slate-400
+                focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+  <select name="status"
+          class="px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100
+                 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+    <option value="">Tous statuts</option>
+    <option value="pending"  {% if request.GET.status == 'pending' %}selected{% endif %}>En attente</option>
+    <option value="accepted" {% if request.GET.status == 'accepted' %}selected{% endif %}>Accepté</option>
+    <option value="declined" {% if request.GET.status == 'declined' %}selected{% endif %}>Refusé</option>
+    <option value="invited"  {% if request.GET.status == 'invited' %}selected{% endif %}>Invité</option>
+    <option value="cancelled"{% if request.GET.status == 'cancelled' %}selected{% endif %}>Annulé</option>
+  </select>
+  <input type="date" name="from" value="{{ request.GET.from }}"
+         class="px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100
+                focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+  <input type="date" name="to" value="{{ request.GET.to }}"
+         class="px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100
+                focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+  <div class="md:col-span-4">
+    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Filtrer</button>
+    {% if request.GET %}
+      <a href="{{ request.path }}" class="ml-2 text-sm text-slate-600 dark:text-slate-300 hover:underline">Réinitialiser</a>
+    {% endif %}
+  </div>
+</form>
+
+<section class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-200">
+      <tr class="text-left">
+        <th class="p-3">Bénévole</th>
+        <th class="p-3">Mission</th>
+        <th class="p-3">Statut</th>
+        <th class="p-3">Créé</th>
+        <th class="p-3 text-right">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+      {% for s in page_obj.object_list %}
+      <tr class="text-slate-800 dark:text-slate-200">
+        <td class="p-3">{{ s.volunteer_name }}</td>
+        <td class="p-3">{{ s.mission_title }}</td>
+        <td class="p-3">{{ s.status|title }}</td>
+        <td class="p-3">{{ s.created_at }}</td>
+        <td class="p-3 text-right">
+          {% if status == 'pending' or status == 'invited' %}
+            <form method="post" action="{% url 'staff:mission_accept' s.id %}" class="inline">{% csrf_token %}
+              <button class="px-2 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700">Accepter</button>
+            </form>
+            <form method="post" action="{% url 'staff:mission_decline' s.id %}" class="inline">{% csrf_token %}
+              <button class="px-2 py-1 rounded bg-rose-600 text-white hover:bg-rose-700">Refuser</button>
+            </form>
+          {% else %}
+            <span class="text-xs text-slate-500 dark:text-slate-400">—</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5" class="p-6 text-center text-slate-500 dark:text-slate-400">Aucune inscription.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+{% include "staff/partials/_pagination.html" with page_obj=page_obj %}
+{% endblock %}

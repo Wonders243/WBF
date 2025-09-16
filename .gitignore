@@ -1,0 +1,20 @@
+# Python/Django
+__pycache__/
+*.pyc
+db.sqlite3
+/media/
+staticfiles/
+*.log
+
+# Node
+node_modules/
+static/css/dist/
+
+# IDE
+.vscode/
+.idea/
+
+
+# secrets
+.env
+*.env

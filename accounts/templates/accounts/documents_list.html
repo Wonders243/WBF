@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Mes documents — Bénévole{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto px-4">
+  <!-- Header -->
+  <header class="mb-6 flex items-center justify-between gap-4">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-extrabold text-blue-700 dark:text-blue-400">Mes documents</h1>
+      <p class="text-slate-600 dark:text-slate-400">Gérez vos fichiers (PDF & images). Taille max : {{ max_upload_mb }} Mo.</p>
+    </div>
+    <a href="{% url 'benevoles:profile_benevole' %}" class="text-blue-600 dark:text-blue-400 hover:underline">← Retour au profil</a>
+  </header>
+
+  {# Upload (dropzone) #}
+  <form method="post" action="{% url 'benevoles:UserDocuments_upload' %}" enctype="multipart/form-data"
+        class="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow p-5 mb-6">
+    {% csrf_token %}
+    <div id="dropzone"
+         class="relative flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-slate-300 dark:border-white/15 bg-slate-50/60 dark:bg-slate-950/40 p-6 text-center transition-colors">
+      <input id="fileInput" type="file" name="files" multiple accept="application/pdf,image/*" class="sr-only">
+      <div class="text-4xl">📎</div>
+      <div class="space-y-1">
+        <p class="text-sm text-slate-700 dark:text-slate-200">
+          <label for="fileInput" class="cursor-pointer underline decoration-dotted underline-offset-4">
+            Cliquez pour sélectionner vos fichiers
+          </label>
+          <span class="text-slate-400">ou</span> glissez-déposez ici
+        </p>
+        <p id="fileHint" class="text-xs text-slate-500 dark:text-slate-400">
+          Formats : PDF, JPG, PNG, WEBP — ≤ {{ max_upload_mb }} Mo par fichier.
+        </p>
+      </div>
+      <div class="pt-2">
+        <button type="submit"
+                class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+          Téléverser
+        </button>
+      </div>
+    </div>
+  </form>
+
+  {# Filtres #}
+  <form method="get" class="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow p-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+      <input type="search" name="q" value="{{ q }}" placeholder="Rechercher…"
+             class="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/40">
+
+      <select name="type"
+              class="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/40">
+        <option value="all" {% if ftype == "all" %}selected{% endif %}>Tous les types</option>
+        <option value="images" {% if ftype == "images" %}selected{% endif %}>Images</option>
+        <option value="pdf" {% if ftype == "pdf" %}selected{% endif %}>PDF</option>
+      </select>
+
+      {% if status_choices %}
+        <select name="status"
+                class="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/40">
+          <option value="" {% if not status_param %}selected{% endif %}>Tous statuts</option>
+          {% for s in status_choices %}
+            <option value="{{ s }}" {% if status_param == s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      {% else %}
+        <div class="text-slate-400 text-sm flex items-center px-1">—</div>
+      {% endif %}
+
+      <button class="rounded-lg border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-white/10 px-3 py-2">
+        Filtrer
+      </button>
+    </div>
+  </form>
+
+  {# Liste #}
+  {% if docs %}
+    <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for d in docs %}
+        {% with status=d.status|default_if_none:"" s=status|lower %}
+        <li class="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow p-4 flex flex-col">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-start gap-3 min-w-0">
+              {% if d.mime|default:""|slice:":6" == "image/" %}
+                {% if d.file %}
+                  <img src="{{ d.file.url }}" alt="" class="h-14 w-14 rounded-lg object-cover ring-1 ring-slate-200/80 dark:ring-white/10">
+                {% else %}
+                  <span class="inline-flex h-14 w-14 items-center justify-center rounded-lg bg-blue-50 text-blue-600">🖼️</span>
+                {% endif %}
+              {% elif d.mime == "application/pdf" %}
+                <span class="inline-flex h-14 w-14 items-center justify-center rounded-lg bg-red-50 text-red-600 ring-1 ring-red-200/60">📄</span>
+              {% else %}
+                <span class="inline-flex h-14 w-14 items-center justify-center rounded-lg bg-slate-100 text-slate-600 ring-1 ring-slate-200/60">📁</span>
+              {% endif %}
+
+              <div class="min-w-0">
+                <div class="font-semibold truncate max-w-[240px]" title="{{ d.name|default:d.file.name }}">
+                  {{ d.name|default:d.file.name }}
+                </div>
+                <div class="text-xs text-slate-500 dark:text-slate-400">
+                  {{ d.uploaded_at|date:"d/m/Y H:i" }} • {{ d.size|filesizeformat }}
+                </div>
+              </div>
+            </div>
+
+            {% if status %}
+              <span class="ml-2 text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full border
+                {% if s == 'verified' or s == 'verifie' or s == 'approuve' or s == 'approved' or s == 'valide' %}
+                  bg-green-50 text-green-700 border-green-200
+                {% elif s == 'pending' or s == 'under_review' or s == 'en_verification' or s == 'en_attente_verification' or s == 'verification' %}
+                  bg-amber-50 text-amber-800 border-amber-200
+                {% elif s == 'rejected' or s == 'refuse' or s == 'invalid' %}
+                  bg-rose-50 text-rose-700 border-rose-200
+                {% else %}
+                  bg-slate-50 text-slate-700 border-slate-200
+                {% endif %}">
+                {{ status }}
+              </span>
+            {% endif %}
+          </div>
+
+          <div class="mt-4 flex flex-wrap items-center gap-3">
+            {% if d.file %}
+              <a href="{{ d.file.url }}" target="_blank" rel="noopener"
+                 class="inline-flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:underline">Ouvrir</a>
+              <a href="{{ d.file.url }}" download
+                 class="inline-flex items-center gap-1 text-sm text-slate-600 dark:text-slate-300 hover:underline">Télécharger</a>
+            {% endif %}
+
+            {% if s == 'verified' or s == 'verifie' or s == 'approuve' or s == 'approved' or s == 'valide' or s == 'verification' or s == 'under_review' or s == 'pending' or s == 'en_verification' or s == 'en_attente_verification' %}
+              <span class="text-sm text-slate-400">Suppression interdite</span>
+            {% else %}
+              <form method="post" action="{% url 'benevoles:documents_delete' d.pk %}" class="inline" onsubmit="return confirm('Supprimer ce fichier ?');">
+                {% csrf_token %}
+                <button class="text-sm text-rose-600 hover:underline">Supprimer</button>
+              </form>
+            {% endif %}
+          </div>
+        </li>
+        {% endwith %}
+      {% endfor %}
+    </ul>
+
+    {# Pagination #}
+    {% if page_obj.paginator.num_pages > 1 %}
+      <nav class="mt-8 flex justify-center" aria-label="Pagination">
+        <ul class="inline-flex -space-x-px rounded-xl overflow-hidden border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow">
+          {% if page_obj.has_previous %}
+            <li><a class="px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-white/5"
+                   href="?q={{ q }}&type={{ ftype }}&status={{ status_param }}&page={{ page_obj.previous_page_number }}">Précédent</a></li>
+          {% endif %}
+          {% for p in page_obj.paginator.page_range %}
+            <li>
+              <a class="px-3 py-2 text-sm {% if p == page_obj.number %}bg-blue-600 text-white{% else %}hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200{% endif %}"
+                 href="?q={{ q }}&type={{ ftype }}&status={{ status_param }}&page={{ p }}">{{ p }}</a>
+            </li>
+          {% endfor %}
+          {% if page_obj.has_next %}
+            <li><a class="px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-white/5"
+                   href="?q={{ q }}&type={{ ftype }}&status={{ status_param }}&page={{ page_obj.next_page_number }}">Suivant</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  {% else %}
+    <div class="rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 text-amber-900 dark:text-amber-100 p-6">
+      <p class="font-medium">Aucun document pour le moment.</p>
+      <p class="text-sm opacity-80">Ajoutez vos pièces (CNI, photo, diplômes…) via le bloc “Téléverser”.</p>
+    </div>
+  {% endif %}
+</section>
+
+<!-- Dropzone JS minimal (drag & drop + comptage) -->
+<script>
+(function(){
+  const dz = document.getElementById('dropzone');
+  const fi = document.getElementById('fileInput');
+  const hint = document.getElementById('fileHint');
+  if (!dz || !fi) return;
+
+  function setFiles(files){
+    fi.files = files; // assignation compatible Chrome/Edge/FF récents
+    if (files.length){
+      hint.textContent = files.length + (files.length>1 ? ' fichiers sélectionnés' : ' fichier sélectionné');
+    }else{
+      hint.textContent = 'Formats : PDF, JPG, PNG, WEBP — ≤ {{ max_upload_mb }} Mo par fichier.';
+    }
+  }
+  dz.addEventListener('dragover', (e)=>{ e.preventDefault(); dz.classList.add('ring-2','ring-blue-500/40'); });
+  dz.addEventListener('dragleave', ()=> dz.classList.remove('ring-2','ring-blue-500/40'));
+  dz.addEventListener('drop', (e)=>{
+    e.preventDefault(); dz.classList.remove('ring-2','ring-blue-500/40');
+    if (e.dataTransfer?.files?.length) setFiles(e.dataTransfer.files);
+  });
+  fi.addEventListener('change', ()=> setFiles(fi.files));
+})();
+</script>
+{% endblock %}

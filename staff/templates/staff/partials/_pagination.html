@@ -1,0 +1,20 @@
+{% if page_obj and page_obj.paginator.num_pages > 1 %}
+<div class="mt-6 flex items-center justify-between">
+  <div class="text-sm text-gray-600">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</div>
+  <div class="flex gap-2">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}"
+         class="px-3 py-2 rounded border hover:bg-gray-50">Précédent</a>
+    {% else %}
+      <span class="px-3 py-2 rounded border text-gray-400">Précédent</span>
+    {% endif %}
+
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if request.GET %}&{{ request.GET.urlencode }}{% endif %}"
+         class="px-3 py-2 rounded border hover:bg-gray-50">Suivant</a>
+    {% else %}
+      <span class="px-3 py-2 rounded border text-gray-400">Suivant</span>
+    {% endif %}
+  </div>
+</div>
+{% endif %}

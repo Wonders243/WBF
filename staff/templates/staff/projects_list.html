@@ -1,0 +1,87 @@
+{% extends "staff/base_staff.html" %}
+{% block staff_title %}Staff — Projets{% endblock %}
+
+{% block staff_content %}
+<header class="mb-4 flex items-center justify-between">
+  <h1 class="text-2xl font-extrabold text-blue-700 dark:text-blue-300">Projets</h1>
+  <a href="{% url 'staff:project_create' %}"
+     class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+    Créer un projet
+  </a>
+</header>
+
+<form method="get"
+      class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4 mb-4 grid grid-cols-1 md:grid-cols-5 gap-3">
+  <input type="search" name="q" value="{{ request.GET.q|default_if_none:'' }}" placeholder="Rechercher (titre, description…)"
+         class="px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 placeholder-slate-400
+                focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+  <select name="partner"
+          class="px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100
+                 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+    <option value="">{% comment %}Tous partenaires{% endcomment %}Tous partenaires</option>
+    {% for p in partners %}
+      <option value="{{ p.id }}" {% if request.GET.partner == p.id|stringformat:"s" %}selected{% endif %}>
+        {{ p }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <select name="has_link"
+          class="px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10
+                 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100
+                 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+    <option value="">Lien — Tous</option>
+    <option value="yes" {% if request.GET.has_link == 'yes' %}selected{% endif %}>Avec lien</option>
+  </select>
+
+  <div class="md:col-span-5">
+    <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Filtrer</button>
+    {% if request.GET %}
+      <a href="{{ request.path }}"
+         class="ml-2 text-sm text-slate-600 dark:text-slate-300 hover:underline">Réinitialiser</a>
+    {% endif %}
+  </div>
+</form>
+
+<section class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-200">
+      <tr class="text-left">
+        <th class="p-3">Titre</th>
+        <th class="p-3">Partenaires</th>
+        <th class="p-3">Événements</th>
+        <th class="p-3">Missions</th>
+        <th class="p-3">Lien</th>
+        <th class="p-3 text-right">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+      {% for r in rows %}
+      <tr class="text-slate-800 dark:text-slate-200">
+        <td class="p-3 font-medium">{{ r.title }}</td>
+        <td class="p-3">{{ r.partners }}</td>
+        <td class="p-3">{{ r.events_count }}</td>
+        <td class="p-3">{{ r.missions_count }}</td>
+        <td class="p-3">
+          {% if r.link %}
+            <a href="{{ r.link }}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">Ouvrir</a>
+          {% else %}—{% endif %}
+        </td>
+        <td class="p-3 text-right space-x-2">
+          <a href="{% url 'staff:project_detail' r.id %}" class="text-blue-600 dark:text-blue-400 hover:underline">Détails</a>
+          <a href="{% url 'staff:project_update' r.id %}" class="text-slate-600 dark:text-slate-300 hover:underline">Éditer</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" class="p-6 text-center text-slate-500 dark:text-slate-400">Aucun projet.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+{% include "staff/partials/_pagination.html" with page_obj=page_obj qs=qs %}
+{% endblock %}

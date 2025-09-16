@@ -1,0 +1,442 @@
+{% load static nav_extras %}
+{% load widget_tweaks i18n %}
+<!DOCTYPE html>
+<html lang="fr" class="min-h-full w-full bg-slate-50 dark:bg-slate-950">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>{% block staff_title %}Console Staff{% endblock %}</title>
+
+  <link rel="stylesheet" href="{% static 'css/dist/styles.css' %}">
+  <link rel="icon" href="{% static 'img/favicon.svg' %}">
+
+  <!-- Détection du thème système si Tailwind est en darkMode:'class' -->
+  <script>
+  (function () {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const root = document.documentElement;
+    function apply(){ root.classList.toggle('dark', mq.matches); }
+    apply();
+    mq.addEventListener ? mq.addEventListener('change', apply) : mq.addListener(apply);
+  })();
+  </script>
+</head>
+<body class="min-h-screen w-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+
+  <!-- HEADER (au-dessus de tout) -->
+  <header class="sticky top-0 z-[70] border-b bg-white/80 dark:bg-slate-900/75 backdrop-blur flex-shrink-0">
+    {% include "partials/messages.html" %}
+    <div class="max-w-7xl mx-auto px-3 sm:px-4">
+      <div class="h-12 flex items-center gap-2">
+        <!-- Menu (mobile) -->
+        <button id="btnSidebar" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 md:hidden" aria-label="Ouvrir le menu">☰</button>
+
+        <!-- Branding -->
+        <a href="{% url 'staff:dashboard' %}" class="flex items-center gap-2">
+          <img src="{% static 'img/logo.png' %}" alt="" class="h-7 w-7">
+          <span class="text-sm font-bold tracking-tight">Console Staff</span>
+        </a>
+
+        <!-- Recherche rapide -->
+        <form method="get" action="{% url 'staff:mission_list' %}" class="ml-2 hidden md:block">
+          <label class="sr-only" for="q">Rechercher</label>
+          <input id="q" name="q" type="search" placeholder="Rechercher…"
+                 class="w-64 text-sm px-3 py-1.5 rounded-lg border border-slate-300 dark:border-white/10
+                        bg-white dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 placeholder-slate-400
+                        focus:outline-none focus:ring focus:ring-blue-200 dark:focus:ring-blue-500/20">
+        </form>
+
+        <!-- User -->
+        <div class="ml-auto relative">
+          <button id="btnUser" class="px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-sm" aria-haspopup="menu" aria-expanded="false">
+            {{ request.user.get_short_name|default:request.user.username }}
+          </button>
+          <div id="menuUser" class="absolute right-0 mt-2 w-44 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl shadow p-1 hidden">
+            <a href="{% url 'staff:profil_staff' %}" class="block px-3 py-2 rounded hover:bg-slate-50 dark:hover:bg-white/5 text-sm">Profil staff</a>
+            <a href="{% url 'benevoles:profile_benevole' %}" class="block px-3 py-2 rounded hover:bg-slate-50 dark:hover:bg-white/5 text-sm">Profil bénévole</a>
+            {% if request.user.is_superuser %}
+              <a href="/admin/" class="block px-3 py-2 rounded hover:bg-slate-50 dark:hover:bg-white/5 text-sm">Django Admin</a>
+            {% endif %}
+            <form method="post" action="{% url 'account_logout' %}">
+              {% csrf_token %}
+              <button class="w-full text-left px-3 py-2 rounded hover:bg-slate-50 dark:hover:bg-white/5 text-sm">Se déconnecter</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- LAYOUT -->
+  <div class="w-full px-3 sm:px-4 py-4 grid grid-cols-1 md:grid-cols-12 gap-4 flex-1">
+
+    <!-- SIDEBAR (au-dessus de l’overlay, sous le header) -->
+    <aside
+      id="sidebar"
+      aria-label="Menu latéral"
+      class="
+        fixed top-12 left-0 z-[60] h-[calc(100vh-3rem)] w-72 max-w-[85vw]
+        -translate-x-full transition-transform duration-200 ease-out
+        bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-white/10
+        shadow-2xl p-3
+        md:static md:top-0 md:h-auto md:w-auto md:translate-x-0 md:transition-none md:shadow-sm
+        md:border md:rounded-2xl md:col-span-3 lg:col-span-2
+      ">
+      <nav class="space-y-1 text-sm">
+
+        <!-- Accueil / Dashboard -->
+        <a href="{% url 'core:accueil' %}"
+           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 transition-colors {% nav_active 'Accueil' %}">
+          🚪 <span>Accueil</span>
+        </a>
+        <a href="{% url 'staff:dashboard' %}"
+           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 transition-colors {% nav_active 'dashboard' %}">
+          🧭 <span>Dashboard</span>
+        </a>
+
+        <!-- Section: Opérations -->
+        <div class="px-3 pt-4 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Opérations</div>
+        <a href="{% url 'staff:events_list' %}"
+           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 transition-colors {% nav_active 'event' 'events' %}">
+          📅 <span>Événements</span>
+        </a>
+        <a href="{% url 'staff:projects_list' %}"
+           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 transition-colors {% nav_active 'project' 'projects' %}">
+          🧩 <span>Projets</span>
+        </a>
+        <a href="{% url 'staff:mission_list' %}"
+           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 transition-colors {% nav_active 'mission' %}">
+          🗂️ <span>Missions</span>
+        </a>
+
+        <a href="{% url 'staff:news_list' %}"
+           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 transition-colors {% nav_active 'news' %}">
+          📰 <span>Actualités</span>
+        </a>
+        <a href="{% url 'staff:testimonials_list' %}"
+           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 transition-colors {% nav_active 'testimonials' 'testimonial' %}">
+          💬 <span>Témoignages</span>
+        </a>
+        <a href="{% url 'staff:stories_list' %}"
+           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 transition-colors {% nav_active 'stories' 'story' %}">
+          📚 <span>Histoires</span>
+        </a>
+        <!-- Section: Personnes -->
+        <div class="px-3 pt-4 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Personnes</div>
+        <a href="{% url 'staff:applications_list' %}"
+           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 transition-colors {% nav_active 'applications' 'application' %}">
+          ✅ <span>Candidatures bénévoles</span>
+        </a>
+        <a href="{% url 'staff:volunteers_list' %}"
+           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 transition-colors {% nav_active 'volunteers' 'volunteer' %}">
+          🙋 <span>Bénévoles</span>
+        </a>
+        <a href="{% url 'staff:team_list' %}"
+           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 transition-colors {% nav_active 'team' 'member' %}">
+          👥 <span>Équipe</span>
+        </a>
+        <a href="{% url 'staff:partner_list' %}"
+           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 transition-colors {% nav_active 'partners' 'partner' %}">
+          🤝 <span>Partenaires</span>
+        </a>
+        <a href="{% url 'staff:signups_list' %}"
+           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 transition-colors {% nav_active 'signups' 'signup' %}">
+          📝 <span>Inscriptions</span>
+        </a>
+
+        <!-- Section: Administration -->
+        <div class="px-3 pt-4 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Administration</div>
+        <a href="{% url 'staff:documents_review' %}"
+           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 transition-colors {% nav_active 'documents' %}">
+          📄 <span>Documents</span>
+        </a>
+        <a href="{% url 'staff:hours_list' %}"
+           class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 transition-colors {% nav_active 'hours' %}">
+          ⏱️ <span>Heures</span>
+        </a>
+
+        {% if request.user.is_superuser %}
+          <a href="{% url 'staff:key_list' %}"
+             class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 transition-colors {% nav_active 'keys' 'key' 'key_list' %}">
+            🔑 <span>Liste des clés</span>
+          </a>
+          <a href="{% url 'staff:legal_list' %}"
+             class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 transition-colors {% nav_active 'legal' 'legal_list' %}">
+            📖 <span>Legals</span>
+          </a>
+          <a href="{% url 'staff:super_stats' %}"
+             class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-200 transition-colors {% nav_active 'super_stats' %}">
+            📊 <span>Stats</span>
+          </a>
+        {% endif %}
+
+      </nav>
+    </aside>
+
+    <!-- Overlay (mobile) — unique, sous la sidebar, ne couvre pas le header -->
+    <div id="sidebarOverlay"
+         class="fixed inset-0 top-12 z-[55] bg-black/40 backdrop-blur-[1px] hidden md:hidden"></div>
+
+    <!-- CONTENT -->
+    <main class="md:col-span-9 lg:col-span-10 space-y-3">
+      {% block breadcrumb %}{% endblock %}
+      {% block staff_content %}{% endblock %}
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="mt-auto border-t border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 flex-shrink-0">
+    <div class="max-w-7xl mx-auto px-3 sm:px-4 h-10 flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
+      <span>© {% now "Y" %} WBF — Console Staff</span>
+      <div class="flex items-center gap-3">
+        <a class="hover:underline" href="{% url 'staff:documents_review' %}">Documents</a>
+        <a class="hover:underline" href="{% url 'staff:hours_list' %}">Heures</a>
+        <a class="hover:underline" href="{% url 'staff:mission_list' %}">Missions</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JS -->
+  <script>
+  (function(){
+    const body     = document.body;
+    const sidebar  = document.getElementById('sidebar');
+    const overlay  = document.getElementById('sidebarOverlay');
+    const btnSide  = document.getElementById('btnSidebar');
+    const btnUser  = document.getElementById('btnUser');
+    const menuUser = document.getElementById('menuUser');
+
+    function openDrawer(){
+      sidebar.classList.remove('-translate-x-full');
+      overlay.classList.remove('hidden');
+      body.classList.add('overflow-hidden');
+      btnSide?.setAttribute('aria-expanded', 'true');
+    }
+    function closeDrawer(){
+      sidebar.classList.add('-translate-x-full');
+      overlay.classList.add('hidden');
+      body.classList.remove('overflow-hidden');
+      btnSide?.setAttribute('aria-expanded', 'false');
+    }
+
+    // Toggler (mobile)
+    btnSide && btnSide.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const closed = sidebar.classList.contains('-translate-x-full');
+      closed ? openDrawer() : closeDrawer();
+    });
+
+    // Fermer par overlay / Échap / clic hors du tiroir
+    overlay && overlay.addEventListener('click', closeDrawer);
+    window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeDrawer(); });
+    document.addEventListener('click', (e)=>{
+      if (window.innerWidth >= 768) return; // desktop: ne rien faire
+      const clickInside = sidebar.contains(e.target) || btnSide.contains(e.target);
+      if (!clickInside) closeDrawer();
+    });
+
+    // Menu utilisateur
+    btnUser && btnUser.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = !menuUser.classList.contains('hidden');
+      menuUser.classList.toggle('hidden', isOpen);
+      btnUser.setAttribute('aria-expanded', String(!isOpen));
+    });
+    document.addEventListener('click', (e) => {
+      if (menuUser && !menuUser.contains(e.target) && !btnUser.contains(e.target)) {
+        menuUser.classList.add('hidden');
+        btnUser.setAttribute('aria-expanded', "false");
+      }
+    });
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        menuUser?.classList.add('hidden');
+        btnUser?.setAttribute('aria-expanded', "false");
+      }
+    });
+  })();
+  </script>
+
+  {% include "security/_auth_key_modal.html" %}
+  <script>
+  (function () {
+    const $  = (s, r=document) => r.querySelector(s);
+    const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+
+    const modal       = $('#authKeyModal');
+    const errModal    = $('#authKeyErrorModal');
+    const keyInput    = $('#authKeyInput');
+    const keyCancel   = modal?.querySelector('[data-action="cancel"]');
+    const keyConfirm  = modal?.querySelector('[data-action="confirm"]');
+    const keyOverlay  = modal?.querySelector('[data-role="overlay"]');
+    const errCloseBtn = errModal?.querySelector('[data-action="close"]');
+    const errMsgEl    = errModal?.querySelector('[data-role="errmsg"]');
+    const keyMsgEl    = modal?.querySelector('[data-role="message"]');
+
+    const show = el => el && el.classList.remove('hidden');
+    const hide = el => el && el.classList.add('hidden');
+
+    function askKey(message) {
+      if (!modal) return Promise.resolve(null);
+      if (keyMsgEl && message) keyMsgEl.textContent = message;
+      keyInput && (keyInput.value = '');
+      show(modal);
+      setTimeout(() => keyInput?.focus(), 20);
+
+      return new Promise(resolve => {
+        function done(val){ cleanup(); resolve(val); }
+        function onCancel(){ done(null); }
+        function onConfirm(){
+          const v = (keyInput?.value || '').trim();
+          if (!v) {
+            keyInput?.focus();
+            keyInput?.classList.add('ring-2','ring-rose-500');
+            setTimeout(()=>keyInput?.classList.remove('ring-2','ring-rose-500'), 300);
+            return;
+          }
+          done(v);
+        }
+        function onKey(e){ if (e.key === 'Escape') onCancel(); if (e.key === 'Enter') onConfirm(); }
+        function cleanup(){
+          keyCancel?.removeEventListener('click', onCancel);
+          keyConfirm?.removeEventListener('click', onConfirm);
+          keyOverlay?.removeEventListener('click', onCancel);
+          document.removeEventListener('keydown', onKey);
+          hide(modal);
+        }
+        keyCancel?.addEventListener('click', onCancel);
+        keyConfirm?.addEventListener('click', onConfirm);
+        keyOverlay?.addEventListener('click', onCancel);
+        document.addEventListener('keydown', onKey);
+      });
+    }
+
+    // Montre le modal d'erreur. Si onOk est fourni, cliquer OK fermera l'erreur ET rouvrira le modal de clé.
+    function showAuthError(message, onOk) {
+      if (errMsgEl && message) errMsgEl.textContent = message;
+      show(errModal);
+
+      function close(){ hide(errModal); errCloseBtn?.removeEventListener('click', onOkClick); }
+      function onOkClick(){
+        close();
+        if (typeof onOk === 'function') onOk();
+      }
+
+      errCloseBtn?.addEventListener('click', onOkClick, { once: true });
+
+      // fermer par overlay / ESC sans relancer la saisie
+      const overlay = errModal?.firstElementChild;
+      overlay?.addEventListener('click', (e) => { if (e.target === e.currentTarget) close(); }, { once: true });
+      const onEsc = (e)=>{ if(e.key==='Escape') { close(); document.removeEventListener('keydown', onEsc); } };
+      document.addEventListener('keydown', onEsc, { once: true });
+    }
+
+    // Interception des formulaires sensibles
+    $$('.js-auth-managed').forEach(form => {
+      const isSuper = (form.getAttribute('data-superuser') || '').toLowerCase() === 'true';
+      const askMsg  = form.getAttribute('data-auth-message') || 'Clé requise pour poursuivre.';
+      let busy = false;
+
+      form.addEventListener('submit', async (e) => {
+        if (isSuper) return; // superuser: pas de clé
+        if (busy) { e.preventDefault(); return; }
+
+        const hidden = form.querySelector('input[name="auth_key"]') || (()=>{
+          const i=document.createElement('input'); i.type='hidden'; i.name='auth_key'; form.appendChild(i); return i;
+        })();
+
+        // Toujours empêcher la soumission classique : on passe par fetch pour capter 403
+        e.preventDefault();
+
+        // Si pas de clé présente, demande-la d'abord
+        if (!hidden.value) {
+          const firstKey = await askKey(askMsg);
+          if (!firstKey) return;
+          hidden.value = firstKey;
+        }
+
+        busy = true;
+        const submitBtn = form.querySelector('button[type="submit"],[type="submit"].btn') || null;
+        submitBtn && (submitBtn.disabled = true);
+
+        try {
+          const action = form.getAttribute('action') || window.location.href;
+          const method = (form.getAttribute('method') || 'POST').toUpperCase();
+          const fd = new FormData(form);
+
+          const headers = { 'X-Auth-Request': '1' };
+          if (hidden.value) { headers['Authorization'] = 'Key ' + hidden.value; }
+          const resp = await fetch(action, {
+            method,
+            body: fd,
+            headers,
+            redirect: 'follow'
+          });
+
+          if (resp.status === 403) {
+            // Préparer nouveau cycle de saisie en cliquant OK
+            let msg = 'Clé invalide, expirée ou insuffisante.';
+            const ct = resp.headers.get('content-type') || '';
+            if (ct.includes('application/json')) {
+              const j = await resp.json().catch(()=>null);
+              if (j && (j.message || j.detail)) msg = j.message || j.detail;
+            } else {
+              const t = await resp.text().catch(()=>null);
+              if (t && t.length < 500) msg = t;
+            }
+
+            // Réinitialiser la clé et l'état pour permettre une nouvelle tentative
+            hidden.value = '';
+            busy = false;
+            submitBtn && (submitBtn.disabled = false);
+
+            showAuthError(msg, async () => {
+              // à l’appui sur OK → rouvrir la saisie
+              const k = await askKey(askMsg);
+              if (!k) return;
+              hidden.value = k;
+              // relancer proprement
+              form.requestSubmit();
+            });
+            return;
+          }
+
+          if (resp.redirected) {
+            window.location.href = resp.url;
+            return;
+          }
+
+          const ct2 = resp.headers.get('content-type') || '';
+          if (ct2.includes('text/html')) {
+            const html = await resp.text();
+            document.open(); document.write(html); document.close();
+            return;
+          }
+          if (ct2.includes('application/json')) {
+            const j = await resp.json().catch(()=>null);
+            if (j && j.redirect) { window.location.href = j.redirect; return; }
+            if (j && j.ok) { window.location.reload(); return; }
+          }
+          window.location.reload();
+        } catch (err) {
+          console.error(err);
+          hidden.value = '';
+          busy = false;
+          submitBtn && (submitBtn.disabled = false);
+          showAuthError('Impossible de joindre le serveur. Réessayez.', async () => {
+            const k = await askKey(askMsg);
+            if (!k) return;
+            hidden.value = k;
+            form.requestSubmit();
+          });
+        }
+      }, { passive: false });
+    });
+  })();
+  </script>
+
+  <!-- Alpine pour partial messages (x-data/x-transition) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</body>
+</html>

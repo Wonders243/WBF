@@ -1,0 +1,31 @@
+{% extends "staff/base_staff.html" %}
+{% block staff_title %}Aperçu global (Superuser){% endblock %}
+{% block staff_content %}
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+  <div class="p-4 rounded-xl border">
+    <div class="text-sm text-slate-500">Utilisateurs</div>
+    <div class="text-2xl font-extrabold">{{ stats.total_users }}</div>
+  </div>
+  <div class="p-4 rounded-xl border">
+    <div class="text-sm text-slate-500">Bénévoles</div>
+    <div class="text-2xl font-extrabold">{{ stats.total_volunteers }}</div>
+  </div>
+  <div class="p-4 rounded-xl border">
+    <div class="text-sm text-slate-500">Staff</div>
+    <div class="text-2xl font-extrabold">{{ stats.total_staff }}</div>
+  </div>
+  <div class="p-4 rounded-xl border">
+    <div class="text-sm text-slate-500">Missions</div>
+    <div class="text-2xl font-extrabold">{{ stats.total_missions }}</div>
+  </div>
+  <div class="p-4 rounded-xl border">
+    <div class="text-sm text-slate-500">Inscriptions</div>
+    <div class="text-2xl font-extrabold">{{ stats.total_signups }}</div>
+  </div>
+  <div class="p-4 rounded-xl border">
+    <div class="text-sm text-slate-500">Déclarations d'heures</div>
+    <div class="text-2xl font-extrabold">{{ stats.total_hours_entries }}</div>
+  </div>
+</div>
+<p class="mt-4 text-sm text-slate-500">Dernière mise à jour: {{ stats.updated_at }}</p>
+{% endblock %}

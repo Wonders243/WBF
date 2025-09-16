@@ -1,0 +1,120 @@
+{% extends "staff/base_staff.html" %}
+{% block staff_title %}Staff — Documents{% endblock %}
+
+{% block staff_content %}
+<h1 class="text-2xl font-extrabold text-blue-700 dark:text-blue-300 mb-4">Documents</h1>
+
+<form method="get" action="" role="search"
+      class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 p-4 mb-4 grid grid-cols-1 md:grid-cols-5 gap-3">
+  <label class="sr-only" for="q">Rechercher</label>
+  <input id="q" type="search" name="q" value="{{ request.GET.q|default_if_none:'' }}" placeholder="Nom de fichier…"
+         class="px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-950
+                text-slate-900 dark:text-slate-100 placeholder-slate-400
+                focus:outline-none focus:ring-2 focus:ring-blue-600/60 md:col-span-2">
+
+  <label class="sr-only" for="status">Statut</label>
+  <select id="status" name="status"
+          class="px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-950
+                 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-600/60">
+    <option value="">Tous statuts</option>
+    <option value="submitted"    {% if request.GET.status == 'submitted' %}selected{% endif %}>Soumis</option>
+    <option value="under_review" {% if request.GET.status == 'under_review' %}selected{% endif %}>En vérification</option>
+    <option value="verified"     {% if request.GET.status == 'verified' %}selected{% endif %}>Vérifié</option>
+    <option value="rejected"     {% if request.GET.status == 'rejected' %}selected{% endif %}>Refusé</option>
+  </select>
+
+  <label class="sr-only" for="type">Type</label>
+  <select id="type" name="type"
+          class="px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-950
+                 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-600/60">
+    <option value="all"    {% if request.GET.type == 'all' or not request.GET.type %}selected{% endif %}>Tous types</option>
+    <option value="images" {% if request.GET.type == 'images' %}selected{% endif %}>Images</option>
+    <option value="pdf"    {% if request.GET.type == 'pdf' %}selected{% endif %}>PDF</option>
+  </select>
+
+  <div class="md:col-span-5">
+    <button class="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700
+                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60">
+      Filtrer
+    </button>
+    {% if request.GET %}
+      <a href="{{ request.path }}"
+         class="ml-2 text-sm text-slate-600 dark:text-slate-400 hover:underline">Réinitialiser</a>
+    {% endif %}
+  </div>
+</form>
+
+<section class="bg-white dark:bg-slate-900 rounded-xl shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 dark:bg-slate-900/60 sticky top-0 z-10">
+        <tr class="text-left text-slate-600 dark:text-slate-300">
+          <th class="p-3 font-medium">Nom</th>
+          <th class="p-3 font-medium">Utilisateur</th>
+          <th class="p-3 font-medium">Type</th>
+          <th class="p-3 font-medium">Taille</th>
+          <th class="p-3 font-medium">Statut</th>
+          <th class="p-3 font-medium text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-200 dark:divide-white/10">
+        {% for d in page_obj.object_list %}
+        <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition">
+          <td class="p-3">
+            <a href="{{ d.file_url }}" target="_blank" class="text-blue-600 dark:text-blue-300 hover:underline"
+               title="{{ d.name }}">{{ d.name }}</a>
+          </td>
+          <td class="p-3">{{ d.user_name }}</td>
+          <td class="p-3">{{ d.mime|default:"—" }}</td>
+          <td class="p-3">{{ d.size|filesizeformat|default:"—" }}</td>
+          <td class="p-3">
+            {% if d.status == 'verified' %}
+              <span class="inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 px-2.5 py-0.5
+                           dark:bg-emerald-900/30 dark:text-emerald-300">Vérifié</span>
+            {% elif d.status == 'under_review' %}
+              <span class="inline-flex items-center rounded-full bg-amber-50 text-amber-700 px-2.5 py-0.5
+                           dark:bg-amber-900/30 dark:text-amber-300">En vérification</span>
+            {% elif d.status == 'rejected' %}
+              <span class="inline-flex items-center rounded-full bg-rose-50 text-rose-700 px-2.5 py-0.5
+                           dark:bg-rose-900/30 dark:text-rose-300">Refusé</span>
+            {% else %}
+              <span class="inline-flex items-center rounded-full bg-slate-100 text-slate-700 px-2.5 py-0.5
+                           dark:bg-slate-800/70 dark:text-slate-300">Soumis</span>
+            {% endif %}
+          </td>
+          <td class="p-3 text-right space-x-2 whitespace-nowrap">
+            <form method="post" action="#" class="inline">{% csrf_token %}
+              <input type="hidden" name="id" value="{{ d.id }}">
+              <input type="hidden" name="status" value="under_review">
+              <button class="px-2 py-1 rounded-lg ring-1 ring-slate-200 dark:ring-white/10 hover:bg-slate-50 dark:hover:bg-white/5">
+                Vérifier
+              </button>
+            </form>
+            <form method="post" action="#" class="inline" onsubmit="return confirm('Valider ce document ?');">{% csrf_token %}
+              <input type="hidden" name="id" value="{{ d.id }}">
+              <input type="hidden" name="status" value="verified">
+              <button class="px-2 py-1 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+                Valider
+              </button>
+            </form>
+            <form method="post" action="#" class="inline" onsubmit="return confirm('Refuser ce document ?');">{% csrf_token %}
+              <input type="hidden" name="id" value="{{ d.id }}">
+              <input type="hidden" name="status" value="rejected">
+              <button class="px-2 py-1 rounded-lg bg-rose-600 text-white hover:bg-rose-700">
+                Refuser
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="p-6 text-center text-slate-500 dark:text-slate-400">Aucun document.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% include "staff/partials/_pagination.html" with page_obj=page_obj %}
+{% endblock %}

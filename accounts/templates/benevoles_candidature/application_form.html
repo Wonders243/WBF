@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+
+{% block title %}Devenir bénévole — BAMU WELLBEING Foundation{% endblock %}
+
+{% block content %}
+<section class="max-w-3xl mx-auto space-y-6">
+  <header>
+    <h1 class="text-2xl font-extrabold text-blue-700 dark:text-blue-300">Devenir bénévole</h1>
+    <p class="text-slate-600 dark:text-slate-400">Remplissez le formulaire et joignez les pièces demandées.</p>
+  </header>
+
+  <form method="post" enctype="multipart/form-data" class="bg-white dark:bg-slate-900 rounded-2xl shadow p-6 space-y-6">
+    {% csrf_token %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {{ form.full_name|as_crispy_field }}
+      {{ form.phone|as_crispy_field }}
+      {{ form.birth_date|as_crispy_field }}
+      {{ form.id_type|as_crispy_field }}
+      {{ form.id_number|as_crispy_field }}
+      {{ form.id_expiry|as_crispy_field }}
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {{ form.address_line1|as_crispy_field }}
+      {{ form.address_line2|as_crispy_field }}
+      {{ form.city|as_crispy_field }}
+      {{ form.state|as_crispy_field }}
+      {{ form.postal_code|as_crispy_field }}
+      {{ form.country|as_crispy_field }}
+    </div>
+
+    {{ form.emergency_contact|as_crispy_field }}
+    {{ form.motivation|as_crispy_field }}
+
+    <div class="border-t border-slate-200 dark:border-slate-800 pt-4">
+      <h2 class="font-semibold mb-2">Documents (min. 1)</h2>
+      {{ formset.management_form }}
+      {% for f in formset %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
+          {{ f.doc_type }}
+          {{ f.file }}
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="flex justify-end gap-3">
+      <a href="{% url 'core:accueil' %}" class="px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-800">Annuler</a>
+      <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Envoyer la candidature</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

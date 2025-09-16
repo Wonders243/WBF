@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Événements — BAMU WELLBEING Foundation{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto px-4 py-8">
+  <header class="mb-6">
+    <h1 class="text-3xl font-extrabold text-blue-700 dark:text-blue-300">Événements</h1>
+    <p class="text-gray-600 dark:text-slate-400">Retrouvez ici nos événements à venir et passés.</p>
+  </header>
+
+  {% with current=request.GET.when|default:"upcoming" %}
+  <!-- Filtres -->
+  <div class="mb-6 inline-flex rounded-lg border bg-white overflow-hidden dark:bg-slate-900 dark:border-white/10">
+    <a href="{% url 'core:events_list' %}?when=upcoming"
+       class="px-4 py-2 text-sm font-medium border-r border-gray-200 dark:border-white/10
+              {% if current == 'upcoming' %}bg-blue-600 text-white dark:bg-blue-500{% else %}text-gray-700 hover:bg-gray-50 dark:text-slate-200 dark:hover:bg-white/5{% endif %}">
+      À venir
+    </a>
+    <a href="{% url 'core:events_list' %}?when=past"
+       class="px-4 py-2 text-sm font-medium border-r border-gray-200 dark:border-white/10
+              {% if current == 'past' %}bg-blue-600 text-white dark:bg-blue-500{% else %}text-gray-700 hover:bg-gray-50 dark:text-slate-200 dark:hover:bg-white/5{% endif %}">
+      Passés
+    </a>
+    <a href="{% url 'core:events_list' %}?when=all"
+       class="px-4 py-2 text-sm font-medium
+              {% if current == 'all' %}bg-blue-600 text-white dark:bg-blue-500{% else %}text-gray-700 hover:bg-gray-50 dark:text-slate-200 dark:hover:bg-white/5{% endif %}">
+      Tous
+    </a>
+  </div>
+
+  {% if events %}
+    <!-- Grille cartes -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for ev in events %}
+        <article class="bg-white dark:bg-slate-900 rounded-xl shadow hover:shadow-lg transition overflow-hidden flex flex-col ring-1 ring-black/5 dark:ring-white/10">
+          <a href="{% url 'core:event_detail' ev.slug %}">
+            <div class="aspect-[16/9] bg-gray-100 dark:bg-slate-800">
+              {% if ev.image %}
+                <img src="{{ ev.image.url }}" alt="{{ ev.title }}"
+                     class="w-full h-full object-cover" loading="lazy" decoding="async">
+              {% else %}
+                <img src="{% static 'img/placeholder-16x9.png' %}" alt=""
+                     class="w-full h-full object-cover" loading="lazy" decoding="async">
+              {% endif %}
+            </div>
+          </a>
+          <div class="p-4 flex-1 flex flex-col">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-slate-100">
+              <a href="{% url 'core:event_detail' ev.slug %}" class="hover:underline">
+                {{ ev.title }}
+              </a>
+            </h2>
+            <p class="text-sm text-gray-600 dark:text-slate-400 mt-1">{{ ev.date|date:"l d F Y" }}</p>
+            <p class="text-gray-700 dark:text-slate-300 text-sm mt-3 line-clamp-3">{{ ev.description }}</p>
+            <div class="mt-4">
+              <a href="{% url 'core:event_detail' ev.slug %}"
+                 class="inline-flex items-center text-blue-600 hover:underline font-medium dark:text-blue-300 dark:hover:text-blue-200">
+                Voir le détail →
+              </a>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.paginator.num_pages > 1 %}
+      <nav class="mt-8 flex justify-center" aria-label="Pagination">
+        <ul class="inline-flex -space-x-px rounded-lg overflow-hidden border bg-white dark:bg-slate-900 dark:border-white/10">
+          {% if page_obj.has_previous %}
+            <li>
+              <a class="px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5"
+                 href="?when={{ current }}&page={{ page_obj.previous_page_number }}">Précédent</a>
+            </li>
+          {% endif %}
+          {% for p in page_obj.paginator.page_range %}
+            <li>
+              <a class="px-3 py-2 text-sm {% if p == page_obj.number %}bg-blue-600 text-white dark:bg-blue-500{% else %}hover:bg-gray-50 dark:hover:bg-white/5{% endif %}"
+                 href="?when={{ current }}&page={{ p }}">{{ p }}</a>
+            </li>
+          {% endfor %}
+          {% if page_obj.has_next %}
+            <li>
+              <a class="px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-white/5"
+                 href="?when={{ current }}&page={{ page_obj.next_page_number }}">Suivant</a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  {% else %}
+    <div class="bg-yellow-50 text-yellow-800 p-4 rounded-lg border border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-200 dark:border-yellow-900/40">
+      Aucun événement pour le moment.
+    </div>
+  {% endif %}
+  {% endwith %}
+</section>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}{{ doc.title }} — BAMU WELLBEING Foundation{% endblock %}
+{% block content %}
+<article class="max-w-3xl mx-auto px-4 py-8">
+  <header class="mb-6">
+    <h1 class="text-3xl font-extrabold text-slate-900 dark:text-slate-100">{{ doc.title }}</h1>
+    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+      Version: <strong>{{ ver.version }}</strong>
+      {% if ver.effective_date %}
+        · Entrée en vigueur: {{ ver.effective_date|date:"j F Y" }}
+      {% endif %}
+      {% if ver.status != 'published' %}
+        · <span class="inline-flex items-center px-2 py-0.5 rounded bg-amber-500 text-white text-xs">Brouillon (aperçu)</span>
+      {% endif %}
+      {% if accepted %}
+        · <span class="inline-flex items-center px-2 py-0.5 rounded bg-emerald-600 text-white text-xs">Accepté</span>
+      {% endif %}
+    </p>
+
+    <div class="mt-3 flex flex-wrap items-center gap-3">
+      <a href="{% url 'legal:history' doc.key doc.locale %}"
+         class="text-sm text-blue-600 hover:underline dark:text-blue-400">Voir l’historique</a>
+      {% if request.user.is_staff and ver.version %}
+        <a href="{% url 'legal:preview' doc.key ver.version doc.locale %}"
+           class="text-sm text-slate-600 hover:underline dark:text-slate-300" target="_blank">Aperçu d’une version</a>
+      {% endif %}
+    </div>
+  </header>
+
+  {# Zone d’acceptation #}
+  <section class="mb-6" aria-live="polite" id="acceptanceBox"
+           data-accept-url="{% url 'legal:accept' doc.key doc.locale %}">
+    {% if request.user.is_authenticated %}
+      {% if accepted %}
+        <div class="rounded-lg border border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 px-4 py-3">
+          Vous avez déjà accepté la version actuelle.
+        </div>
+      {% else %}
+        <div class="rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/30 px-4 py-3 flex items-start gap-3">
+          <div class="flex-1 text-slate-800 dark:text-slate-200">
+            <strong>Action requise&nbsp;:</strong> veuillez lire et accepter cette version.
+          </div>
+          <button type="button" id="acceptBtn"
+                  class="shrink-0 inline-flex items-center px-3 py-1.5 rounded bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:opacity-60">
+            J’accepte
+          </button>
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 px-4 py-3">
+        <a href="{% url 'account_login' %}" class="text-blue-600 hover:underline">Connectez-vous</a>
+        pour accepter cette version.
+      </div>
+    {% endif %}
+  </section>
+
+  {# Contenu rendu (HTML) #}
+  <section class="prose prose-slate dark:prose-invert max-w-none">
+    {% if ver.change_log %}
+      <aside class="rounded-md border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-900/40 p-3 mb-6">
+        <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-1">Résumé des changements</div>
+        <div class="text-sm whitespace-pre-line">{{ ver.change_log }}</div>
+      </aside>
+    {% endif %}
+    <div class="leading-relaxed">{{ ver.body_html|safe }}</div>
+  </section>
+</article>
+
+{% if request.user.is_authenticated and not accepted %}
+<script>
+(function(){
+  function getCsrfToken(){
+    const m = document.cookie.match(/(?:^|; )csrftoken=([^;]+)/); return m ? decodeURIComponent(m[1]) : '';
+  }
+  const box = document.getElementById('acceptanceBox');
+  const btn = document.getElementById('acceptBtn');
+  if(!box || !btn) return;
+  const url = box.getAttribute('data-accept-url');
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    try{
+      const res = await fetch(url, {method:'POST', headers:{'X-CSRFToken': getCsrfToken()}, credentials:'same-origin'});
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const data = await res.json();
+      box.innerHTML = '<div class="rounded-lg border border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 px-4 py-3">Merci, accepté (version '+(data.accepted_version||'')+').</div>';
+    }catch(e){
+      btn.disabled = false;
+      alert("Échec de l’acceptation. Réessayez ou rechargez la page.");
+    }
+  });
+})();
+</script>
+{% endif %}
+{% endblock %}

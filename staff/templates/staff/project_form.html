@@ -1,0 +1,101 @@
+{% extends "staff/base_staff.html" %}
+{% block staff_title %}Staff — {% if project %}Modifier{% else %}Créer{% endif %} un projet{% endblock %}
+
+{% block staff_content %}
+<section class="max-w-3xl">
+  <h1 class="text-2xl font-extrabold text-blue-700 dark:text-blue-300 mb-4">
+    {% if project %}Modifier{% else %}Créer{% endif %} un projet
+  </h1>
+
+  {# erreurs globales #}
+  {% if form.non_field_errors %}
+    <div class="mb-3 px-3 py-2 rounded border bg-red-50 text-red-800 text-sm
+                dark:bg-red-900/30 dark:text-red-200 dark:border-red-900/40">
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+  <form method="post" enctype="multipart/form-data"
+        class="auth-key-form js-auth-managed bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6 space-y-6"
+        data-auth-message="Clé requise pour créer un projet."
+        data-superuser="{{ request.user.is_superuser|yesno:'true,false' }}">
+    {% csrf_token %}
+    <input type="hidden" name="auth_key">
+
+    <label class="block">
+      <span class="text-sm text-slate-700 dark:text-slate-200">Titre</span>
+      {{ form.title }}
+      {% if form.title.errors %}<div class="text-xs text-rose-600 dark:text-rose-400 mt-1">{{ form.title.errors }}</div>{% endif %}
+    </label>
+
+    <label class="block">
+      <span class="text-sm text-slate-700 dark:text-slate-200">Description</span>
+      {{ form.description }}
+      {% if form.description.errors %}<div class="text-xs text-rose-600 dark:text-rose-400 mt-1">{{ form.description.errors }}</div>{% endif %}
+    </label>
+
+    <label class="block">
+      <span class="text-sm text-slate-700 dark:text-slate-200">Partenaires</span>
+      {{ form.partners }}
+      {% if form.partners.errors %}<div class="text-xs text-rose-600 dark:text-rose-400 mt-1">{{ form.partners.errors }}</div>{% endif %}
+    </label>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <label class="block">
+        <span class="text-sm text-slate-700 dark:text-slate-200">Image</span>
+        {{ form.image }}
+        {% if form.image.errors %}<div class="text-xs text-rose-600 dark:text-rose-400 mt-1">{{ form.image.errors }}</div>{% endif %}
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">PNG/JPG jusqu’à 5 Mo.</p>
+      </label>
+
+      <div class="block">
+        <span class="text-sm text-slate-700 dark:text-slate-200">Aperçu</span>
+        <div class="mt-1 border rounded-lg p-2 bg-gray-50 dark:bg-slate-800/50 border-slate-200 dark:border-white/10">
+          {% if project and project.image %}
+            <img id="preview" src="{{ project.image.url }}" alt="" class="max-h-40 object-contain mx-auto rounded">
+          {% else %}
+            <img id="preview" alt="" class="hidden max-h-40 object-contain mx-auto rounded">
+            <div id="noPreview" class="text-xs text-slate-500 dark:text-slate-400 text-center py-6">Aucune image</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <label class="block">
+      <span class="text-sm text-slate-700 dark:text-slate-200">Lien</span>
+      {{ form.link }}
+      {% if form.link.errors %}<div class="text-xs text-rose-600 dark:text-rose-400 mt-1">{{ form.link.errors }}</div>{% endif %}
+    </label>
+    <div class="flex items-center gap-2">
+      <button class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
+        {% if project %}Enregistrer{% else %}Créer{% endif %}
+      </button>
+      <a href="{% url 'staff:projects_list' %}"
+         class="px-4 py-2 rounded-lg ring-1 ring-slate-200 hover:bg-slate-50
+                dark:ring-white/10 dark:hover:bg-white/5">
+        Annuler
+      </a>
+    </div>
+     
+  </form>
+</section>
+
+<script>
+  // preview live de l'image choisie
+  (function(){
+    const input = document.getElementById("id_image");
+    const img   = document.getElementById("preview");
+    const none  = document.getElementById("noPreview");
+    if (!input) return;
+    input.addEventListener("change", (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      if (img) {
+        img.src = url;
+        img.classList.remove("hidden");
+      }
+      if (none) none.classList.add("hidden");
+    });
+  })();
+</script>
+{% endblock %}

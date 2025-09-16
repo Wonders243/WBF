@@ -1,0 +1,107 @@
+{% extends "staff/base_staff.html" %}
+{% load static %}
+
+{% block staff_title %}Clé créée{% endblock %}
+
+{% block staff_content %}
+<section class="max-w-3xl mx-auto space-y-6">
+  <header>
+    <h1 class="text-2xl font-extrabold text-blue-700 dark:text-blue-300">Clé d'autorisation créée</h1>
+    <p class="text-slate-600 dark:text-slate-300 text-sm mt-1">Le token complet est affiché une seule fois. Copiez-le et conservez-le en lieu sûr.</p>
+  </header>
+
+  <div class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+      <div>
+        <dt class="text-slate-500">Libellé</dt>
+        <dd class="font-medium">{{ key.label|default:'—' }}</dd>
+      </div>
+      <div>
+        <dt class="text-slate-500">Niveau</dt>
+        <dd class="font-medium">{{ key.get_level_display }}</dd>
+      </div>
+      <div class="sm:col-span-2">
+        <dt class="text-slate-500">Token (complet)</dt>
+        <dd class="mt-1">
+          <div class="flex items-center gap-2">
+            <input id="tokenField" type="text" readonly value="{{ token }}"
+                   class="w-full font-mono text-sm px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-950">
+            <button type="button" id="btnCopy" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Copier</button>
+          </div>
+        </dd>
+      </div>
+      <div>
+        <dt class="text-slate-500">Prefix</dt>
+        <dd class="font-mono text-sm">{{ key.token_prefix }}</dd>
+      </div>
+      <div>
+        <dt class="text-slate-500">Expiration</dt>
+        <dd class="font-medium">{% if key.expires_at %}{{ key.expires_at|date:'d/m/Y H:i' }}{% else %}—{% endif %}</dd>
+      </div>
+      <div class="sm:col-span-2">
+        <dt class="text-slate-500">Actions autorisées</dt>
+        <dd>
+          {% if key.allowed_actions == "*" or "*" in key.allowed_actions %}
+            <span class="px-2 py-1 text-xs rounded bg-amber-50 text-amber-700 border border-amber-200">Toutes</span>
+          {% elif key.allowed_actions %}
+            <span class="text-xs text-slate-700 dark:text-slate-200">{{ key.allowed_actions|join:", " }}</span>
+          {% else %}
+            <span class="text-xs text-slate-500 dark:text-slate-400">—</span>
+          {% endif %}
+        </dd>
+      </div>
+    </dl>
+  </div>
+
+  <form method="post" class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6 space-y-4">
+    {% csrf_token %}
+    <input type="hidden" name="send_existing" value="1">
+    <input type="hidden" name="key_id" value="{{ key.id }}">
+
+    <h2 class="text-lg font-semibold">Envoyer par email</h2>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <label class="block">
+        <span class="text-sm text-slate-700 dark:text-slate-200">Sujet</span>
+        <input type="text" name="email_subject" value="Clé d'autorisation"
+               class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-950">
+      </label>
+      <div></div>
+      <label class="block sm:col-span-2">
+        <span class="text-sm text-slate-700 dark:text-slate-200">Message</span>
+        <textarea name="email_body" rows="4" class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-950" placeholder="Bonjour,
+Voici votre clé d'autorisation (copiez-la en toute sécurité)." ></textarea>
+      </label>
+    </div>
+
+    <div>
+      <span class="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-2">Destinataires (staff)</span>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-auto p-2 rounded-lg border border-slate-200 dark:border-white/10">
+        {% for u in staff_users %}
+        <label class="inline-flex items-center gap-2">
+          <input type="checkbox" name="recipients" value="{{ u.id }}">
+          <span class="text-sm">{{ u.get_full_name|default:u.username }}{% if u.email %} <span class="text-slate-500">— {{ u.email }}</span>{% endif %}</span>
+        </label>
+        {% empty %}
+        <p class="text-sm text-slate-500">Aucun utilisateur staff disponible.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="text-right">
+      <button class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">Envoyer</button>
+    </div>
+  </form>
+
+  <p class="text-xs text-slate-500">Astuce: ne renvoyez jamais un token par email après sa création. Utilisez une nouvelle clé (rotation) si besoin.</p>
+</section>
+
+<script>
+  (function(){
+    var b=document.getElementById('btnCopy');
+    var f=document.getElementById('tokenField');
+    if(b && f){ b.addEventListener('click', function(){ f.select(); try{document.execCommand('copy'); b.textContent='Copié'; setTimeout(function(){b.textContent='Copier'}, 1500);}catch(e){} }); }
+  })();
+</script>
+{% endblock %}
+

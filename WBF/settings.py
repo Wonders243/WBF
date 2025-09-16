@@ -183,7 +183,8 @@ SOCIALACCOUNT_PROVIDERS = {
 # Support DATABASE_URL if provided (Heroku/Render). Falls back to
 # SQLite in DEBUG or manual PG* env vars in production.
 DATABASES = {}
-DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+# Prefer a standard DATABASE_URL; fallback to Clever Cloud's POSTGRESQL_ADDON_URI
+DATABASE_URL = (os.getenv("DATABASE_URL") or os.getenv("POSTGRESQL_ADDON_URI") or "").strip()
 if DATABASE_URL:
     try:
         import dj_database_url  # type: ignore

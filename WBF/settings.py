@@ -210,11 +210,10 @@ else:
         "OPTIONS": {"sslmode": "require"} if USE_HTTPS else {},
     }
 
+
 # ────────────────────────────────
 # SECURITY (prod)
 # ────────────────────────────────
-# Active par défaut en production; peut être forçé via DJANGO_USE_HTTPS
-USE_HTTPS = env_bool("DJANGO_USE_HTTPS", not DEBUG)
 
 # Redirection HTTPS et cookies sécurisés
 SECURE_SSL_REDIRECT = USE_HTTPS

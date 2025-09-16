@@ -8,7 +8,6 @@ staticfiles/
 
 # Node
 node_modules/
-static/css/dist/
 
 # IDE
 .vscode/

@@ -2,6 +2,7 @@
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+import sys
 
 # ────────────────────────────────
 # BASE / ENV
@@ -179,24 +180,40 @@ SOCIALACCOUNT_PROVIDERS = {
 # DATABASE
 # ────────────────────────────────
 
-if DEBUG:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+# Support DATABASE_URL if provided (Heroku/Render). Falls back to
+# SQLite in DEBUG or manual PG* env vars in production.
+DATABASES = {}
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+if DATABASE_URL:
+    try:
+        import dj_database_url  # type: ignore
+        DATABASES["default"] = dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+        # Enforce SSL when HTTPS is enabled
+        if USE_HTTPS:
+            DATABASES["default"].setdefault("OPTIONS", {}).update({"sslmode": "require"})
+    except Exception as e:
+        print("[settings] Failed to parse DATABASE_URL:", e, file=sys.stderr)
+        # soft-fallback below
+
+if not DATABASES.get("default"):
+    if DEBUG:
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": BASE_DIR / "db.sqlite3",
+            }
         }
-    }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.getenv("PGDATABASE"),
-            "USER": os.getenv("PGUSER"),
-            "PASSWORD": os.getenv("PGPASSWORD"),
-            "HOST": os.getenv("PGHOST", "localhost"),
-            "PORT": os.getenv("PGPORT", "5432"),
+    else:
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.postgresql",
+                "NAME": os.getenv("PGDATABASE"),
+                "USER": os.getenv("PGUSER"),
+                "PASSWORD": os.getenv("PGPASSWORD"),
+                "HOST": os.getenv("PGHOST", "localhost"),
+                "PORT": os.getenv("PGPORT", "5432"),
+            }
         }
-    }
 
 # ────────────────────────────────
 # SECURITY (prod)

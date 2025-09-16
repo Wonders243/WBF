@@ -40,3 +40,4 @@ whitenoise
 python-dotenv
 django-crispy-forms
 crispy-tailwind
+dj-database-url

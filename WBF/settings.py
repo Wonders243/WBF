@@ -187,9 +187,11 @@ SOCIALACCOUNT_PROVIDERS = {
 import dj_database_url
 
 DATABASES = {}
+# Prefer DB URL in production; in dev, only if explicitly enabled
 DB_URL = os.getenv("DATABASE_URL") or os.getenv("POSTGRESQL_ADDON_URI")
+USE_DB_URL = env_bool("DJANGO_USE_DB_URL", not DEBUG)
 
-if DB_URL:
+if USE_DB_URL and DB_URL:
     DATABASES["default"] = dj_database_url.parse(DB_URL, conn_max_age=600)
     if USE_HTTPS:
         DATABASES["default"].setdefault("OPTIONS", {}).update({"sslmode": "require"})

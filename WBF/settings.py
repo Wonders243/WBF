@@ -271,32 +271,27 @@ LOCALE_PATHS = [BASE_DIR / "locale"]
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]        # tes assets sources
 STATIC_ROOT = BASE_DIR / "staticfiles"          # collectstatic (prod)
-
-# ─────────── MEDIA via S3/Cellar ───────────
-USE_S3_MEDIA = env_bool("USE_S3_MEDIA", not DEBUG)
-
-if USE_S3_MEDIA:
-    # django-storages
+# ───────── S3 / Cellar pour les MEDIAS (uploads) ─────────
+# Active si USE_S3_MEDIA=1 dans les variables d'env
+if env_bool("USE_S3_MEDIA", False):
     INSTALLED_APPS += ["storages"]
 
-    # On lit d'abord les AWS_*, sinon on retombe sur les variables injectées par l'addon
-    AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL") or (
-        f"https://{os.getenv('CELLAR_ADDON_HOST','')}".rstrip("/")
-    )
+    # On lit d'abord les variables standard AWS_* si tu les as créées,
+    # sinon on retombe sur celles injectées par l'addon Cellar (CELLAR_ADDON_*)
     AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID") or os.getenv("CELLAR_ADDON_KEY_ID", "")
     AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY") or os.getenv("CELLAR_ADDON_KEY_SECRET", "")
-    AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME") or os.getenv("CELLAR_BUCKET_NAME", "")
+    AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL") or (
+        f"https://{os.getenv('CELLAR_ADDON_HOST', '')}"
+    )
+    AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "")  # ← ton bucket
 
-    # Spécifique aux S3 compatibles (Clever Cloud) : adressage en mode "path"
-    AWS_S3_ADDRESSING_STYLE = "path"
-    AWS_DEFAULT_ACL = None  # on gère les ACL côté bucket/objets
-    AWS_QUERYSTRING_AUTH = env_bool("AWS_QUERYSTRING_AUTH", False)  # False = URLs publiques
+    AWS_S3_SIGNATURE_VERSION = "s3v4"
+    AWS_S3_ADDRESSING_STYLE = "virtual"  # Cellar supporte le style virtual-host
+    AWS_DEFAULT_ACL = None               # pas d'ACL implicite
+    AWS_QUERYSTRING_AUTH = env_bool("AWS_QUERYSTRING_AUTH", False)  # False => URLs publiques
 
+    # Tous les FileField/ImageField iront sur S3
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-
-    # URL publique des médias
-    if AWS_S3_ENDPOINT_URL and AWS_STORAGE_BUCKET_NAME:
-        MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/"
 else:
     # Stockage local (développement)
     MEDIA_URL = "/media/"

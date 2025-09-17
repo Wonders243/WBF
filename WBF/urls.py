@@ -3,26 +3,28 @@ URL configuration for WBF project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
-from accounts.views import post_login_redirect
 from django.http import HttpResponseRedirect
+from django.views.generic import TemplateView
+from accounts.views import post_login_redirect
+
+# SEO: sitemap.xml
+from django.contrib.sitemaps.views import sitemap
+try:
+    # Utilise la fabrique proposée (core/sitemaps.py -> get_sitemaps)
+    from core.sitemaps import get_sitemaps
+    sitemaps = get_sitemaps()
+except Exception:
+    # Fallback si le module n'est pas encore créé
+    sitemaps = {}
 
 def _legacy_media_redirect(request, prefix: str, path: str):
-    """Redirect old media paths without MEDIA_URL prefix to the correct URL.
+    """
+    Redirect old media paths without MEDIA_URL prefix to the correct URL.
 
     Example: /user_documents/... -> /media/user_documents/...
              /applications/...   -> /media/applications/...
@@ -30,25 +32,39 @@ def _legacy_media_redirect(request, prefix: str, path: str):
     return HttpResponseRedirect(f"{settings.MEDIA_URL}{prefix}/{path}")
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('accounts/', include('allauth.urls')),
-    path('accounts/', include(('accounts.urls', 'benevoles'), namespace='benevoles')),
-    path('notifications/', include(('notifications.urls', 'notifications'), namespace='notifications')),
-    path('', include(('core.urls', 'core'), namespace='core')),
-    path('staff/', include(('staff.urls', 'staff'), namespace='staff')),
-    path("accounts/redirect/", post_login_redirect, name="post_login_redirect"),
-    path("", include("legal.urls", namespace="legal")),
-    path("pay/", include("payments.urls", namespace="payments")),
+    # Admin
+    path("admin/", admin.site.urls),
 
+    # Auth / comptes
+    path("accounts/", include("allauth.urls")),
+    path("accounts/", include(("accounts.urls", "benevoles"), namespace="benevoles")),
+    path("accounts/redirect/", post_login_redirect, name="post_login_redirect"),
+
+    # Apps projet
+    path("notifications/", include(("notifications.urls", "notifications"), namespace="notifications")),
+    path("", include(("core.urls", "core"), namespace="core")),
+    path("staff/", include(("staff.urls", "staff"), namespace="staff")),
+    path("", include(("legal.urls", "legal"), namespace="legal")),
+    path("pay/", include(("payments.urls", "payments"), namespace="payments")),
+
+    # SEO
+    path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="sitemap"),
+    path(
+        "robots.txt",
+        TemplateView.as_view(template_name="robots.txt", content_type="text/plain"),
+        name="robots",
+    ),
 ]
 
+# Médias (dev / optionnel en prod si SERVE_MEDIA=1)
 if getattr(settings, "SERVE_MEDIA", False):
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     # Fallback legacy prefixes accessed without /media/
     urlpatterns += [
         re_path(r"^(?P<prefix>user_documents|applications)/(?P<path>.+)$", _legacy_media_redirect),
     ]
-    
+
+# Outils dev
 if settings.DEBUG:
     urlpatterns += [
         path("__reload__/", include("django_browser_reload.urls")),

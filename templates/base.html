@@ -5,7 +5,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>{% block title %}BAMU WELLBEING Foundation{% endblock %}</title>
+  <title>{% block title %}BAMU WELLBEING Foundation — Bien-être & inclusion{% endblock %}</title>
+  {% block meta %}
+  <meta name="description" content="{% block meta_description %}Bamu Wellbeing Foundation : santé mentale, inclusion sociale et actions de terrain.{% endblock %}">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://{{ request.get_host }}{{ request.path }}">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Bamu Wellbeing Foundation">
+  <meta property="og:title" content="{% block og_title %}Bamu Wellbeing Foundation{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Nous accompagnons les personnes vulnérables par des actions concrètes de bien-être.{% endblock %}">
+  <meta property="og:url" content="https://{{ request.get_host }}{{ request.path }}">
+  <meta property="og:image" content="{% block og_image %}https://bamuwellbeing.org/static/img/og-cover.jpg{% endblock %}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  {% endblock %}
 
   <link rel="stylesheet" href="{% static 'css/dist/styles.css' %}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -438,6 +456,26 @@
   setTimeout(setHeaderOffset, 300);
   setTimeout(setHeaderOffset, 800);
 })();
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "NGO",
+  "name": "Bamu Wellbeing Foundation",
+  "url": "https://bamuwellbeing.org",
+  "logo": "https://bamuwellbeing.org/static/img/logo.png",
+  "sameAs": [
+    "https://www.instagram.com/ton_compte",
+    "https://www.facebook.com/ta_page",
+    "https://www.linkedin.com/company/ta_page"
+  ],
+  "email": "contact@bamuwellbeing.org",
+  "foundingDate": "2025",
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "RDC"
+  }
+}
 </script>
 
 

@@ -4,6 +4,7 @@ from django.urls import reverse
 from core.models import Event, Project
 
 class StaticViewSitemap(Sitemap):
+    protocol = "https"
     changefreq, priority = "monthly", 0.6
     def items(self):
         return [
@@ -25,6 +26,7 @@ class StaticViewSitemap(Sitemap):
         return reverse(item)
 
 class ProjectSitemap(Sitemap):
+    protocol = "https"
     changefreq, priority = "weekly", 0.7
     def items(self):
         return Project.objects.all()
@@ -32,6 +34,7 @@ class ProjectSitemap(Sitemap):
         return obj.get_absolute_url()
 
 class EventSitemap(Sitemap):
+    protocol = "https"
     changefreq, priority = "weekly", 0.7
     def items(self):
         return Event.objects.all()

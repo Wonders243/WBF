@@ -42,3 +42,4 @@ django-crispy-forms
 crispy-tailwind
 dj-database-url
 django-cleanup>=8.0,<9
+django-storages[boto3]

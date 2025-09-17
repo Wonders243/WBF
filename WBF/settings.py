@@ -272,8 +272,36 @@ STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]        # tes assets sources
 STATIC_ROOT = BASE_DIR / "staticfiles"          # collectstatic (prod)
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# ─────────── MEDIA via S3/Cellar ───────────
+USE_S3_MEDIA = env_bool("USE_S3_MEDIA", not DEBUG)
+
+if USE_S3_MEDIA:
+    # django-storages
+    INSTALLED_APPS += ["storages"]
+
+    # On lit d'abord les AWS_*, sinon on retombe sur les variables injectées par l'addon
+    AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL") or (
+        f"https://{os.getenv('CELLAR_ADDON_HOST','')}".rstrip("/")
+    )
+    AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID") or os.getenv("CELLAR_ADDON_KEY_ID", "")
+    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY") or os.getenv("CELLAR_ADDON_KEY_SECRET", "")
+    AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME") or os.getenv("CELLAR_BUCKET_NAME", "")
+
+    # Spécifique aux S3 compatibles (Clever Cloud) : adressage en mode "path"
+    AWS_S3_ADDRESSING_STYLE = "path"
+    AWS_DEFAULT_ACL = None  # on gère les ACL côté bucket/objets
+    AWS_QUERYSTRING_AUTH = env_bool("AWS_QUERYSTRING_AUTH", False)  # False = URLs publiques
+
+    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+
+    # URL publique des médias
+    if AWS_S3_ENDPOINT_URL and AWS_STORAGE_BUCKET_NAME:
+        MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/"
+else:
+    # Stockage local (développement)
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
+
 
 # WhiteNoise storage (optionnel)
 if env_bool("DJANGO_USE_WHITENOISE", False):

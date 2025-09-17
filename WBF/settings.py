@@ -283,7 +283,7 @@ if env_bool("USE_S3_MEDIA", False):
     AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL") or (
         f"https://{os.getenv('CELLAR_ADDON_HOST', '')}"
     )
-    AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "")  # ← ton bucket
+    AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME") or os.getenv("CELLAR_ADDON_BUCKET", "")
 
     AWS_S3_SIGNATURE_VERSION = "s3v4"
     AWS_S3_ADDRESSING_STYLE = "virtual"  # Cellar supporte le style virtual-host
@@ -296,6 +296,8 @@ else:
     # Stockage local (développement)
     MEDIA_URL = "/media/"
     MEDIA_ROOT = BASE_DIR / "media"
+    # Servir les médias via Django (utile en dev; possible provisoirement en prod)
+    SERVE_MEDIA = env_bool("DJANGO_SERVE_MEDIA", DEBUG)
 
 
 # WhiteNoise storage (optionnel)
@@ -341,3 +343,5 @@ FLW_PUBLIC_KEY = os.getenv("FLW_PUBLIC_KEY", "")
 FLW_SECRET_KEY = os.getenv("FLW_SECRET_KEY", "")
 FLW_WEBHOOK_SECRET = os.getenv("FLW_WEBHOOK_SECRET", "")  # 'verif-hash' header sur webhook
 FLW_SANDBOX = env_bool("FLW_SANDBOX", True)
+
+

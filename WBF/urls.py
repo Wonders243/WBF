@@ -15,10 +15,19 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from accounts.views import post_login_redirect
+from django.http import HttpResponseRedirect
+
+def _legacy_media_redirect(request, prefix: str, path: str):
+    """Redirect old media paths without MEDIA_URL prefix to the correct URL.
+
+    Example: /user_documents/... -> /media/user_documents/...
+             /applications/...   -> /media/applications/...
+    """
+    return HttpResponseRedirect(f"{settings.MEDIA_URL}{prefix}/{path}")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -33,8 +42,12 @@ urlpatterns = [
 
 ]
 
-if settings.DEBUG:
+if getattr(settings, "SERVE_MEDIA", False):
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Fallback legacy prefixes accessed without /media/
+    urlpatterns += [
+        re_path(r"^(?P<prefix>user_documents|applications)/(?P<path>.+)$", _legacy_media_redirect),
+    ]
     
 if settings.DEBUG:
     urlpatterns += [

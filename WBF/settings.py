@@ -122,6 +122,9 @@ SECURE_HSTS_PRELOAD = False  # passe à True plus tard si tu veux le preload
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
+
+INSTALLED_APPS += ["django.contrib.sitemaps"]
+
 # ────────────────────────────────
 INSTALLED_APPS += ["crispy_forms", "crispy_tailwind"]
 CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"

@@ -216,6 +216,17 @@ else:
         "PORT": os.getenv("POSTGRESQL_ADDON_PORT", "5432"),
         "OPTIONS": {"sslmode": "require"} if USE_HTTPS else {},
     }
+DATABASES["default"]["CONN_MAX_AGE"] = int(os.getenv("DB_CONN_MAX_AGE", "0"))  # 0 = ferme après chaque requête
+DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
+
+# Utiliser des sessions en cookies signés (pas de hits DB pour les sessions)
+SESSION_ENGINE = os.getenv(
+    "DJANGO_SESSION_ENGINE",
+    "django.contrib.sessions.backends.signed_cookies"
+)
+SESSION_COOKIE_AGE = int(os.getenv("DJANGO_SESSION_COOKIE_AGE", "1209600"))  # 14 jours
+SESSION_SAVE_EVERY_REQUEST = False  # cookie pas regénéré à chaque hit
+
 
 # ────────────────────────────────
 # SÉCURITÉ (prod)

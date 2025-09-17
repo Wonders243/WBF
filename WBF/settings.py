@@ -166,8 +166,8 @@ ACCOUNT_LOGOUT_REDIRECT_URL = "/"
 # Allauth moderne
 ACCOUNT_LOGIN_METHODS = {"username", "email"}   # login par email OU username
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
-ACCOUNT_EMAIL_VERIFICATION = "none"             # dev: pas de vérif email
-##ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+#ACCOUNT_EMAIL_VERIFICATION = "none"             # dev: pas de vérif email
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 # Providers (Google) — ⚠️ mets tes secrets dans l’env
 SOCIALACCOUNT_PROVIDERS = {
     "google": {

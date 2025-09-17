@@ -111,6 +111,16 @@ if env_bool("DJANGO_USE_WHITENOISE", False):
     if "whitenoise.middleware.WhiteNoiseMiddleware" not in MIDDLEWARE:
         MIDDLEWARE.insert(idx + 1, "whitenoise.middleware.WhiteNoiseMiddleware")
 
+ALLOWED_HOSTS = ["bamuwellbeing.org", "www.bamuwellbeing.org"]
+CSRF_TRUSTED_ORIGINS = ["https://bamuwellbeing.org", "https://www.bamuwellbeing.org"]
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = True
+# HSTS (verrouille le HTTPS après 1 an)
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = False  # passe à True plus tard si tu veux le preload
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 # ────────────────────────────────
 INSTALLED_APPS += ["crispy_forms", "crispy_tailwind"]

@@ -44,7 +44,7 @@ def create_auth_key(request):
         html = render_to_string("security/_email_key.html", ctx)
         from django.conf import settings as dj_settings
         from_email = (
-            getattr(dj_settings, "DEFAULT_FROM_EMAIL", None) or "no-reply@example.com"
+            getattr(dj_settings, "DEFAULT_FROM_EMAIL", None) or "ne_pas_repondre@bamuwellbeing.org"
         )
         if recipients:
             try:
@@ -197,7 +197,7 @@ def key_created(request, key_id):
         from django.conf import settings as dj_settings
 
         from_email = (
-            getattr(dj_settings, "DEFAULT_FROM_EMAIL", None) or "no-reply@example.com"
+            getattr(dj_settings, "DEFAULT_FROM_EMAIL", None) or "ne_pas_repondre@bamuwellbeing.org"
         )
         if recipients:
             try:

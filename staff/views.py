@@ -99,7 +99,7 @@ def staff_team_send_invite(request, slug):
     body_txt = render_to_string("emails/team_member_invite.txt", context)
     body_html = render_to_string("emails/team_member_invite.html", context)
 
-    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None) or "no-reply@example.com"
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None) or "ne_pas_repondre@bamuwellbeing.org"
     send_mail(subject, body_txt, from_email, [member.user.email], html_message=body_html)
 
     messages.success(request, f"Invitation envoyée à {member.user.email} ✅")
@@ -1382,7 +1382,7 @@ def staff_volunteer_send_team_invite(request, volunteer_id: int):
     body_txt = render_to_string("staff/team/team_member_invite.txt", ctx)
     body_html = render_to_string("staff/team/team_member_invite.html", ctx)
 
-    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None) or "no-reply@example.com"
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", None) or "ne_pas_repondre@bamuwellbeing.org"
     try:
         send_mail(subject, body_txt, from_email, [target_email], html_message=body_html)
         messages.success(request, f"Invitation envoyée à {target_email} ✅")
@@ -2097,7 +2097,7 @@ def team_invite_picker(request):
             body_txt = render_to_string("staff/team/team_member_invite.txt", ctx)
             body_html = render_to_string("staff/team/team_member_invite.html", ctx)
 
-            from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@example.com")
+            from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "ne_pas_repondre@bamuwellbeing.org")
             to_email = v.email or v.user.email
             if to_email:
                 try:
@@ -2184,7 +2184,7 @@ def team_invite_resend(request, invite_id: int):
     body_txt = render_to_string("staff/team/team_member_invite.txt", ctx)
     body_html = render_to_string("staff/team/team_member_invite.html", ctx)
 
-    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@example.com")
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "ne_pas_repondre@bamuwellbeing.org")
     to_email = member.email or (getattr(member.user, "email", None) if member.user else None)
     if to_email:
         try:

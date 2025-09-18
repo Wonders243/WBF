@@ -290,31 +290,37 @@ if _use_whitenoise:
 # ───────── S3 / Cellar pour les MEDIAS (uploads) ─────────
 USE_S3_MEDIA = env_bool("USE_S3_MEDIA", False)
 
+# ───────── S3 / Cellar pour les MEDIAS (uploads) ─────────
+USE_S3_MEDIA = env_bool("USE_S3_MEDIA", False)
+
 if USE_S3_MEDIA:
     INSTALLED_APPS += ["storages"]
 
-    # Identifiants : on privilégie les variables standard AWS_* ;
-    # sinon on retombe sur celles injectées par l'add-on Cellar.
+    # Identifiants : on privilégie AWS_* puis on retombe sur CELLAR_*
     AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID") or os.getenv("CELLAR_ADDON_KEY_ID", "")
     AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY") or os.getenv("CELLAR_ADDON_KEY_SECRET", "")
     AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL") or f"https://{os.getenv('CELLAR_ADDON_HOST', '').strip()}"
     AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME") or os.getenv("CELLAR_ADDON_BUCKET", "")
 
-    # Options S3
+    # Options S3 communes
     AWS_S3_SIGNATURE_VERSION = "s3v4"
-    AWS_S3_ADDRESSING_STYLE = "virtual"  # bucket.host
-    AWS_DEFAULT_ACL = None               # pas d'ACL implicite
-    AWS_S3_FILE_OVERWRITE = False        # ne pas écraser si même nom
-    AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "max-age=31536000, public"}
+    AWS_S3_ADDRESSING_STYLE = "virtual"          # URLs de type <bucket>.<host>
+    AWS_DEFAULT_ACL = None                       # pas d'ACL implicite
+    AWS_S3_FILE_OVERWRITE = False                # n'écrase pas si même nom
 
-    # Public vs privé : si True -> URLs signées (privé), sinon -> URLs publiques jolies
-    AWS_QUERYSTRING_AUTH = env_bool("AWS_QUERYSTRING_AUTH", False)
+    # Public vs Privé (URLs signées)
+    AWS_QUERYSTRING_AUTH = env_bool("AWS_QUERYSTRING_AUTH", False)   # True => privé (signé)
+    AWS_QUERYSTRING_EXPIRE = int(os.getenv("AWS_QUERYSTRING_EXPIRE", "300"))  # 5 min par défaut
 
     if AWS_QUERYSTRING_AUTH:
-        # PRIVÉ : URLs signées via endpoint/bucket (pas de domaine custom)
+        # PRIVÉ : lien signé + cache court
+        AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "private, max-age=60"}
+        # Pas de domaine custom en privé, on pointe sur endpoint/bucket
         MEDIA_URL = f"{AWS_S3_ENDPOINT_URL.rstrip('/')}/{AWS_STORAGE_BUCKET_NAME}/"
+        # (ne définis PAS AWS_S3_CUSTOM_DOMAIN en mode privé)
     else:
-        # PUBLIC : domaine custom propre <bucket>.<cellar-host>
+        # PUBLIC : lien propre + cache long
+        AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "public, max-age=31536000"}
         AWS_S3_CUSTOM_DOMAIN = os.getenv("AWS_S3_CUSTOM_DOMAIN") or \
             f"{AWS_STORAGE_BUCKET_NAME}.{os.getenv('CELLAR_ADDON_HOST', '').strip()}"
         MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
@@ -355,7 +361,7 @@ if EMAIL_USE_SSL and EMAIL_USE_TLS:
 EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "20"))
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "no-reply@bamuwellbeing.org")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "ne-pas'repondre@bamuwellbeing.org")
 SERVER_EMAIL = os.getenv("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
 
 # En dev, pas d'envoi réel (les mails s'affichent en console)

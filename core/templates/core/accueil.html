@@ -4,274 +4,267 @@
 
 {% is_volunteer as user_is_volunteer %}
 
-{% block title %}Accueil — BAMU WELLBEING Foundation{% endblock %}
+{% block title %}Accueil – — BAMU WELLBEING Foundation{% endblock %}
 
 {% block content %}
-
-{# ───────────────────────── HERO mobile-first ───────────────────────── #}
+  <!-- HERO -->
+ {# === HERO (contraste renforcé) === #}
 <section id="hero" class="relative overflow-hidden">
-  {# Image: en flux normal sur mobile, en arrière-plan dès md+ #}
-  <picture class="block md:absolute md:inset-0">
+  <picture>
     <source media="(min-width:1024px)" srcset="{% static 'img/cover-hero-21x9-textsafe.webp' %}">
     <source media="(min-width:640px)"  srcset="{% static 'img/cover-hero-16x9.webp' %}">
     <img
       src="{% static 'img/cover-mobile-4x5.webp' %}"
       alt="Responsable de la fondation souriante entourée d’enfants — mission psycho-sociale"
-      class="w-full h-[48vh] sm:h-[56vh] md:h-full object-cover object-[60%_50%]"
+      class="w-full h-[58vh] sm:h-[64vh] lg:h-[76vh] object-cover object-[60%_50%]"
       loading="eager" fetchpriority="high" decoding="async">
   </picture>
 
-  {# Voiles/gradients — actifs seulement dès md+ (carte lisible sur mobile) #}
-  <div aria-hidden="true" class="hidden md:block md:absolute md:inset-0">
-    <div class="absolute inset-0 bg-black/25 mix-blend-multiply"></div>
-    <div class="absolute inset-y-0 left-0 right-[40%] bg-gradient-to-r from-black/50 via-black/40 to-transparent"></div>
+  {# VOILE GLOBAL + DÉGRADÉ À GAUCHE (garantit la lisibilité) #}
+  <div aria-hidden="true" class="absolute inset-0">
+    <!-- voile multiplicatif (assombrit toute l'image) -->
+    <div class="absolute inset-0 bg-black/35 md:bg-black/25 mix-blend-multiply"></div>
+    <!-- bande gauche pour le texte -->
+    <div class="absolute inset-y-0 left-0 right-[35%] lg:right-[45%] 
+                bg-gradient-to-r from-black/20 via-black/45 to-transparent"></div>
   </div>
 
-  {# Texte: carte indépendante (mobile) → cartouche translucide overlay (md+) #}
-  <div class="relative z-10">
-    <div class="container mx-auto px-4">
-      <div class="py-6 sm:py-8 md:py-24 lg:py-32 max-w-3xl">
-        <div class="rounded-2xl ring-1 p-5 sm:p-6 transition
-                    bg-white/95 text-slate-900 ring-black/5 shadow-md
-                    md:bg-black/35 md:text-white md:ring-white/10 md:backdrop-blur-sm
-                    js-reveal js-delay-0">
-          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight drop-shadow-md">
+  <div class="absolute inset-0">
+    <div class="container mx-auto h-full px-4">
+      <div class="h-full max-w-3xl flex flex-col justify-center">
+        {# CARTOUCHE TRANSLUCIDE (blur + bord) #}
+        <div class="bg-black/35 backdrop-blur-[2px] ring-1 ring-white/10 rounded-2xl p-5 sm:p-6">
+          <h1 class="text-white text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight
+                     drop-shadow-lg">
             Bamu Wellbeing Foundation
           </h1>
-          <h2 class="mt-3 text-xl sm:text-2xl font-bold text-sky-700 md:text-white/95 drop-shadow js-reveal js-delay-1">
+          <h2 class="mt-3 text-xl sm:text-2xl font-bold text-white/95 drop-shadow">
             Ton bien-être, notre priorité
           </h2>
-          <p class="mt-5 text-base sm:text-lg md:text-xl text-slate-700 md:text-white/90 js-reveal js-delay-2">
+          <p class="mt-5 text-base sm:text-lg md:text-xl text-white/90">
             Lancée récemment et portée par des experts en santé mentale et inclusion sociale,
             la Bamu Wellbeing Foundation améliore le bien-être des personnes vulnérables.
             Transparence, expertise et impact mesurable guident nos actions.
           </p>
 
-          <div class="mt-7 flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center js-reveal js-delay-3">
+          <div class="mt-7 flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center">
             <a href="{% url 'core:nous' %}"
-               class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 text-white font-semibold px-6 py-3 shadow hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
+               class="inline-flex items-center justify-center gap-2 rounded-xl bg-white
+                      text-blue-700 font-semibold px-6 py-3 shadow hover:bg-blue-50
+                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
               Qui sommes-nous ?
             </a>
             <a href="#actions"
-               class="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 font-semibold
-                      text-blue-700 md:text-white ring-1 ring-blue-200/70 md:ring-white/40 hover:bg-blue-50 md:hover:bg-white/10">
+               class="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3
+                      font-semibold text-white ring-1 ring-white/40 hover:bg-white/10">
               Nos actions
             </a>
           </div>
         </div>
-
-        {# Espace respirant sous la carte sur mobile #}
-        <div class="h-4 sm:h-6 md:hidden"></div>
       </div>
     </div>
   </div>
 </section>
-
 {% include "partials/news_carousel.html" %}
 
-{# ─────────── ÉVÉNEMENTS + ENGAGEMENTS (espacements & animations) ─────────── #}
-<section class="py-14 md:py-16 bg-slate-50 dark:bg-slate-950">
-  <div class="container mx-auto px-4">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
 
-      {# ◀── Carrousel d’événements ──▶ #}
-      <div class="relative bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden js-reveal">
-        <div class="flex items-baseline justify-between gap-4 mb-4">
-          <h2 class="text-2xl font-semibold text-blue-700 dark:text-blue-300">Événements à venir</h2>
-          {% if upcoming_events %}
-          <span class="inline-flex items-center rounded-full bg-blue-50 text-blue-700 px-2.5 py-1 text-xs font-semibold dark:bg-blue-950/50 dark:text-blue-300">
-            {{ upcoming_events|length }} évènements
-          </span>
+  <!-- ÉVÉNEMENTS + ENGAGEMENTS -->
+  <section class="py-12 bg-slate-50 dark:bg-slate-950">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+
+        <!-- ◀── Carrousel d’événements ──▶ -->
+        <div class="relative bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
+          <div class="flex items-baseline justify-between gap-4 mb-4">
+            <h2 class="text-2xl font-semibold text-blue-700 dark:text-blue-300">Événements à venir</h2>
+            {% if upcoming_events %}
+              <span class="inline-flex items-center rounded-full bg-blue-50 text-blue-700 px-2.5 py-1 text-xs font-semibold dark:bg-blue-950/50 dark:text-blue-300">
+                {{ upcoming_events|length }} évènements
+              </span>
+            {% endif %}
+          </div>
+
+          <!-- Carrousel -->
+          <div id="events-carousel"
+               class="relative overflow-hidden h-[62vw] sm:h-[50vw] md:h-80 lg:h-96"
+               role="region"
+               aria-roledescription="carousel"
+               aria-label="Carrousel des événements à venir">
+            <!-- SR status -->
+            <p id="ec-status" class="sr-only" aria-live="polite" aria-atomic="true"></p>
+
+            {% for ev in upcoming_events %}
+              <div class="ec-slide absolute inset-0 transition-opacity duration-700 ease-in-out flex flex-col {% if forloop.first %}opacity-100{% else %}opacity-0{% endif %}"
+                   role="group" aria-roledescription="slide" aria-label="{{ forloop.counter }} / {{ upcoming_events|length }}">
+                <!-- Image centrée -->
+                <a href="{% url 'core:event_detail' ev.slug %}" class="w-full h-full flex items-center justify-center bg-slate-50 dark:bg-slate-800/50">
+                  {% if ev.image %}
+                    <img
+                      src="{{ ev.image.url }}"
+                      alt="{{ ev.title }}"
+                      class="max-h-full max-w-full object-contain"
+                      {% if forloop.first %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}
+                      decoding="async">
+                  {% else %}
+                    <div class="text-slate-400 text-sm">Aucune image</div>
+                  {% endif %}
+                </a>
+
+                <!-- Bandeau info -->
+                <div class="pointer-events-none absolute bottom-0 left-0 right-0">
+                  <div class="h-16 bg-gradient-to-t from-white via-white/95 to-white/60 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-900/60"></div>
+                  <div class="bg-white/90 dark:bg-slate-900/80 backdrop-blur px-4 py-3 ring-1 ring-black/5 dark:ring-white/10">
+                    <h3 class="text-lg md:text-xl font-semibold text-blue-700 dark:text-blue-300 leading-tight">
+                      {{ ev.title }}
+                    </h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2">
+                      <span class="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5">📅 {{ ev.date|date:"d M Y" }}</span>
+                      {% if ev.lieu %}<span class="hidden sm:inline">• {{ ev.lieu }}</span>{% endif %}
+                    </p>
+                    {% if ev.description %}
+                      <p class="text-slate-700 dark:text-slate-300 text-sm mt-1 line-clamp-3">
+                        {{ ev.description }}
+                      </p>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            {% empty %}
+              <div class="flex items-center justify-center h-full text-slate-500 dark:text-slate-400">
+                Aucun événement à venir pour le moment.
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Flèches -->
+          <div class="pointer-events-none absolute inset-0 flex items-center justify-between px-2">
+            <button id="events-prev"
+                    class="pointer-events-auto bg-white/80 dark:bg-slate-900/70 hover:bg-white dark:hover:bg-slate-800 p-2 rounded-full shadow ring-1 ring-black/10 dark:ring-white/10"
+                    aria-controls="events-carousel" aria-label="Diapo précédente">‹</button>
+            <button id="events-next"
+                    class="pointer-events-auto bg-white/80 dark:bg-slate-900/70 hover:bg-white dark:hover:bg-slate-800 p-2 rounded-full shadow ring-1 ring-black/10 dark:ring-white/10"
+                    aria-controls="events-carousel" aria-label="Diapo suivante">›</button>
+          </div>
+
+          <!-- Points -->
+          {% if upcoming_events|length > 1 %}
+          <div class="mt-4 flex items-center justify-center gap-2">
+            {% for ev in upcoming_events %}
+              <button type="button"
+                      class="ec-dot h-2.5 w-2.5 rounded-full bg-slate-300 dark:bg-slate-600 aria-selected:bg-blue-600 aria-selected:dark:bg-blue-400"
+                      role="tab"
+                      aria-controls="events-carousel"
+                      aria-label="Aller à la diapo {{ forloop.counter }}"
+                      aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+                      data-index="{{ forloop.counter0 }}"></button>
+            {% endfor %}
+          </div>
           {% endif %}
         </div>
 
-        <div id="events-carousel"
-             class="relative overflow-hidden h-64 sm:h-72 md:h-80 lg:h-96"
-             role="region" aria-roledescription="carousel" aria-label="Carrousel des événements à venir">
-          <p id="ec-status" class="sr-only" aria-live="polite" aria-atomic="true"></p>
-
-          {% for ev in upcoming_events %}
-            <div class="ec-slide absolute inset-0 transition-opacity duration-700 ease-in-out flex flex-col {% if forloop.first %}opacity-100{% else %}opacity-0{% endif %}"
-                 role="group" aria-roledescription="slide" aria-label="{{ forloop.counter }} / {{ upcoming_events|length }}">
-              <a href="{% url 'core:event_detail' ev.slug %}" class="w-full h-full flex items-center justify-center bg-slate-50 dark:bg-slate-800/50">
-                {% if ev.image %}
-                  <img
-                    src="{{ ev.image.url }}"
-                    alt="{{ ev.title }}"
-                    class="max-h-full max-w-full object-contain"
-                    {% if forloop.first %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}
-                    decoding="async">
-                {% else %}
-                  <div class="text-slate-400 text-sm">Aucune image</div>
-                {% endif %}
-              </a>
-
-              <div class="pointer-events-none absolute bottom-0 left-0 right-0">
-                <div class="h-16 bg-gradient-to-t from-white via-white/95 to-white/60 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-900/60"></div>
-                <div class="bg-white/90 dark:bg-slate-900/80 backdrop-blur px-4 py-3 ring-1 ring-black/5 dark:ring-white/10">
-                  <h3 class="text-lg md:text-xl font-semibold text-blue-700 dark:text-blue-300 leading-tight">
-                    {{ ev.title }}
-                  </h3>
-                  <p class="text-slate-600 dark:text-slate-400 text-sm flex items-center gap-2">
-                    <span class="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5">📅 {{ ev.date|date:"d M Y" }}</span>
-                    {% if ev.lieu %}<span class="hidden sm:inline">• {{ ev.lieu }}</span>{% endif %}
-                  </p>
-                  {% if ev.description %}
-                  <p class="text-slate-700 dark:text-slate-300 text-sm mt-1 line-clamp-3">
-                    {{ ev.description }}
-                  </p>
-                  {% endif %}
-                </div>
-              </div>
-            </div>
-          {% empty %}
-            <div class="flex items-center justify-center h-full text-slate-500 dark:text-slate-400">
-              Aucun événement à venir pour le moment.
-            </div>
-          {% endfor %}
+        <!-- ▶── Nos Engagements ──▶ -->
+        <div class="grid grid-cols-1 gap-6">
+          <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 text-center transition hover:shadow-lg">
+            <h3 class="text-2xl font-semibold text-blue-700 dark:text-blue-300 mb-2">Transparence</h3>
+            <p class="text-slate-600 dark:text-slate-300">Gestion claire et rapports annuels publics pour un suivi en toute confiance.</p>
+          </div>
+          <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 text-center transition hover:shadow-lg">
+            <h3 class="text-2xl font-semibold text-blue-700 dark:text-blue-300 mb-2">Expertise</h3>
+            <p class="text-slate-600 dark:text-slate-300">Équipe pluridisciplinaire (psychologues, travailleurs sociaux…) reconnue pour son professionnalisme.</p>
+          </div>
+          <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 text-center transition hover:shadow-lg">
+            <h3 class="text-2xl font-semibold text-blue-700 dark:text-blue-300 mb-2">Impact</h3>
+            <p class="text-slate-600 dark:text-slate-300">Plus de 10&nbsp;000 personnes accompagnées chaque année grâce à votre soutien.</p>
+          </div>
         </div>
 
-        <div class="pointer-events-none absolute inset-0 flex items-center justify-between px-2">
-          <button id="events-prev"
-                  class="pointer-events-auto bg-white/80 dark:bg-slate-900/70 hover:bg-white dark:hover:bg-slate-800 p-2 rounded-full shadow ring-1 ring-black/10 dark:ring-white/10"
-                  aria-controls="events-carousel" aria-label="Diapo précédente">‹</button>
-          <button id="events-next"
-                  class="pointer-events-auto bg-white/80 dark:bg-slate-900/70 hover:bg-white dark:hover:bg-slate-800 p-2 rounded-full shadow ring-1 ring-black/10 dark:ring-white/10"
-                  aria-controls="events-carousel" aria-label="Diapo suivante">›</button>
-        </div>
-
-        {% if upcoming_events|length > 1 %}
-        <div class="mt-4 flex items-center justify-center gap-2">
-          {% for ev in upcoming_events %}
-          <button type="button"
-                  class="ec-dot h-2.5 w-2.5 rounded-full bg-slate-300 dark:bg-slate-600 aria-selected:bg-blue-600 aria-selected:dark:bg-blue-400"
-                  role="tab"
-                  aria-controls="events-carousel"
-                  aria-label="Aller à la diapo {{ forloop.counter }}"
-                  aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
-                  data-index="{{ forloop.counter0 }}"></button>
-          {% endfor %}
-        </div>
-        {% endif %}
       </div>
-
-      {# ▶── Nos Engagements ──▶ #}
-      <div class="grid grid-cols-1 gap-6">
-        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 text-center transition hover:shadow-lg js-reveal js-delay-0">
-          <h3 class="text-2xl font-semibold text-blue-700 dark:text-blue-300 mb-2">Transparence</h3>
-          <p class="text-slate-600 dark:text-slate-300">Gestion claire et rapports annuels publics pour un suivi en toute confiance.</p>
-        </div>
-        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 text-center transition hover:shadow-lg js-reveal js-delay-1">
-          <h3 class="text-2xl font-semibold text-blue-700 dark:text-blue-300 mb-2">Expertise</h3>
-          <p class="text-slate-600 dark:text-slate-300">Équipe pluridisciplinaire (psychologues, travailleurs sociaux…) reconnue pour son professionnalisme.</p>
-        </div>
-        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 text-center transition hover:shadow-lg js-reveal js-delay-2">
-          <h3 class="text-2xl font-semibold text-blue-700 dark:text-blue-300 mb-2">Impact</h3>
-          <p class="text-slate-600 dark:text-slate-300">Plus de 10&nbsp;000 personnes accompagnées chaque année grâce à votre soutien.</p>
-        </div>
-      </div>
-
     </div>
-  </div>
 
-  {# Carrousel JS (inchangé) + micro-animations #}
-  <script>
-    // ───────── Carrousel Événements
-    document.addEventListener('DOMContentLoaded', () => {
-      const root = document.getElementById('events-carousel');
-      const slides = root ? Array.from(root.querySelectorAll('.ec-slide')) : [];
-      const dots = Array.from(document.querySelectorAll('.ec-dot'));
-      const total = slides.length;
-      const status = document.getElementById('ec-status');
-      let current = 0, timer = null, paused = false;
+    <!-- Script carrousel (a11y + reduced motion + points) -->
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const root = document.getElementById('events-carousel');
+        const slides = root ? Array.from(root.querySelectorAll('.ec-slide')) : [];
+        const dots = Array.from(document.querySelectorAll('.ec-dot'));
+        const total = slides.length;
+        const status = document.getElementById('ec-status');
+        let current = 0, timer = null, paused = false;
 
-      const btnNext = document.getElementById('events-next');
-      const btnPrev = document.getElementById('events-prev');
+        const btnNext = document.getElementById('events-next');
+        const btnPrev = document.getElementById('events-prev');
 
-      function announce() { if (status) status.textContent = `Diapo ${current + 1} sur ${total}`; }
-      function reflectDots() { dots.forEach((d,i) => d.setAttribute('aria-selected', String(i === current))); }
-      function show(i) {
-        if (!total) return;
-        slides.forEach((s, idx) => { s.style.opacity = (idx === i) ? '1' : '0'; s.setAttribute('aria-hidden', String(idx !== i)); });
-        current = i; reflectDots(); announce();
-      }
-      function next() { show((current + 1) % total); }
-      function prev() { show((current - 1 + total) % total); }
-
-      const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-      function start() { if (prefersReduced || total <= 1) return; stop(); timer = setInterval(next, 5000); }
-      function stop() { if (timer) { clearInterval(timer); timer = null; } }
-
-      if (total > 0) show(0);
-      if (total > 1) {
-        btnNext?.addEventListener('click', () => { next(); start(); });
-        btnPrev?.addEventListener('click', () => { prev(); start(); });
-
-        dots.forEach(d => d.addEventListener('click', () => {
-          const i = Number(d.getAttribute('data-index')) || 0;
-          show(i); start();
-        }));
-
-        [btnNext, btnPrev].forEach(b=>{
-          b?.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight') { next(); start(); }
-            if (e.key === 'ArrowLeft')  { prev(); start(); }
-            if (e.key === 'Home') { show(0); start(); }
-            if (e.key === 'End')  { show(total - 1); start(); }
+        function announce() {
+          if (status) status.textContent = `Diapo ${current + 1} sur ${total}`;
+        }
+        function reflectDots() {
+          dots.forEach((d,i) => d.setAttribute('aria-selected', String(i === current)));
+        }
+        function show(i) {
+          if (!total) return;
+          slides.forEach((s, idx) => {
+            s.style.opacity = (idx === i) ? '1' : '0';
+            s.setAttribute('aria-hidden', String(idx !== i));
           });
-        });
+          current = i;
+          reflectDots();
+          announce();
+        }
+        function next() { show((current + 1) % total); }
+        function prev() { show((current - 1 + total) % total); }
 
-        root?.addEventListener('mouseenter', () => { paused = true; stop(); });
-        root?.addEventListener('mouseleave', () => { paused = false; start(); });
-        document.addEventListener('visibilitychange', () => {
-          if (document.hidden) stop();
-          else if (!paused) start();
-        });
+        const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-        start();
-      } else {
-        btnNext?.classList.add('hidden');
-        btnPrev?.classList.add('hidden');
-      }
-    });
+        function start() {
+          if (prefersReduced || total <= 1) return;
+          stop();
+          timer = setInterval(next, 5000);
+        }
+        function stop() { if (timer) { clearInterval(timer); timer = null; } }
 
-    // ───────── Micro-animations “révélation”
-    (function(){
-      const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-      if (prefersReduced) return;
+        if (total > 0) { show(0); }
+        if (total > 1) {
+          btnNext?.addEventListener('click', () => { next(); start(); });
+          btnPrev?.addEventListener('click', () => { prev(); start(); });
 
-      const els = document.querySelectorAll('.js-reveal');
-      els.forEach((el) => {
-        el.style.transition = 'opacity 600ms ease, transform 600ms ease';
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(10px)';
+          // Points click
+          dots.forEach(d => d.addEventListener('click', () => {
+            const i = Number(d.getAttribute('data-index')) || 0;
+            show(i); start();
+          }));
+
+          // Clavier
+          [btnNext, btnPrev].forEach(b=>{
+            b?.addEventListener('keydown', (e) => {
+              if (e.key === 'ArrowRight') { next(); start(); }
+              if (e.key === 'ArrowLeft')  { prev(); start(); }
+              if (e.key === 'Home') { show(0); start(); }
+              if (e.key === 'End')  { show(total - 1); start(); }
+            });
+          });
+
+          // Pause au survol & perte de focus onglet
+          root?.addEventListener('mouseenter', () => { paused = true; stop(); });
+          root?.addEventListener('mouseleave', () => { paused = false; start(); });
+          document.addEventListener('visibilitychange', () => {
+            if (document.hidden) stop();
+            else if (!paused) start();
+          });
+
+          start();
+        } else {
+          btnNext?.classList.add('hidden');
+          btnPrev?.classList.add('hidden');
+        }
       });
+    </script>
+  </section>
 
-      const io = new IntersectionObserver((entries, obs) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const el = entry.target;
-            const d = Array.from(el.classList).find(c => c.startsWith('js-delay-'));
-            const delay = d ? Number(d.split('-').pop()) * 120 : 0;
-            setTimeout(() => {
-              el.style.opacity = '1';
-              el.style.transform = 'translateY(0px)';
-            }, delay);
-            obs.unobserve(el);
-          }
-        });
-      }, { threshold: 0.12 });
-
-      els.forEach(el => io.observe(el));
-    })();
-  </script>
-</section>
-
-{# ───────────────────────── Actions clés ───────────────────────── #}
-<section id="actions" class="py-14 md:py-16 bg-white dark:bg-slate-900">
+  <!-- Actions clés -->
+<section id="actions" class="py-12 bg-white dark:bg-slate-900">
   <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-
-    <div class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 hover:shadow-xl transition flex flex-col js-reveal js-delay-0">
+    {# 1) Projets #}
+    <div class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 hover:shadow-xl transition flex flex-col">
       <div class="h-12 w-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mb-4">📦</div>
       <h3 class="text-xl font-semibold text-slate-900 dark:text-white">Projets</h3>
       <p class="mt-2 text-slate-600 dark:text-slate-300">Programmes d’accompagnement, ateliers bien-être, formations…</p>
@@ -280,7 +273,8 @@
       </a>
     </div>
 
-    <div class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 hover:shadow-xl transition flex flex-col js-reveal js-delay-1">
+    {# 2) Événements #}
+    <div class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 hover:shadow-xl transition flex flex-col">
       <div class="h-12 w-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mb-4">📅</div>
       <h3 class="text-xl font-semibold text-slate-900 dark:text-white">Événements</h3>
       <p class="mt-2 text-slate-600 dark:text-slate-300">Conférences, journées solidarités et ateliers interactifs.</p>
@@ -289,74 +283,85 @@
       </a>
     </div>
 
-    {% if not user_is_volunteer %}
-      <div class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 hover:shadow-xl transition flex flex-col js-reveal js-delay-2">
-        <div class="h-12 w-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mb-4">🤝</div>
-        <h3 class="text-xl font-semibold text-slate-900 dark:text-white">Devenir bénévole</h3>
-        <p class="mt-2 text-slate-600 dark:text-slate-300">Rejoignez-nous sur le terrain et faites entendre votre cœur.</p>
+    {# 3) Bénévolat (état dépendant) #}
+    {# ⚠️ suppose VolunteerApplication.Meta.ordering = ['-submitted_at'] pour que |first prenne la plus récente #}
+{% if not user_is_volunteer %}
+  {# --- Non bénévole : CTA candidature --- #}
+  <div class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 hover:shadow-xl transition flex flex-col">
+    <div class="h-12 w-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mb-4">🤝</div>
+    <h3 class="text-xl font-semibold text-slate-900 dark:text-white">Devenir bénévole</h3>
+    <p class="mt-2 text-slate-600 dark:text-slate-300">Rejoignez-nous sur le terrain et faites entendre votre cœur.</p>
 
-        {% if request.user.is_authenticated %}
-          {% with open_app=request.user.volunteer_applications.all|first %}
-            {% if open_app %}
-              {% with s=open_app.status %}
-                {% if s == 'pending' or s == 'needs_changes' %}
-                  <a href="{% url 'benevoles:application_detail' open_app.pk %}"
-                     class="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 text-white px-4 py-2 hover:bg-blue-700">
-                    {% if s == 'needs_changes' %}Compléter ma candidature{% else %}Voir ma candidature{% endif %}
-                  </a>
-                  <span class="mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium
-                               {% if s == 'pending' %}bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200
-                               {% else %}bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-200{% endif %}">
-                    Statut : {{ open_app.get_status_display }}
-                  </span>
-                {% elif s == 'rejected' %}
-                  <a href="{% url 'staff:application_start' %}"
-                     class="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 text-white px-4 py-2 hover:bg-blue-700">
-                    Refaire une demande
-                  </a>
-                {% else %}
-                  <a href="{% url 'benevoles:dashboard' %}"
-                     class="mt-4 inline-flex items-center justify-center rounded-lg bg-slate-200 text-slate-800 px-4 py-2 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-100">
-                    Espace bénévole
-                  </a>
-                {% endif %}
-              {% endwith %}
-            {% else %}
+    {% if request.user.is_authenticated %}
+      {% with open_app=request.user.volunteer_applications.all|first %}
+        {% if open_app %}
+          {% with s=open_app.status %}
+            {% if s == 'pending' or s == 'needs_changes' %}
+              <a href="{% url 'benevoles:application_detail' open_app.pk %}"
+                 class="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 text-white px-4 py-2 hover:bg-blue-700">
+                {% if s == 'needs_changes' %}Compléter ma candidature{% else %}Voir ma candidature{% endif %}
+              </a>
+              <span class="mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium
+                           {% if s == 'pending' %}bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200
+                           {% else %}bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-200{% endif %}">
+                Statut : {{ open_app.get_status_display }}
+              </span>
+            {% elif s == 'rejected' %}
               <a href="{% url 'staff:application_start' %}"
                  class="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 text-white px-4 py-2 hover:bg-blue-700">
-                Commencer ma candidature
+                Refaire une demande
+              </a>
+            {% else %}
+              {# sécurité : si 'approved' mais user_is_volunteer est faux #}
+              <a href="{% url 'benevoles:dashboard' %}"
+                 class="mt-4 inline-flex items-center justify-center rounded-lg bg-slate-200 text-slate-800 px-4 py-2 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-100">
+                Espace bénévole
               </a>
             {% endif %}
           {% endwith %}
         {% else %}
-          {% url 'staff:application_start' as start_url %}
-          <a href="{% url 'account_login' %}?next={{ start_url }}"
+          <a href="{% url 'staff:application_start' %}"
              class="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 text-white px-4 py-2 hover:bg-blue-700">
             Commencer ma candidature
           </a>
         {% endif %}
-      </div>
+      {% endwith %}
     {% else %}
-      <div class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 hover:shadow-xl transition flex flex-col js-reveal js-delay-2">
-        <div class="h-12 w-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mb-4">🧭</div>
-        <h3 class="text-xl font-semibold text-slate-900 dark:text-white">
-          {% if request.user.first_name %}Bonjour {{ request.user.first_name }} 👋{% else %}Espace bénévole{% endif %}
-        </h3>
-        <p class="mt-2 text-slate-600 dark:text-slate-300">Accès rapide à vos missions et documents.</p>
-        <div class="mt-4 flex flex-wrap gap-2">
-          <a href="{% url 'benevoles:dashboard' %}" class="rounded-full px-3 py-1 text-sm ring-1 ring-blue-200/70 dark:ring-white/10 hover:bg-blue-50 dark:hover:bg-white/5">Mon espace</a>
-          <a href="{% url 'benevoles:missions_browse' %}" class="rounded-full px-3 py-1 text-sm ring-1 ring-blue-200/70 dark:ring-white/10 hover:bg-blue-50 dark:hover:bg-white/5">Missions</a>
-          <a href="{% url 'benevoles:UserDocuments_list' %}" class="rounded-full px-3 py-1 text-sm ring-1 ring-blue-200/70 dark:ring-white/10 hover:bg-blue-50 dark:hover:bg-white/5">Documents</a>
-        </div>
-        {% if request.user.volunteer_profile and request.user.volunteer_profile.missing_documents %}
-          <div class="mt-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-900 dark:text-amber-200 p-3 text-xs">
-            ⚠️ Documents manquants : {{ request.user.volunteer_profile.missing_documents|join:", " }}
-          </div>
-        {% endif %}
+      {% url 'staff:application_start' as start_url %}
+      <a href="{% url 'account_login' %}?next={{ start_url }}"
+         class="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 text-white px-4 py-2 hover:bg-blue-700">
+        Commencer ma candidature
+      </a>
+    {% endif %}
+  </div>
+
+{% else %}
+  {# --- Déjà bénévole : accès rapide --- #}
+  <div class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 hover:shadow-xl transition flex flex-col">
+    <div class="h-12 w-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mb-4">🧭</div>
+    <h3 class="text-xl font-semibold text-slate-900 dark:text-white">
+      {% if request.user.first_name %}Bonjour {{ request.user.first_name }} 👋{% else %}Espace bénévole{% endif %}
+    </h3>
+    <p class="mt-2 text-slate-600 dark:text-slate-300">Accès rapide à vos missions et documents.</p>
+    <div class="mt-4 flex flex-wrap gap-2">
+      <a href="{% url 'benevoles:dashboard' %}" class="rounded-full px-3 py-1 text-sm ring-1 ring-blue-200/70 dark:ring-white/10 hover:bg-blue-50 dark:hover:bg-white/5">Mon espace</a>
+      <a href="{% url 'benevoles:missions_browse' %}" class="rounded-full px-3 py-1 text-sm ring-1 ring-blue-200/70 dark:ring-white/10 hover:bg-blue-50 dark:hover:bg-white/5">Missions</a>
+      {# adapte le namespace si ta vue documents est dans 'accounts' #}
+      <a href="{% url 'benevoles:UserDocuments_list' %}" class="rounded-full px-3 py-1 text-sm ring-1 ring-blue-200/70 dark:ring-white/10 hover:bg-blue-50 dark:hover:bg-white/5">Documents</a>
+    </div>
+
+    {# garde ce bloc seulement si 'volunteer_profile' existe réellement #}
+    {% if request.user.volunteer_profile and request.user.volunteer_profile.missing_documents %}
+      <div class="mt-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-900 dark:text-amber-200 p-3 text-xs">
+        ⚠️ Documents manquants : {{ request.user.volunteer_profile.missing_documents|join:", " }}
       </div>
     {% endif %}
+  </div>
+{% endif %}
 
-    <div class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 hover:shadow-xl transition flex flex-col js-reveal js-delay-3">
+
+    {# 4) Don #}
+    <div class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 hover:shadow-xl transition flex flex-col">
       <div class="h-12 w-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mb-4">💙</div>
       <h3 class="text-xl font-semibold text-slate-900 dark:text-white">Faire un don</h3>
       <p class="mt-2 text-slate-600 dark:text-slate-300">Votre générosité finance directement nos actions.</p>
@@ -368,18 +373,15 @@
   </div>
 </section>
 
-{# ───────────────────────── CTA ───────────────────────── #}
-<section class="bg-blue-600 dark:bg-blue-500 text-white py-16">
-  <div class="container mx-auto px-4 text-center">
-    <h2 class="text-3xl font-bold mb-4 drop-shadow-sm js-reveal">Ensemble, transformons des vies</h2>
-    <p class="mb-6 text-lg text-blue-50 js-reveal js-delay-1">
-      Chaque contribution compte. Participez à notre mission et devenez acteur du changement.
-    </p>
-    <a href="{% url 'core:coming_soon' %}"
-       class="inline-flex items-center justify-center gap-2 rounded-xl bg-white text-blue-600 font-semibold py-3 px-8 shadow hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 js-reveal js-delay-2">
-      Agir dès aujourd’hui
-    </a>
-  </div>
-</section>
-
+  <!-- CTA -->
+  <section class="bg-blue-600 dark:bg-blue-500 text-white py-16">
+    <div class="container mx-auto px-4 text-center">
+      <h2 class="text-3xl font-bold mb-4 drop-shadow-sm">Ensemble, transformons des vies</h2>
+      <p class="mb-6 text-lg text-blue-50">Chaque contribution compte. Participez à notre mission et devenez acteur du changement.</p>
+      <a href="{% url 'core:coming_soon' %}"
+         class="inline-flex items-center justify-center gap-2 rounded-xl bg-white text-blue-600 font-semibold py-3 px-8 shadow hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
+        Agir dès aujourd’hui
+      </a>
+    </div>
+  </section>
 {% endblock %}

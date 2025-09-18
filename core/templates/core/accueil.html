@@ -8,67 +8,68 @@
 
 {% block content %}
 
-  {# === HERO (mobile-first, image visible, texte en dessous sur mobile) === #}
-  <section id="hero" class="relative overflow-hidden">
-    <div class="relative">
-      <picture>
-        <source media="(min-width:1024px)" srcset="{% static 'img/cover-hero-21x9-textsafe.webp' %}">
-        <source media="(min-width:640px)"  srcset="{% static 'img/cover-hero-16x9.webp' %}">
-        <img
-          src="{% static 'img/cover-mobile-4x5.webp' %}"
-          alt="Responsable de la fondation souriante entourée d’enfants — mission psycho-sociale"
-          class="w-full h-[62svh] sm:h-[64svh] md:h-[76vh] object-cover object-[60%_50%]"
-          loading="eager" fetchpriority="high" decoding="async">
-      </picture>
+  {# === HERO (compact mobile) === #}
+<section id="hero" class="relative overflow-hidden">
+  <div class="relative">
+    <picture>
+      <source media="(min-width:1024px)" srcset="{% static 'img/cover-hero-21x9-textsafe.webp' %}">
+      <source media="(min-width:640px)"  srcset="{% static 'img/cover-hero-16x9.webp' %}">
+      <img
+        src="{% static 'img/cover-mobile-4x5.webp' %}"
+        alt="Responsable de la fondation souriante entourée d’enfants — mission psycho-sociale"
+        class="w-full h-[44svh] sm:h-[50svh] md:h-[68vh] lg:h-[72vh]
+               object-cover object-[50%_58%]"
+        loading="eager" fetchpriority="high" decoding="async">
+    </picture>
 
-      {# Sur desktop seulement : voile + bande gauche pour lisibilité du texte superposé #}
-      <div aria-hidden="true" class="hidden md:block absolute inset-0">
-        <div class="absolute inset-0 bg-black/25 mix-blend-multiply"></div>
-        <div class="absolute inset-y-0 left-0 right-[45%] bg-gradient-to-r from-black/20 via-black/45 to-transparent"></div>
-      </div>
+    {# Overlay lisibilité: seulement à partir de md (desktop/tablette paysage) #}
+    <div aria-hidden="true" class="hidden md:block absolute inset-0">
+      <div class="absolute inset-0 bg-black/25 mix-blend-multiply"></div>
+      <div class="absolute inset-y-0 left-0 right-[45%] bg-gradient-to-r from-black/20 via-black/45 to-transparent"></div>
     </div>
+  </div>
 
-    {# Bloc texte : en flux normal sur mobile (dessous), en superposition à partir de md #}
-    <div class="relative md:absolute md:inset-0">
-      <div class="container mx-auto h-full px-4">
-        <div class="md:h-full md:max-w-3xl md:flex md:flex-col md:justify-center">
-          <div
-            class="will-animate fade-up
-                   bg-white/95 text-slate-900 ring-1 ring-slate-900/10
-                   md:bg-black/35 md:text-white md:ring-white/10
-                   rounded-2xl p-5 sm:p-6 mt-5 md:mt-0 backdrop-blur-[2px]">
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight drop-shadow-lg">
-              Bamu Wellbeing Foundation
-            </h1>
-            <h2 class="mt-3 text-xl sm:text-2xl font-bold text-black/70 md:text-white/95 drop-shadow">
-              Ton bien-être, notre priorité
-            </h2>
-            <p class="mt-5 max-w-prose text-base sm:text-lg md:text-xl text-slate-700 md:text-white/90">
-              Lancée récemment et portée par des experts en santé mentale et inclusion sociale,
-              la Bamu Wellbeing Foundation améliore le bien-être des personnes vulnérables.
-              Transparence, expertise et impact mesurable guident nos actions.
-            </p>
+  {# Texte: sous l'image en mobile, superposé à partir de md #}
+  <div class="relative md:absolute md:inset-0">
+    <div class="container mx-auto h-full px-4">
+      <div class="md:h-full md:max-w-3xl md:flex md:flex-col md:justify-center">
+        <div
+          class="will-animate fade-up
+                 bg-white/95 text-slate-900 ring-1 ring-slate-900/10
+                 md:bg-black/35 md:text-white md:ring-white/10
+                 rounded-2xl p-5 sm:p-6 mt-4 md:mt-0 backdrop-blur-[2px]">
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight drop-shadow-lg">
+            Bamu Wellbeing Foundation
+          </h1>
+          <h2 class="mt-3 text-xl sm:text-2xl font-bold text-black/70 md:text-white/95 drop-shadow">
+            Ton bien-être, notre priorité
+          </h2>
+          <p class="mt-5 max-w-prose text-base sm:text-lg md:text-xl text-slate-700 md:text-white/90">
+            Lancée récemment et portée par des experts en santé mentale et inclusion sociale,
+            la Bamu Wellbeing Foundation améliore le bien-être des personnes vulnérables.
+            Transparence, expertise et impact mesurable guident nos actions.
+          </p>
 
-            <div class="mt-7 flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center">
-              <a href="{% url 'core:nous' %}"
-                 class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 text-white
-                        font-semibold px-6 py-3 shadow hover:bg-blue-700 focus-visible:outline-none
-                        focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-600
-                        transition will-animate fade-up hover:-translate-y-0.5" data-delay="80">
-                Qui sommes-nous ?
-              </a>
-              <a href="#actions"
-                 class="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3
-                        font-semibold text-blue-700 md:text-white ring-1 ring-blue-200/70 md:ring-white/40
-                        hover:bg-blue-50 md:hover:bg-white/10 transition will-animate fade-up hover:-translate-y-0.5" data-delay="140">
-                Nos actions
-              </a>
-            </div>
+          <div class="mt-6 flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center">
+            <a href="{% url 'core:nous' %}"
+               class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 text-white
+                      font-semibold px-6 py-3 shadow hover:bg-blue-700 focus-visible:outline-none
+                      focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-600
+                      transition will-animate fade-up hover:-translate-y-0.5" data-delay="80">
+              Qui sommes-nous ?
+            </a>
+            <a href="#actions"
+               class="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3
+                      font-semibold text-blue-700 md:text-white ring-1 ring-blue-200/70 md:ring-white/40
+                      hover:bg-blue-50 md:hover:bg-white/10 transition will-animate fade-up hover:-translate-y-0.5" data-delay="140">
+              Nos actions
+            </a>
           </div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
   {% include "partials/news_carousel.html" %}
 

@@ -80,7 +80,7 @@ ACCOUNT_FORMS = {
 }
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_EMAIL_VERIFICATION = "none"  # "mandatory" en prod si tu veux forcer la vérif
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
@@ -304,21 +304,43 @@ else:
     MEDIA_ROOT = BASE_DIR / "media"
     SERVE_MEDIA = env_bool("DJANGO_SERVE_MEDIA", DEBUG)
 
+
 # ────────────────────────────────
 # EMAIL
 # ────────────────────────────────
-if DEBUG:
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-else:
-    EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
-    EMAIL_HOST = os.getenv("EMAIL_HOST", "")
-    EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
-    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
-    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
-    EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
+import os
 
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "no-reply@exemple.org")
-CONTACT_EMAIL = os.getenv("CONTACT_EMAIL", "contact@exemple.org")
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = os.getenv("EMAIL_HOST", "")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+
+# Supporte SSL et TLS (mais pas les deux à la fois)
+def _env_bool(k, default=False):
+    return os.getenv(k, str(default)).lower() in {"1", "true", "yes", "on"}
+
+EMAIL_USE_SSL = _env_bool("EMAIL_USE_SSL", False)
+EMAIL_USE_TLS = _env_bool("EMAIL_USE_TLS", False)
+
+# Si rien n'est précisé → TLS (587)
+if not EMAIL_USE_SSL and not EMAIL_USE_TLS:
+    EMAIL_USE_TLS = True
+# Si les deux sont à True → privilégier SSL (on coupe TLS)
+if EMAIL_USE_SSL and EMAIL_USE_TLS:
+    EMAIL_USE_TLS = False
+
+EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "20"))
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "no-reply@bamuwellbeing.org")
+SERVER_EMAIL = os.getenv("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
+
+# En dev, pas d'envoi réel (les mails s'affichent en console)
+from django.conf import settings as _s
+if _s.DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+
+CONTACT_EMAIL = os.getenv("CONTACT_EMAIL", "bamu.wellbeing_foundation@bamuwellbeing.org")
 
 # ────────────────────────────────
 # LOGGING (console en prod)
@@ -340,3 +362,4 @@ FLW_PUBLIC_KEY = os.getenv("FLW_PUBLIC_KEY", "")
 FLW_SECRET_KEY = os.getenv("FLW_SECRET_KEY", "")
 FLW_WEBHOOK_SECRET = os.getenv("FLW_WEBHOOK_SECRET", "")  # 'verif-hash' header sur webhook
 FLW_SANDBOX = env_bool("FLW_SANDBOX", True)
+

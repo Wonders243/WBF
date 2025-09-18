@@ -287,19 +287,43 @@ STATIC_ROOT = BASE_DIR / "staticfiles"          # collectstatic (prod)
 if _use_whitenoise:
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# S3 / Cellar pour les MEDIAS (uploads)
-if env_bool("USE_S3_MEDIA", False):
+# ───────── S3 / Cellar pour les MEDIAS (uploads) ─────────
+USE_S3_MEDIA = env_bool("USE_S3_MEDIA", False)
+
+if USE_S3_MEDIA:
     INSTALLED_APPS += ["storages"]
+
+    # Identifiants : on privilégie les variables standard AWS_* ;
+    # sinon on retombe sur celles injectées par l'add-on Cellar.
     AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID") or os.getenv("CELLAR_ADDON_KEY_ID", "")
     AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY") or os.getenv("CELLAR_ADDON_KEY_SECRET", "")
-    AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL") or f"https://{os.getenv('CELLAR_ADDON_HOST', '')}"
+    AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL") or f"https://{os.getenv('CELLAR_ADDON_HOST', '').strip()}"
     AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME") or os.getenv("CELLAR_ADDON_BUCKET", "")
+
+    # Options S3
     AWS_S3_SIGNATURE_VERSION = "s3v4"
-    AWS_S3_ADDRESSING_STYLE = "virtual"
-    AWS_DEFAULT_ACL = None
+    AWS_S3_ADDRESSING_STYLE = "virtual"  # bucket.host
+    AWS_DEFAULT_ACL = None               # pas d'ACL implicite
+    AWS_S3_FILE_OVERWRITE = False        # ne pas écraser si même nom
+    AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "max-age=31536000, public"}
+
+    # Public vs privé : si True -> URLs signées (privé), sinon -> URLs publiques jolies
     AWS_QUERYSTRING_AUTH = env_bool("AWS_QUERYSTRING_AUTH", False)
+
+    if AWS_QUERYSTRING_AUTH:
+        # PRIVÉ : URLs signées via endpoint/bucket (pas de domaine custom)
+        MEDIA_URL = f"{AWS_S3_ENDPOINT_URL.rstrip('/')}/{AWS_STORAGE_BUCKET_NAME}/"
+    else:
+        # PUBLIC : domaine custom propre <bucket>.<cellar-host>
+        AWS_S3_CUSTOM_DOMAIN = os.getenv("AWS_S3_CUSTOM_DOMAIN") or \
+            f"{AWS_STORAGE_BUCKET_NAME}.{os.getenv('CELLAR_ADDON_HOST', '').strip()}"
+        MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+
+    # Stockage par défaut = S3
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+
 else:
+    # Stockage local (dev)
     MEDIA_URL = "/media/"
     MEDIA_ROOT = BASE_DIR / "media"
     SERVE_MEDIA = env_bool("DJANGO_SERVE_MEDIA", DEBUG)

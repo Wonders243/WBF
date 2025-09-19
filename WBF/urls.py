@@ -63,5 +63,7 @@ if settings.DEBUG:
         path("__reload__/", include("django_browser_reload.urls")),
     ]
 
-if not settings.USE_S3_MEDIA:
+# Servez les médias depuis le FS Bucket monté.
+# En prod, c’est acceptable sur Clever pour un volume modéré.
+if getattr(settings, "SERVE_MEDIA", False):
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

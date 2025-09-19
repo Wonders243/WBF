@@ -289,40 +289,14 @@ STATIC_ROOT = BASE_DIR / "staticfiles"          # collectstatic (prod)
 if _use_whitenoise:
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# ───────── S3 / Cellar pour les MEDIAS (uploads) ─────────
-USE_S3_MEDIA = os.getenv("USE_S3_MEDIA", "false").lower() == "true"
 
-if USE_S3_MEDIA:
-    INSTALLED_APPS += ["storages"]
+# === MEDIA (FS Bucket monté) ===
+# Correspond exactement au point de montage défini dans CC_FS_BUCKET
+MEDIA_ROOT = "/media"                      # ← le dossier monté par FS Bucket
+MEDIA_URL = "/media/"                      # URL publique servie par Django
 
-    AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID") or os.getenv("CELLAR_ADDON_KEY_ID", "")
-    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY") or os.getenv("CELLAR_ADDON_KEY_SECRET", "")
-    AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL") or f"https://{os.getenv('CELLAR_ADDON_HOST','')}"
-    AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME") or os.getenv("CELLAR_ADDON_BUCKET", "")
-
-    AWS_S3_SIGNATURE_VERSION = os.getenv("AWS_S3_SIGNATURE_VERSION", "s3v4")
-    AWS_S3_ADDRESSING_STYLE = os.getenv("AWS_S3_ADDRESSING_STYLE", "virtual")
-    AWS_DEFAULT_ACL = os.getenv("AWS_DEFAULT_ACL", "public-read")
-    AWS_QUERYSTRING_AUTH = os.getenv("AWS_QUERYSTRING_AUTH", "false").lower() == "true"
-    AWS_S3_OBJECT_PARAMETERS = {
-        "CacheControl": "public, max-age=31536000, immutable",
-    }
-
-    # Stockage MEDIA uniquement sur S3 (recommandé)
-    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-
-    # URL publique vers le bucket
-    MEDIA_CDN_DOMAIN = os.getenv("MEDIA_CDN_DOMAIN", "")
-    if MEDIA_CDN_DOMAIN:
-        MEDIA_URL = f"https://{MEDIA_CDN_DOMAIN}/"
-    else:
-        # fallback générique
-        MEDIA_URL = f"{AWS_S3_ENDPOINT_URL.rstrip('/')}/{AWS_STORAGE_BUCKET_NAME}/"
-else:
-    # stockage local en dev
-    MEDIA_URL = "/media/"
-    MEDIA_ROOT = BASE_DIR / "media"
-
+# Optionnel : activer un flag pour servir les médias par Django en prod
+SERVE_MEDIA = os.getenv("DJANGO_SERVE_MEDIA", "1") == "1"
 
 # ────────────────────────────────
 # EMAIL

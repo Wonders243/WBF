@@ -80,7 +80,9 @@ ACCOUNT_FORMS = {
 }
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
-ACCOUNT_EMAIL_VERIFICATION = "none"  # "mandatory" en prod si tu veux forcer la vérif
+ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION", "none")
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
@@ -292,7 +294,6 @@ USE_S3_MEDIA = env_bool("USE_S3_MEDIA", False)
 
 if USE_S3_MEDIA:
     INSTALLED_APPS += ["storages"]
-    MEDIA_URL = "https://cellar-c2.services.clever-cloud.com/wbf-media/"
     # Identifiants : on privilégie AWS_* puis on retombe sur CELLAR_*
     AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID") or os.getenv("CELLAR_ADDON_KEY_ID", "")
     AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY") or os.getenv("CELLAR_ADDON_KEY_SECRET", "")

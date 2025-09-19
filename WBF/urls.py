@@ -78,3 +78,7 @@ urlpatterns += [
 # Acceptable en prod pour volumétrie modérée ; sinon, prévoir un frontal/CDN plus tard.
 if getattr(settings, "SERVE_MEDIA", False):
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+from core.views_media_test import media_write_test
+urlpatterns += [ path("__media_test__/write", media_write_test) ]
+# Permet de tester que l'écriture dans MEDIA_ROOT fonctionne (FS Bucket monté)

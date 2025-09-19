@@ -82,6 +82,19 @@ ACCOUNT_LOGIN_METHODS = {"username", "email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION", "none")
 
+# settings.py
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+    },
+    "loggers": {
+        "django.request": {"handlers": ["console"], "level": "ERROR", "propagate": False},
+        "django": {"handlers": ["console"], "level": "ERROR"},
+    },
+}
+
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
@@ -302,6 +315,26 @@ if not MEDIA_URL.startswith("/"):
     MEDIA_URL = "/" + MEDIA_URL
 if not MEDIA_URL.endswith("/"):
     MEDIA_URL = MEDIA_URL + "/"
+
+# Robust MEDIA_ROOT selection: prefer env overrides and writable paths
+from pathlib import Path as _Path
+_media_root_env = (os.getenv("DJANGO_MEDIA_ROOT") or os.getenv("CC_FS_BUCKET") or "/media").strip()
+if not os.path.isabs(_media_root_env):
+    _media_root_env = str(BASE_DIR / _media_root_env)
+try:
+    _mr_path = _Path(_media_root_env)
+    _mr_path.mkdir(parents=True, exist_ok=True)
+    # quick write test to detect RO mounts
+    _t = _mr_path / ".__wtest__"
+    with open(_t, "w", encoding="utf-8") as f:
+        f.write("ok")
+    try:
+        os.remove(str(_t))
+    except Exception:
+        pass
+    MEDIA_ROOT = str(_mr_path)
+except Exception:
+    MEDIA_ROOT = str(BASE_DIR / "media")
 
 
 # ────────────────────────────────

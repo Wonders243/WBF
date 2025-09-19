@@ -318,30 +318,38 @@ if not MEDIA_URL.endswith("/"):
 
 # Robust MEDIA_ROOT selection: prefer env overrides and writable paths
 from pathlib import Path as _Path
-_media_root_env = (os.getenv("DJANGO_MEDIA_ROOT") or os.getenv("CC_FS_BUCKET") or "/media").strip()
-# Clever Cloud sometimes formats CC_FS_BUCKET like "/mountpoint:bucket-uuid"
-# Keep only the mount path segment if a colon is present.
-if ":" in _media_root_env:
-    for _seg in [s.strip() for s in _media_root_env.split(":") if s.strip()]:
-        if _seg.startswith("/"):
-            _media_root_env = _seg
-            break
-if not os.path.isabs(_media_root_env):
-    _media_root_env = str(BASE_DIR / _media_root_env)
-try:
-    _mr_path = _Path(_media_root_env)
-    _mr_path.mkdir(parents=True, exist_ok=True)
-    # quick write test to detect RO mounts
-    _t = _mr_path / ".__wtest__"
-    with open(_t, "w", encoding="utf-8") as f:
-        f.write("ok")
+_raw_bucket = (os.getenv("DJANGO_MEDIA_ROOT") or os.getenv("CC_FS_BUCKET") or "/media").strip()
+# Extract mount folder before ":" if CC_FS_BUCKET format is used ("/folder:bucket-host[:async]")
+_folder = _raw_bucket.split(":", 1)[0].strip()
+
+# Build candidate absolute paths. Prefer mapping under APP_HOME when available.
+app_home = (os.getenv("APP_HOME") or os.getenv("CC_APP_HOME") or "").strip()
+candidates = []
+if _folder.startswith("/"):
+    if app_home:
+        candidates.append(str(_Path(app_home) / _folder.lstrip("/")))
+    candidates.append(_folder)
+else:
+    candidates.append(str(BASE_DIR / _folder))
+candidates += [str(BASE_DIR / "media"), "/media"]
+
+MEDIA_ROOT = str(BASE_DIR / "media")
+for _p in candidates:
     try:
-        os.remove(str(_t))
+        _mr_path = _Path(_p)
+        _mr_path.mkdir(parents=True, exist_ok=True)
+        # quick write test to detect read-only mounts
+        _t = _mr_path / ".__wtest__"
+        with open(_t, "w", encoding="utf-8") as f:
+            f.write("ok")
+        try:
+            _t.unlink()
+        except Exception:
+            pass
+        MEDIA_ROOT = str(_mr_path)
+        break
     except Exception:
-        pass
-    MEDIA_ROOT = str(_mr_path)
-except Exception:
-    MEDIA_ROOT = str(BASE_DIR / "media")
+        continue
 
 
 # ────────────────────────────────

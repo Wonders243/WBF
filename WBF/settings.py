@@ -290,47 +290,38 @@ if _use_whitenoise:
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # ───────── S3 / Cellar pour les MEDIAS (uploads) ─────────
-USE_S3_MEDIA = env_bool("USE_S3_MEDIA", False)
+USE_S3_MEDIA = os.getenv("USE_S3_MEDIA", "false").lower() == "true"
 
 if USE_S3_MEDIA:
     INSTALLED_APPS += ["storages"]
-    # Identifiants : on privilégie AWS_* puis on retombe sur CELLAR_*
+
     AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID") or os.getenv("CELLAR_ADDON_KEY_ID", "")
     AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY") or os.getenv("CELLAR_ADDON_KEY_SECRET", "")
-    AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL") or f"https://{os.getenv('CELLAR_ADDON_HOST', '').strip()}"
+    AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL") or f"https://{os.getenv('CELLAR_ADDON_HOST','')}"
     AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME") or os.getenv("CELLAR_ADDON_BUCKET", "")
 
-    # Options S3 communes
-    AWS_S3_SIGNATURE_VERSION = "s3v4"
-    AWS_S3_ADDRESSING_STYLE = "virtual"          # URLs de type <bucket>.<host>
-    AWS_DEFAULT_ACL = None                       # pas d'ACL implicite
-    AWS_S3_FILE_OVERWRITE = False                # n'écrase pas si même nom
+    AWS_S3_SIGNATURE_VERSION = os.getenv("AWS_S3_SIGNATURE_VERSION", "s3v4")
+    AWS_S3_ADDRESSING_STYLE = os.getenv("AWS_S3_ADDRESSING_STYLE", "virtual")
+    AWS_DEFAULT_ACL = os.getenv("AWS_DEFAULT_ACL", "public-read")
+    AWS_QUERYSTRING_AUTH = os.getenv("AWS_QUERYSTRING_AUTH", "false").lower() == "true"
+    AWS_S3_OBJECT_PARAMETERS = {
+        "CacheControl": "public, max-age=31536000, immutable",
+    }
 
-    # Public vs Privé (URLs signées)
-    AWS_QUERYSTRING_AUTH = env_bool("AWS_QUERYSTRING_AUTH", False)   # True => privé (signé)
-    AWS_QUERYSTRING_EXPIRE = int(os.getenv("AWS_QUERYSTRING_EXPIRE", "300"))  # 5 min par défaut
-
-    if AWS_QUERYSTRING_AUTH:
-        # PRIVÉ : lien signé + cache court
-        AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "private, max-age=60"}
-        # Pas de domaine custom en privé, on pointe sur endpoint/bucket
-        MEDIA_URL = f"{AWS_S3_ENDPOINT_URL.rstrip('/')}/{AWS_STORAGE_BUCKET_NAME}/"
-        # (ne définis PAS AWS_S3_CUSTOM_DOMAIN en mode privé)
-    else:
-        # PUBLIC : lien propre + cache long
-        AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "public, max-age=31536000"}
-        AWS_S3_CUSTOM_DOMAIN = os.getenv("AWS_S3_CUSTOM_DOMAIN") or \
-            f"{AWS_STORAGE_BUCKET_NAME}.{os.getenv('CELLAR_ADDON_HOST', '').strip()}"
-        MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
-
-    # Stockage par défaut = S3
+    # Stockage MEDIA uniquement sur S3 (recommandé)
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
+    # URL publique vers le bucket
+    MEDIA_CDN_DOMAIN = os.getenv("MEDIA_CDN_DOMAIN", "")
+    if MEDIA_CDN_DOMAIN:
+        MEDIA_URL = f"https://{MEDIA_CDN_DOMAIN}/"
+    else:
+        # fallback générique
+        MEDIA_URL = f"{AWS_S3_ENDPOINT_URL.rstrip('/')}/{AWS_STORAGE_BUCKET_NAME}/"
 else:
-    # Stockage local (dev)
+    # stockage local en dev
     MEDIA_URL = "/media/"
     MEDIA_ROOT = BASE_DIR / "media"
-    SERVE_MEDIA = env_bool("DJANGO_SERVE_MEDIA", DEBUG)
 
 
 # ────────────────────────────────

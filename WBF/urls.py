@@ -56,16 +56,12 @@ urlpatterns = [
     ),
 ]
 
-# Médias (dev / optionnel en prod si SERVE_MEDIA=1)
-if getattr(settings, "SERVE_MEDIA", False):
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    # Fallback legacy prefixes accessed without /media/
-    urlpatterns += [
-        re_path(r"^(?P<prefix>user_documents|applications)/(?P<path>.+)$", _legacy_media_redirect),
-    ]
 
 # Outils dev
 if settings.DEBUG:
     urlpatterns += [
         path("__reload__/", include("django_browser_reload.urls")),
     ]
+
+if not settings.USE_S3_MEDIA:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

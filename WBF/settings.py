@@ -290,12 +290,9 @@ if _use_whitenoise:
 # ───────── S3 / Cellar pour les MEDIAS (uploads) ─────────
 USE_S3_MEDIA = env_bool("USE_S3_MEDIA", False)
 
-# ───────── S3 / Cellar pour les MEDIAS (uploads) ─────────
-USE_S3_MEDIA = env_bool("USE_S3_MEDIA", False)
-
 if USE_S3_MEDIA:
     INSTALLED_APPS += ["storages"]
-
+    MEDIA_URL = "https://cellar-c2.services.clever-cloud.com/wbf-media/"
     # Identifiants : on privilégie AWS_* puis on retombe sur CELLAR_*
     AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID") or os.getenv("CELLAR_ADDON_KEY_ID", "")
     AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY") or os.getenv("CELLAR_ADDON_KEY_SECRET", "")

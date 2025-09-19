@@ -319,6 +319,13 @@ if not MEDIA_URL.endswith("/"):
 # Robust MEDIA_ROOT selection: prefer env overrides and writable paths
 from pathlib import Path as _Path
 _media_root_env = (os.getenv("DJANGO_MEDIA_ROOT") or os.getenv("CC_FS_BUCKET") or "/media").strip()
+# Clever Cloud sometimes formats CC_FS_BUCKET like "/mountpoint:bucket-uuid"
+# Keep only the mount path segment if a colon is present.
+if ":" in _media_root_env:
+    for _seg in [s.strip() for s in _media_root_env.split(":") if s.strip()]:
+        if _seg.startswith("/"):
+            _media_root_env = _seg
+            break
 if not os.path.isabs(_media_root_env):
     _media_root_env = str(BASE_DIR / _media_root_env)
 try:

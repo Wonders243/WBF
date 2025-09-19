@@ -79,6 +79,9 @@ urlpatterns += [
 if getattr(settings, "SERVE_MEDIA", False):
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-from core.views_media_test import media_write_test
-urlpatterns += [ path("__media_test__/write", media_write_test) ]
+from core.views_media_test import media_write_test, media_ls
+urlpatterns += [
+    path("__media_test__/write", media_write_test),
+    path("__media_test__/ls", media_ls),
+]
 # Permet de tester que l'écriture dans MEDIA_ROOT fonctionne (FS Bucket monté)

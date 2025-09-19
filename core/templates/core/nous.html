@@ -123,7 +123,7 @@
         <section class="lg:col-span-2 rounded-2xl bg-white dark:bg-slate-900 shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
           <h2 class="text-3xl font-bold text-blue-700 dark:text-blue-300 mb-6 text-center">Contactez-nous</h2>
 
-          <form action="{% url 'core:contact' %}" method="post" class="space-y-6" novalidate>
+          <form action="{% url 'core:contact' %}" method="post" enctype="multipart/form-data" class="space-y-6" novalidate>
             {% csrf_token %}
 
             {% if form.non_field_errors %}

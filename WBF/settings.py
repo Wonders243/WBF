@@ -81,8 +81,7 @@ ACCOUNT_FORMS = {
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION", "none")
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = True
+
 
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
@@ -290,13 +289,20 @@ if _use_whitenoise:
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
-# === MEDIA (FS Bucket monté) ===
-# Correspond exactement au point de montage défini dans CC_FS_BUCKET
-MEDIA_ROOT = "/media"                      # ← le dossier monté par FS Bucket
-MEDIA_URL = "/media/"                      # URL publique servie par Django
+# MEDIA via FS Bucket monté
+MEDIA_ROOT = "/media"            # ← doit correspondre au point de montage CC_FS_BUCKET
+MEDIA_URL = "/media/"
 
-# Optionnel : activer un flag pour servir les médias par Django en prod
-SERVE_MEDIA = os.getenv("DJANGO_SERVE_MEDIA", "1") == "1"
+# Flag d’activation du service des médias par Django
+import os
+SERVE_MEDIA = os.getenv("DJANGO_SERVE_MEDIA", "1").lower() in {"1", "true", "yes"}
+
+# Garde propre
+if not MEDIA_URL.startswith("/"):
+    MEDIA_URL = "/" + MEDIA_URL
+if not MEDIA_URL.endswith("/"):
+    MEDIA_URL = MEDIA_URL + "/"
+
 
 # ────────────────────────────────
 # EMAIL

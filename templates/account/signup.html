@@ -22,7 +22,7 @@
     </div>
   {% endif %}
 
-  <form id="signup-form" method="post" action="{% url 'account_signup' %}" class="grid grid-cols-1 md:grid-cols-2 gap-3" novalidate>
+  <form id="signup-form" method="post" action="{% url 'account_signup' %}" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-3" novalidate>
     {% csrf_token %}
     {% for h in form.hidden_fields %}{{ h }}{% endfor %}
 

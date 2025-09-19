@@ -62,7 +62,7 @@
   <p class="text-sm text-gray-600 dark:text-slate-400">
     Un code a été envoyé par SMS au <strong>{{ phone_verif.phone }}</strong>. Il expire le {{ phone_verif.expires_at|date:"d/m/Y H:i" }}.
   </p>
-  <form method="post" class="mt-3 flex items-end gap-2">
+  <form method="post" enctype="multipart/form-data" class="mt-3 flex items-end gap-2">
     {% csrf_token %}
     <input type="hidden" name="action" value="phone_verify">
     <input type="hidden" name="pv_id" value="{{ phone_verif.id }}">

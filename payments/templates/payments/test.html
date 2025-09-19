@@ -9,7 +9,7 @@
 
   {% include "partials/messages.html" %}
 
-  <form method="post" action="{% url 'payments:rdc_start' %}" class="space-y-3">
+  <form method="post" action="{% url 'payments:rdc_start' %}" enctype="multipart/form-data" class="space-y-3">
     {% csrf_token %}
     <div>
       <label class="block text-sm font-medium mb-1">Montant (CDF)</label>

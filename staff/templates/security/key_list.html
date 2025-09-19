@@ -60,7 +60,7 @@
           <td class="p-3">{{ k.created_by.get_full_name|default:k.created_by.username }}</td>
           <td class="p-3 text-right space-x-2">
             {% if k.is_active %}
-              <form method="post" action="{% url 'staff:revoke_key' k.id %}" class="inline">{% csrf_token %}
+  <form method="post" action="{% url 'staff:revoke_key' k.id %}" enctype="multipart/form-data" class="inline">{% csrf_token %}
                 <button class="px-3 py-1.5 rounded bg-rose-600 text-white hover:bg-rose-700"
                         onclick="return confirm('Révoquer cette clé ?');">
                   Révoquer

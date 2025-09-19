@@ -50,7 +50,7 @@ Notifications — version premium, robuste
            role="menu" tabindex="-1">
         <header class="px-3 py-2 flex items-center justify-between">
           <p class="text-sm font-semibold">Notifications</p>
-          <form action="{% url 'notifications:read_all' %}" method="post" id="notifMarkAllForm">
+          <form action="{% url 'notifications:read_all' %}" method="post" enctype="multipart/form-data" id="notifMarkAllForm">
             {% csrf_token %}
             <button id="notifMarkAll" type="submit"
                     class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md

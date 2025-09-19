@@ -22,6 +22,7 @@ except Exception:
     # Fallback si le module n'est pas encore créé
     sitemaps = {}
 
+
 def _legacy_media_redirect(request, prefix: str, path: str):
     """
     Redirect old media paths without MEDIA_URL prefix to the correct URL.
@@ -29,7 +30,9 @@ def _legacy_media_redirect(request, prefix: str, path: str):
     Example: /user_documents/... -> /media/user_documents/...
              /applications/...   -> /media/applications/...
     """
-    return HttpResponseRedirect(f"{settings.MEDIA_URL}{prefix}/{path}")
+    base = (settings.MEDIA_URL or "/media/").rstrip("/")
+    return HttpResponseRedirect(f"{base}/{prefix}/{path}")
+
 
 urlpatterns = [
     # Admin
@@ -56,14 +59,22 @@ urlpatterns = [
     ),
 ]
 
-
 # Outils dev
 if settings.DEBUG:
     urlpatterns += [
         path("__reload__/", include("django_browser_reload.urls")),
     ]
 
-# Servez les médias depuis le FS Bucket monté.
-# En prod, c’est acceptable sur Clever pour un volume modéré.
+# ── Redirects Legacy (ACTIVÉS) ────────────────────────────────────────────────
+# Ex : anciens liens "/user_documents/xyz.jpg" → redirigent vers "/media/user_documents/xyz.jpg"
+urlpatterns += [
+    re_path(r"^user_documents/(?P<path>.+)$",
+            lambda r, path: _legacy_media_redirect(r, "user_documents", path)),
+    re_path(r"^applications/(?P<path>.+)$",
+            lambda r, path: _legacy_media_redirect(r, "applications", path)),
+]
+
+# ── Service des médias depuis FS Bucket monté ────────────────────────────────
+# Acceptable en prod pour volumétrie modérée ; sinon, prévoir un frontal/CDN plus tard.
 if getattr(settings, "SERVE_MEDIA", False):
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

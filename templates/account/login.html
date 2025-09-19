@@ -22,7 +22,7 @@
     </div>
   {% endif %}
 
-  <form method="post" action="{% url 'account_login' %}" class="space-y-4" novalidate>
+  <form method="post" action="{% url 'account_login' %}" enctype="multipart/form-data" class="space-y-4" novalidate>
     {% csrf_token %}
 
     {# Hidden redirect field (Allauth) #}

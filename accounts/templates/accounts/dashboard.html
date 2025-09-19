@@ -98,7 +98,7 @@
             </a>
 
             {% if item.signup_id %}
-              <form method="post" action="{% url 'staff:mission_cancel' item.signup_id %}">
+              <form method="post" action="{% url 'staff:mission_cancel' item.signup_id %}" enctype="multipart/form-data">
                 {% csrf_token %}
                 <button class="text-gray-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400"
                         title="Se désinscrire">

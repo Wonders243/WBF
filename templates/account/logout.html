@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block account_content %}
-  <form method="post" action="{% url 'account_logout' %}" class="space-y-4">
+  <form method="post" action="{% url 'account_logout' %}" enctype="multipart/form-data" class="space-y-4">
     {% csrf_token %}
     <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 font-semibold text-white shadow hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600/60">
       {% trans "Se déconnecter" %}

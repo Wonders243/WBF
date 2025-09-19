@@ -68,7 +68,7 @@
       <!-- Modifier mes infos (édition légère) -->
       <div class="bg-white dark:bg-slate-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
         <h2 class="text-lg font-bold mb-3">Modifier mes informations</h2>
-        <form method="post" class="space-y-4">
+<form method="post" enctype="multipart/form-data" class="space-y-4">
           {% csrf_token %}
           <input type="hidden" name="action" value="update_infos">
           {{ edit_form.non_field_errors }}

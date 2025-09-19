@@ -232,7 +232,7 @@
                      class="text-blue-600 dark:text-blue-300 hover:underline text-xs">Détails</a>
 
                   {% if it.signup_id %}
-                    <form method="post" action="{% url 'staff:mission_cancel' it.signup_id %}">
+<form method="post" action="{% url 'staff:mission_cancel' it.signup_id %}" enctype="multipart/form-data">
                       {% csrf_token %}
                       <button class="text-xs text-red-600 hover:underline" title="Se désinscrire de cette mission">
                         Annuler

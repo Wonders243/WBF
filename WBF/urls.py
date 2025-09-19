@@ -79,6 +79,13 @@ urlpatterns += [
 if getattr(settings, "SERVE_MEDIA", False):
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+# ➜ Autoriser Django à servir /media/ en production quand on le demande
+if settings.DEBUG or getattr(settings, "SERVE_MEDIA", False):
+    from django.views.static import serve
+    urlpatterns += [
+        re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
+    ]
+
 from core.views_media_test import media_write_test, media_ls
 urlpatterns += [
     path("__media_test__/write", media_write_test),

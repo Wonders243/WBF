@@ -302,6 +302,18 @@ def missions_browse(request):
             return d.date()
         return None
 
+    def _is_past(d):
+        if d is None:
+            return False
+        try:
+            if isinstance(d, datetime):
+                return d.date() < today
+            if isinstance(d, ddate):
+                return d < today
+        except Exception:
+            return False
+        return False
+
     # Aliases acceptés: start/end, from/to, date_from/date_to, (FR) de/à
     date_start = _first(_parse_date("start"), _parse_date("from"), _parse_date("date_from"), _parse_date("de"))
     date_end   = _first(_parse_date("end"),   _parse_date("to"),   _parse_date("date_to"),   _parse_date("a"))
@@ -345,7 +357,7 @@ def missions_browse(request):
             "date": d,
             "location": location,
             "status": s.status,          # "invited"
-            "is_past": bool(d and d < today),
+            "is_past": _is_past(d),
         })
 
     # -------------------- 2) MES DEMANDES ENVOYÉES (status=PENDING) -------------------
@@ -457,7 +469,7 @@ def missions_browse(request):
             "date": d,
             "location": location,
             "capacity": m.capacity,
-            "is_past": bool(d and d < today),
+            "is_past": _is_past(d),
         })
 
     return render(request, "accounts/missions_browse.html", {

@@ -268,6 +268,7 @@ def _build_volunteer_tasks(volunteer, today):
 # --------- Page Missions (invitations + demandes + missions disponibles) ----------
 @login_required
 @never_cache
+@login_required
 def missions_browse(request):
     volunteer = Volunteer.objects.filter(user=request.user).first()
     if not volunteer:

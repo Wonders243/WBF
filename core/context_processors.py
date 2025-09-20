@@ -62,3 +62,19 @@ def latest_news(request):
     except Exception:
         items = []
     return {"latest_news": items}
+
+
+def staff_counters(request):
+    """Small counters for staff header/sidebar badges.
+
+    Currently exposes pending volunteer applications count.
+    Only computed for authenticated staff users.
+    """
+    try:
+        user = getattr(request, "user", None)
+        if not (user and user.is_authenticated and user.is_staff):
+            return {}
+        pending_apps = VolunteerApplication.objects.filter(status=ApplicationStatus.PENDING).count()
+        return {"staff_pending_applications": pending_apps}
+    except Exception:
+        return {}

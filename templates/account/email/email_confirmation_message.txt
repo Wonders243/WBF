@@ -1,0 +1,11 @@
+Bonjour,
+
+Merci de vous inscrire à Bamu Wellbeing Foundation.
+Pour confirmer votre adresse email, cliquez sur le lien ci‑dessous:
+
+{{ activate_url }}
+
+Si vous n’êtes pas à l’origine de cette demande, vous pouvez ignorer ce message.
+
+— Bamu Wellbeing Foundation
+

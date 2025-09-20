@@ -36,6 +36,7 @@
         <a href="{% url 'staff:dashboard' %}" class="flex items-center gap-2">
           <img src="{% static 'img/logo.png' %}" alt="" class="h-7 w-7">
           <span class="text-sm font-bold tracking-tight">Console Staff</span>
+          {% if staff_pending_applications %}<span class="ml-auto inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 rounded-full bg-blue-600 text-white text-[11px] font-semibold">{{ staff_pending_applications }}</span>{% endif %}
         </a>
 
         <!-- Recherche rapide -->

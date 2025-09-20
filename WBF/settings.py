@@ -180,6 +180,7 @@ TEMPLATES = [
                 "core.context_processors.flags",
                 "core.context_processors.volunteer_cta",
                 "core.context_processors.latest_news",
+                "core.context_processors.staff_counters",
                 "notifications.context_processors.notifications_badge",
                 "legal.context_processors.legal_outdated",
                 # Django

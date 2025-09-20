@@ -1,0 +1,9 @@
+Bonjour,
+
+Votre adresse email associée à Bamu Wellbeing Foundation a été modifiée:
+de {{ from_email }} vers {{ to_email }}.
+
+Si vous n’êtes pas à l’origine de ce changement, contactez‑nous au plus vite.
+
+— Bamu Wellbeing Foundation
+

@@ -1,6 +1,8 @@
 from django.db.models.signals import pre_save, post_save, post_delete
 from django.dispatch import receiver
 from django.forms.models import model_to_dict
+from django.conf import settings
+from django.core.mail import send_mail
 
 from .utils import send_notification, recipients_for
 from .models import Notification
@@ -99,6 +101,18 @@ def _notify_signup(sender, instance: MissionSignup, created, **kwargs):
             title=msg,
             message="",
         )
+        # Notify staff if the action was initiated by a volunteer (not staff)
+        if not getattr(actor, "is_staff", False):
+            staff = list(recipients_for(getattr(instance, "mission", instance)))
+            if staff:
+                send_notification(
+                    recipients=staff,
+                    actor=actor,
+                    verb=Notification.Verb.CREATED,
+                    target=getattr(instance, "mission", instance),
+                    title="Nouvelle inscription a une mission",
+                    message=f"{getattr(u, 'get_full_name', lambda: u.username)()} sur '{title}'",
+                )
     else:
         changes = getattr(instance, "_pending_changes", {}) or {}
         if "status" in changes:
@@ -120,13 +134,36 @@ def _notify_signup(sender, instance: MissionSignup, created, **kwargs):
                 title=msg,
                 message="",
             )
+            if not getattr(actor, "is_staff", False):
+                staff = list(recipients_for(getattr(instance, "mission", instance)))
+                if staff:
+                    send_notification(
+                        recipients=staff,
+                        actor=actor,
+                        verb=Notification.Verb.UPDATED,
+                        target=getattr(instance, "mission", instance),
+                        title=f"Statut d'inscription modifie ({label})",
+                        message=f"{getattr(u, 'get_full_name', lambda: u.username)()} sur '{title}'",
+                    )
 
 
 @receiver(post_save, sender=UserDocument)
 def _notify_document(sender, instance: UserDocument, created, **kwargs):
-    if created:
-        return
     actor = get_current_user()
+    if created:
+        # Volunteer uploaded a new document -> notify staff
+        if not getattr(actor, "is_staff", False):
+            staff = list(recipients_for(instance))
+            if staff:
+                send_notification(
+                    recipients=staff,
+                    actor=actor,
+                    verb=Notification.Verb.CREATED,
+                    target=instance,
+                    title="Nouveau document utilisateur",
+                    message=getattr(instance, "name", ""),
+                )
+        return
     u = getattr(instance, "user", None)
     if not u:
         return
@@ -147,9 +184,34 @@ def _notify_document(sender, instance: UserDocument, created, **kwargs):
 
 @receiver(post_save, sender=VolunteerApplication)
 def _notify_application(sender, instance: VolunteerApplication, created, **kwargs):
-    if created:
-        return
     actor = get_current_user()
+    if created:
+        # New application submitted by a candidate -> notify staff (in‑app + email)
+        staff = list(recipients_for(instance))
+        if staff:
+            try:
+                u = getattr(instance, "user", None)
+                full_name = u.get_full_name() if u and hasattr(u, "get_full_name") else (u.username if u else "")
+            except Exception:
+                full_name = ""
+            send_notification(
+                recipients=staff,
+                actor=actor,
+                verb=Notification.Verb.CREATED,
+                target=instance,
+                title="Nouvelle candidature",
+                message=full_name,
+            )
+            # Optional email alert to SUPPORT_EMAIL
+            support_email = getattr(settings, "SUPPORT_EMAIL", "")
+            if support_email:
+                try:
+                    subj = "[BWF] Nouvelle candidature bénévole"
+                    body = f"Candidat: {full_name}\nID: {getattr(instance, 'pk', '')}"
+                    send_mail(subj, body, getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@localhost"), [support_email], fail_silently=True)
+                except Exception:
+                    pass
+        return
     u = getattr(instance, "user", None)
     if not u:
         return
@@ -166,6 +228,22 @@ def _notify_application(sender, instance: VolunteerApplication, created, **kwarg
             title=title,
             message="",
         )
+        # If candidate updated (not staff), also alert staff
+        if not getattr(actor, "is_staff", False):
+            staff = list(recipients_for(instance))
+            if staff:
+                try:
+                    full_name2 = u.get_full_name() if hasattr(u, "get_full_name") else u.username
+                except Exception:
+                    full_name2 = ""
+                send_notification(
+                    recipients=staff,
+                    actor=actor,
+                    verb=Notification.Verb.UPDATED,
+                    target=instance,
+                    title=f"Candidature mise a jour ({labels.get(new, str(new))})",
+                    message=full_name2,
+                )
 
 
 @receiver(post_delete, sender=Project)
@@ -184,4 +262,5 @@ def _notify_delete(sender, instance, **kwargs):
         title=title,
         message=message,
     )
+
 

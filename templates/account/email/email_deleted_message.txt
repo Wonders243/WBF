@@ -1,0 +1,7 @@
+Bonjour,
+
+L’adresse email {{ email }} a été supprimée de votre compte Bamu Wellbeing Foundation.
+Si ce n’est pas vous, merci de nous le signaler immédiatement.
+
+— Bamu Wellbeing Foundation
+

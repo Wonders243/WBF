@@ -332,10 +332,16 @@ def missions_browse(request):
         raw_date = getattr(ev, "date", None) or getattr(s.mission, "start_date", None)
         d = _date_only(raw_date)
         location = (getattr(ev, "location", "") or s.mission.location or "")
+        inv_title = s.mission.title
+        try:
+            if ev and getattr(ev, "title", None):
+                inv_title = f"{s.mission.title} — {ev.title}"
+        except Exception:
+            pass
         invitations.append({
             "signup_id": s.id,
             "mission_id": s.mission_id,
-            "title": s.mission.title + (f" — {ev.title}" if ev and getattr(ev, "title", None) else ""),
+            "title": inv_title,
             "date": d,
             "location": location,
             "status": s.status,          # "invited"
@@ -377,10 +383,16 @@ def missions_browse(request):
             getattr(MissionSignup.Status, "ACCEPTED", "accepted"),
         }) and not is_past
 
+        app_title = s.mission.title
+        try:
+            if ev and getattr(ev, "title", None):
+                app_title = f"{s.mission.title} — {ev.title}"
+        except Exception:
+            pass
         applications.append({
             "signup_id": s.id,
             "mission_id": s.mission_id,
-            "title": s.mission.title + (f" — {ev.title}" if ev and getattr(ev, "title", None) else ""),
+            "title": app_title,
             "date": d,
             "location": location,
             "status": s.status,      # "pending"

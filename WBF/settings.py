@@ -411,3 +411,14 @@ FLW_SECRET_KEY = os.getenv("FLW_SECRET_KEY", "")
 FLW_WEBHOOK_SECRET = os.getenv("FLW_WEBHOOK_SECRET", "")  # 'verif-hash' header sur webhook
 FLW_SANDBOX = env_bool("FLW_SANDBOX", True)
 
+
+
+# settings.py
+LOGGING = {
+  "version": 1,
+  "handlers": {"console": {"class": "logging.StreamHandler"}},
+  "loggers": {
+    "django.request": {"handlers": ["console"], "level": "ERROR"},
+    "django": {"handlers": ["console"], "level": "INFO"},
+  },
+}

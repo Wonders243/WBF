@@ -5,10 +5,17 @@ from core.models import TeamMember
 
 
 class TeamMemberSelfForm(forms.ModelForm):
+    """Fiche de complétion Staff simplifiée (contexte santé mentale/social).
+
+    - Supprime les champs non pertinents (github, twitter, site personnel)
+    - Pré-remplit le téléphone depuis le profil bénévole s'il existe
+    - Laisse la possibilité de modifier toutes les valeurs
+    """
+
     class Meta:
         model = TeamMember
         fields = [
-            "bio", "image", "phone", "website", "linkedin", "twitter", "github",
+            "bio", "image", "phone", "linkedin",
             "pronouns", "location", "languages", "expertise",
         ]
         widgets = {
@@ -21,6 +28,26 @@ class TeamMemberSelfForm(forms.ModelForm):
         for name, f in self.fields.items():
             if getattr(f.widget, "input_type", "") != "checkbox":
                 f.widget.attrs.setdefault("class", "w-full mt-1 px-3 py-2 border rounded-lg")
+
+        # Placeholders utiles
+        self.fields.get("phone").widget.attrs.setdefault("placeholder", "+243 810 000 000")
+        self.fields.get("linkedin").widget.attrs.setdefault("placeholder", "https://www.linkedin.com/in/votre-profil")
+        self.fields.get("location").widget.attrs.setdefault("placeholder", "Ville, Pays")
+        self.fields.get("languages").widget.attrs.setdefault("placeholder", "fr, en …")
+        self.fields.get("expertise").widget.attrs.setdefault("placeholder", "Ex: psychologue, travail social, coordination …")
+
+        # Pré-remplir le téléphone depuis le profil bénévole si présent et si non lié
+        try:
+            if not self.is_bound:  # seulement sur affichage initial
+                inst = getattr(self, "instance", None)
+                current = getattr(inst, "phone", "") if inst else ""
+                if (not current) and inst and getattr(inst, "user", None):
+                    vol = getattr(inst.user, "volunteer", None)
+                    if vol and getattr(vol, "phone", ""):
+                        self.fields["phone"].initial = vol.phone
+        except Exception:
+            # silencieux: on n'empêche jamais le formulaire de s'afficher
+            pass
 
 class DonationForm(forms.ModelForm):
     # On override le champ pour contrôler précisément la validation et la localisation

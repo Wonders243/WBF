@@ -386,7 +386,7 @@ def missions_browse(request):
         raw_date = getattr(ev, "date", None) or getattr(s.mission, "start_date", None)
         d = _date_only(raw_date)  # doit renvoyer un objet date ou None
         location = (getattr(ev, "location", "") or s.mission.location or "")
-        is_past = bool(d and d < today)
+        is_past = _is_past(d)
 
         # Ici tu n'as que des PENDING dans le QS, donc True… sauf si tu veux bloquer l'annulation pour les missions passées
         can_cancel = (s.status in {

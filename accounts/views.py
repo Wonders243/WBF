@@ -1239,3 +1239,4 @@ def post_login_redirect(request):
 
     # Démarrer la candidature si rien n’existe
     return redirect("staff:application_start")
+

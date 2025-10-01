@@ -8,70 +8,66 @@
 
 {% block content %}
   <!-- HERO -->
-<!-- HERO -->
-<section id="hero" class="relative overflow-hidden">
-  <picture>
-    <source media="(min-width:1024px)" srcset="{% static 'img/cover-hero-21x9-textsafe.webp' %}">
-    <source media="(min-width:640px)"  srcset="{% static 'img/cover-hero-16x9.webp' %}">
-    <img
-      src="{% static 'img/cover-mobile-4x5.webp' %}"
-      alt="Responsable de la fondation souriante entourée d’enfants — mission psycho-sociale"
-      class="w-full h-[52vh] sm:h-[62vh] lg:h-[76vh] object-cover object-[60%_50%]"
-      loading="eager" fetchpriority="high" decoding="async">
-  </picture>
+  <section id="hero" class="relative overflow-hidden">
+    <picture>
+      <source media="(min-width:1024px)" srcset="{% static 'img/cover-hero-21x9-textsafe.webp' %}">
+      <source media="(min-width:640px)"  srcset="{% static 'img/cover-hero-16x9.webp' %}">
+      <img
+        src="{% static 'img/cover-mobile-4x5.webp' %}"
+        alt="Responsable de la fondation souriante entourée d’enfants — mission psycho-sociale"
+        class="w-full h-[52vh] sm:h-[62vh] lg:h-[76vh] object-cover object-[60%_50%]"
+        loading="eager" fetchpriority="high" decoding="async">
+    </picture>
 
-  <!-- VOILE GLOBAL + DÉGRADÉ À GAUCHE -->
-  <div aria-hidden="true" class="absolute inset-0">
-    <!-- voile multiplicatif (un peu plus sombre en mobile) -->
-    <div class="absolute inset-0 bg-black/45 sm:bg-black/30 mix-blend-multiply"></div>
-    <!-- bande gauche pour le texte, plus marquée en mobile -->
-    <div class="absolute inset-y-0 left-0 right-[30%] lg:right-[45%]
-                bg-gradient-to-r from-black/70 via-black/50 to-transparent
-                sm:from-black/50 sm:via-black/40"></div>
-  </div>
+    <!-- VOILE GLOBAL + DÉGRADÉ À GAUCHE -->
+    <div aria-hidden="true" class="absolute inset-0">
+      <div class="absolute inset-0 bg-black/45 sm:bg-black/30 mix-blend-multiply"></div>
+      <div class="absolute inset-y-0 left-0 right-[30%] lg:right-[45%]
+                  bg-gradient-to-r from-black/70 via-black/50 to-transparent
+                  sm:from-black/50 sm:via-black/40"></div>
+    </div>
 
-  <div class="absolute inset-0">
-    <div class="container mx-auto h-full px-3 sm:px-4">
-      <div class="h-full max-w-xl sm:max-w-3xl flex flex-col justify-center">
-        <!-- CARTOUCHE TRANSLUCIDE (plus compact en mobile) -->
-        <div class="bg-black/40 backdrop-blur-[2px] ring-1 ring-white/15 rounded-2xl p-4 sm:p-6">
-          <h1 class="text-white text-3xl sm:text-5xl lg:text-6xl font-extrabold leading-tight drop-shadow">
-            Bamu Wellbeing Foundation
-          </h1>
-          <h2 class="mt-2 text-lg sm:text-2xl font-bold text-white/95 drop-shadow">
-            Ton bien-être, notre priorité
-          </h2>
+    <div class="absolute inset-0">
+      <div class="container mx-auto h-full px-3 sm:px-4">
+        <div class="h-full max-w-xl sm:max-w-3xl flex flex-col justify-center">
+          <!-- CARTOUCHE TRANSLUCIDE -->
+          <div class="bg-black/40 backdrop-blur-[2px] ring-1 ring-white/15 rounded-2xl p-4 sm:p-6">
+            <h1 class="text-white text-3xl sm:text-5xl lg:text-6xl font-extrabold leading-tight drop-shadow">
+              Bamu Wellbeing Foundation
+            </h1>
+            <h2 class="mt-2 text-lg sm:text-2xl font-bold text-white/95 drop-shadow">
+              Ton bien-être, notre priorité
+            </h2>
 
-          <p class="mt-3 sm:mt-4 text-[15px] sm:text-lg md:text-xl text-white/90 leading-relaxed">
-            Lancée récemment et portée par des experts en santé mentale et inclusion sociale,
-            Bamu Wellbeing Foundation améliore le bien-être des personnes vulnérables.
-            Transparence, expertise et impact mesurable guident nos actions.
-          </p>
+            <p class="mt-3 sm:mt-4 text-[15px] sm:text-lg md:text-xl text-white/90 leading-relaxed">
+              Lancée récemment et portée par des experts en santé mentale et inclusion sociale,
+              Bamu Wellbeing Foundation améliore le bien-être des personnes vulnérables.
+              Transparence, expertise et impact mesurable guident nos actions.
+            </p>
 
-          <div class="mt-5 sm:mt-7 flex flex-col xs:flex-row gap-2.5 sm:gap-4 xs:items-center">
-            <a href="{% url 'core:nous' %}"
-               class="inline-flex items-center justify-center gap-2 rounded-xl bg-white
-                      text-blue-700 font-semibold px-4 py-2 sm:px-6 sm:py-3 shadow
-                      hover:bg-blue-50 focus-visible:outline-none
-                      focus-visible:ring-2 focus-visible:ring-white/70">
-              Qui sommes-nous ?
-            </a>
-            <a href="#actions"
-               class="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 sm:px-6 sm:py-3
-                      font-semibold text-white ring-1 ring-white/40 hover:bg-white/10">
-              Nos actions
-            </a>
+            <div class="mt-5 sm:mt-7 flex flex-col xs:flex-row gap-2.5 sm:gap-4 xs:items-center">
+              <a href="{% url 'core:nous' %}"
+                 class="inline-flex items-center justify-center gap-2 rounded-xl bg-white
+                        text-blue-700 font-semibold px-4 py-2 sm:px-6 sm:py-3 shadow
+                        hover:bg-blue-50 focus-visible:outline-none
+                        focus-visible:ring-2 focus-visible:ring-white/70">
+                Qui sommes-nous ?
+              </a>
+              <a href="#domaines"
+                 class="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 sm:px-6 sm:py-3
+                        font-semibold text-white ring-1 ring-white/40 hover:bg-white/10">
+                Domaines d’intervention
+              </a>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-{% include "partials/news_carousel.html" %}
+  {% include "partials/news_carousel.html" %}
 
-
-  <!-- ÉVÉNEMENTS + ENGAGEMENTS -->
+  <!-- ÉVÉNEMENTS + ENGAGEMENT RAPIDE -->
   <section class="py-12 bg-slate-50 dark:bg-slate-950">
     <div class="container mx-auto px-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
@@ -93,13 +89,11 @@
                role="region"
                aria-roledescription="carousel"
                aria-label="Carrousel des événements à venir">
-            <!-- SR status -->
             <p id="ec-status" class="sr-only" aria-live="polite" aria-atomic="true"></p>
 
             {% for ev in upcoming_events %}
               <div class="ec-slide absolute inset-0 transition-opacity duration-700 ease-in-out flex flex-col {% if forloop.first %}opacity-100{% else %}opacity-0{% endif %}"
                    role="group" aria-roledescription="slide" aria-label="{{ forloop.counter }} / {{ upcoming_events|length }}">
-                <!-- Image centrée -->
                 <a href="{% url 'core:event_detail' ev.slug %}" class="w-full h-full flex items-center justify-center bg-slate-50 dark:bg-slate-800/50">
                   {% if ev.image %}
                     <img
@@ -165,19 +159,94 @@
           {% endif %}
         </div>
 
-        <!-- ▶── Nos Engagements ──▶ -->
+        <!-- ▶── Cartes d’actions rapides (Projets / Événements / Bénévolat / Don) ──▶ -->
         <div class="grid grid-cols-1 gap-6">
+          <!-- Projets -->
           <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 text-center transition hover:shadow-lg">
-            <h3 class="text-2xl font-semibold text-blue-700 dark:text-blue-300 mb-2">Transparence</h3>
-            <p class="text-slate-600 dark:text-slate-300">Gestion claire et rapports annuels publics pour un suivi en toute confiance.</p>
+            <h3 class="text-2xl font-semibold text-blue-700 dark:text-blue-300 mb-2">Projets</h3>
+            <p class="text-slate-600 dark:text-slate-300">Programmes d’accompagnement, ateliers bien-être, formations…</p>
+            <a href="{% url 'core:project' %}" class="mt-4 inline-flex items-center gap-2 text-blue-700 dark:text-blue-300 hover:underline">Découvrir</a>
           </div>
+
+          <!-- Événements -->
           <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 text-center transition hover:shadow-lg">
-            <h3 class="text-2xl font-semibold text-blue-700 dark:text-blue-300 mb-2">Expertise</h3>
-            <p class="text-slate-600 dark:text-slate-300">Équipe pluridisciplinaire (psychologues, travailleurs sociaux…) reconnue pour son professionnalisme.</p>
+            <h3 class="text-2xl font-semibold text-blue-700 dark:text-blue-300 mb-2">Événements</h3>
+            <p class="text-slate-600 dark:text-slate-300">Conférences, journées solidarités et ateliers interactifs.</p>
+            <a href="{% url 'core:events_list' %}" class="mt-4 inline-flex items-center gap-2 text-blue-700 dark:text-blue-300 hover:underline">Voir les événements</a>
           </div>
-          <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 text-center transition hover:shadow-lg">
-            <h3 class="text-2xl font-semibold text-blue-700 dark:text-blue-300 mb-2">Motivation</h3>
-            <p class="text-slate-600 dark:text-slate-300"> « L’avenir du Congo se tisse avec des actes simples et sincères. »</p>
+
+          <!-- Bénévolat (état dépendant) -->
+          {% if not user_is_volunteer %}
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 text-center transition hover:shadow-lg">
+              <h3 class="text-2xl font-semibold text-blue-700 dark:text-blue-300 mb-2">Devenir bénévole</h3>
+              <p class="text-slate-600 dark:text-slate-300">Rejoignez-nous sur le terrain et faites entendre votre cœur.</p>
+
+              {% if request.user.is_authenticated %}
+                {% with open_app=request.user.volunteer_applications.all|first %}
+                  {% if open_app %}
+                    {% with s=open_app.status %}
+                      {% if s == 'pending' or s == 'needs_changes' %}
+                        <a href="{% url 'benevoles:application_detail' open_app.pk %}"
+                           class="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 text-white px-4 py-2 hover:bg-blue-700">
+                          {% if s == 'needs_changes' %}Compléter ma candidature{% else %}Voir ma candidature{% endif %}
+                        </a>
+                        <span class="mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium
+                                     {% if s == 'pending' %}bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200
+                                     {% else %}bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-200{% endif %}">
+                          Statut : {{ open_app.get_status_display }}
+                        </span>
+                      {% elif s == 'rejected' %}
+                        <a href="{% url 'staff:application_start' %}"
+                           class="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 text-white px-4 py-2 hover:bg-blue-700">
+                          Refaire une demande
+                        </a>
+                      {% else %}
+                        <a href="{% url 'benevoles:dashboard' %}"
+                           class="mt-4 inline-flex items-center justify-center rounded-lg bg-slate-200 text-slate-800 px-4 py-2 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-100">
+                          Espace bénévole
+                        </a>
+                      {% endif %}
+                    {% endwith %}
+                  {% else %}
+                    <a href="{% url 'staff:application_start' %}"
+                       class="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 text-white px-4 py-2 hover:bg-blue-700">
+                      Commencer ma candidature
+                    </a>
+                  {% endif %}
+                {% endwith %}
+              {% else %}
+                {% url 'staff:application_start' as start_url %}
+                <a href="{% url 'account_login' %}?next={{ start_url }}"
+                   class="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 text-white px-4 py-2 hover:bg-blue-700">
+                  Commencer ma candidature
+                </a>
+              {% endif %}
+            </div>
+          {% else %}
+            <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 transition hover:shadow-lg">
+              <h3 class="text-2xl font-semibold text-blue-700 dark:text-blue-300 mb-2">
+                {% if request.user.first_name %}Bonjour {{ request.user.first_name }} 👋{% else %}Espace bénévole{% endif %}
+              </h3>
+              <p class="text-slate-600 dark:text-slate-300">Accès rapide à vos missions et documents.</p>
+              <div class="mt-4 flex flex-wrap gap-2">
+                <a href="{% url 'benevoles:dashboard' %}" class="rounded-full px-3 py-1 text-sm ring-1 ring-blue-200/70 dark:ring-white/10 hover:bg-blue-50 dark:hover:bg-white/5">Mon espace</a>
+                <a href="{% url 'benevoles:missions_browse' %}" class="rounded-full px-3 py-1 text-sm ring-1 ring-blue-200/70 dark:ring-white/10 hover:bg-blue-50 dark:hover:bg-white/5">Missions</a>
+                <a href="{% url 'benevoles:UserDocuments_list' %}" class="rounded-full px-3 py-1 text-sm ring-1 ring-blue-200/70 dark:ring-white/10 hover:bg-blue-50 dark:hover:bg-white/5">Documents</a>
+              </div>
+
+              {% if request.user.volunteer_profile and request.user.volunteer_profile.missing_documents %}
+                <div class="mt-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-900 dark:text-amber-200 p-3 text-xs">
+                  ⚠️ Documents manquants : {{ request.user.volunteer_profile.missing_documents|join:", " }}
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          <!-- Don -->
+          <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 transition hover:shadow-lg">
+            <h3 class="text-2xl font-semibold text-blue-700 dark:text-blue-300 mb-2">Faire un don</h3>
+            <p class="text-slate-600 dark:text-slate-300">Votre générosité finance directement nos actions.</p>
+            <a href="{% url 'core:coming_soon' %}" class="mt-4 inline-flex items-center gap-2 text-blue-700 dark:text-blue-300 hover:underline">Donner maintenant</a>
           </div>
         </div>
 
@@ -197,32 +266,22 @@
         const btnNext = document.getElementById('events-next');
         const btnPrev = document.getElementById('events-prev');
 
-        function announce() {
-          if (status) status.textContent = `Diapo ${current + 1} sur ${total}`;
-        }
-        function reflectDots() {
-          dots.forEach((d,i) => d.setAttribute('aria-selected', String(i === current)));
-        }
+        function announce() { if (status) status.textContent = `Diapo ${current + 1} sur ${total}`; }
+        function reflectDots() { dots.forEach((d,i) => d.setAttribute('aria-selected', String(i === current))); }
         function show(i) {
           if (!total) return;
           slides.forEach((s, idx) => {
             s.style.opacity = (idx === i) ? '1' : '0';
             s.setAttribute('aria-hidden', String(idx !== i));
           });
-          current = i;
-          reflectDots();
-          announce();
+          current = i; reflectDots(); announce();
         }
         function next() { show((current + 1) % total); }
         function prev() { show((current - 1 + total) % total); }
 
         const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-        function start() {
-          if (prefersReduced || total <= 1) return;
-          stop();
-          timer = setInterval(next, 5000);
-        }
+        function start() { if (prefersReduced || total <= 1) return; stop(); timer = setInterval(next, 5000); }
         function stop() { if (timer) { clearInterval(timer); timer = null; } }
 
         if (total > 0) { show(0); }
@@ -230,13 +289,11 @@
           btnNext?.addEventListener('click', () => { next(); start(); });
           btnPrev?.addEventListener('click', () => { prev(); start(); });
 
-          // Points click
           dots.forEach(d => d.addEventListener('click', () => {
             const i = Number(d.getAttribute('data-index')) || 0;
             show(i); start();
           }));
 
-          // Clavier
           [btnNext, btnPrev].forEach(b=>{
             b?.addEventListener('keydown', (e) => {
               if (e.key === 'ArrowRight') { next(); start(); }
@@ -246,7 +303,6 @@
             });
           });
 
-          // Pause au survol & perte de focus onglet
           root?.addEventListener('mouseenter', () => { paused = true; stop(); });
           root?.addEventListener('mouseleave', () => { paused = false; start(); });
           document.addEventListener('visibilitychange', () => {
@@ -263,118 +319,9 @@
     </script>
   </section>
 
-  <!-- Actions clés -->
-<section id="actions" class="py-12 bg-white dark:bg-slate-900">
-  <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-    {# 1) Projets #}
-    <div class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 hover:shadow-xl transition flex flex-col">
-      <div class="h-12 w-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mb-4">📦</div>
-      <h3 class="text-xl font-semibold text-slate-900 dark:text-white">Projets</h3>
-      <p class="mt-2 text-slate-600 dark:text-slate-300">Programmes d’accompagnement, ateliers bien-être, formations…</p>
-      <a href="{% url 'core:project' %}" class="mt-4 inline-flex items-center gap-2 text-blue-700 dark:text-blue-300 hover:underline">
-        Découvrir
-      </a>
-    </div>
-
-    {# 2) Événements #}
-    <div class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 hover:shadow-xl transition flex flex-col">
-      <div class="h-12 w-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mb-4">📅</div>
-      <h3 class="text-xl font-semibold text-slate-900 dark:text-white">Événements</h3>
-      <p class="mt-2 text-slate-600 dark:text-slate-300">Conférences, journées solidarités et ateliers interactifs.</p>
-      <a href="{% url 'core:events_list' %}" class="mt-4 inline-flex items-center gap-2 text-blue-700 dark:text-blue-300 hover:underline">
-        Voir les événements
-      </a>
-    </div>
-
-    {# 3) Bénévolat (état dépendant) #}
-    {# ⚠️ suppose VolunteerApplication.Meta.ordering = ['-submitted_at'] pour que |first prenne la plus récente #}
-{% if not user_is_volunteer %}
-  {# --- Non bénévole : CTA candidature --- #}
-  <div class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 hover:shadow-xl transition flex flex-col">
-    <div class="h-12 w-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mb-4">🤝</div>
-    <h3 class="text-xl font-semibold text-slate-900 dark:text-white">Devenir bénévole</h3>
-    <p class="mt-2 text-slate-600 dark:text-slate-300">Rejoignez-nous sur le terrain et faites entendre votre cœur.</p>
-
-    {% if request.user.is_authenticated %}
-      {% with open_app=request.user.volunteer_applications.all|first %}
-        {% if open_app %}
-          {% with s=open_app.status %}
-            {% if s == 'pending' or s == 'needs_changes' %}
-              <a href="{% url 'benevoles:application_detail' open_app.pk %}"
-                 class="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 text-white px-4 py-2 hover:bg-blue-700">
-                {% if s == 'needs_changes' %}Compléter ma candidature{% else %}Voir ma candidature{% endif %}
-              </a>
-              <span class="mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium
-                           {% if s == 'pending' %}bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200
-                           {% else %}bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-200{% endif %}">
-                Statut : {{ open_app.get_status_display }}
-              </span>
-            {% elif s == 'rejected' %}
-              <a href="{% url 'staff:application_start' %}"
-                 class="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 text-white px-4 py-2 hover:bg-blue-700">
-                Refaire une demande
-              </a>
-            {% else %}
-              {# sécurité : si 'approved' mais user_is_volunteer est faux #}
-              <a href="{% url 'benevoles:dashboard' %}"
-                 class="mt-4 inline-flex items-center justify-center rounded-lg bg-slate-200 text-slate-800 px-4 py-2 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-100">
-                Espace bénévole
-              </a>
-            {% endif %}
-          {% endwith %}
-        {% else %}
-          <a href="{% url 'staff:application_start' %}"
-             class="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 text-white px-4 py-2 hover:bg-blue-700">
-            Commencer ma candidature
-          </a>
-        {% endif %}
-      {% endwith %}
-    {% else %}
-      {% url 'staff:application_start' as start_url %}
-      <a href="{% url 'account_login' %}?next={{ start_url }}"
-         class="mt-4 inline-flex items-center justify-center rounded-lg bg-blue-600 text-white px-4 py-2 hover:bg-blue-700">
-        Commencer ma candidature
-      </a>
-    {% endif %}
-  </div>
-
-{% else %}
-  {# --- Déjà bénévole : accès rapide --- #}
-  <div class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 hover:shadow-xl transition flex flex-col">
-    <div class="h-12 w-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mb-4">🧭</div>
-    <h3 class="text-xl font-semibold text-slate-900 dark:text-white">
-      {% if request.user.first_name %}Bonjour {{ request.user.first_name }} 👋{% else %}Espace bénévole{% endif %}
-    </h3>
-    <p class="mt-2 text-slate-600 dark:text-slate-300">Accès rapide à vos missions et documents.</p>
-    <div class="mt-4 flex flex-wrap gap-2">
-      <a href="{% url 'benevoles:dashboard' %}" class="rounded-full px-3 py-1 text-sm ring-1 ring-blue-200/70 dark:ring-white/10 hover:bg-blue-50 dark:hover:bg-white/5">Mon espace</a>
-      <a href="{% url 'benevoles:missions_browse' %}" class="rounded-full px-3 py-1 text-sm ring-1 ring-blue-200/70 dark:ring-white/10 hover:bg-blue-50 dark:hover:bg-white/5">Missions</a>
-      {# adapte le namespace si ta vue documents est dans 'accounts' #}
-      <a href="{% url 'benevoles:UserDocuments_list' %}" class="rounded-full px-3 py-1 text-sm ring-1 ring-blue-200/70 dark:ring-white/10 hover:bg-blue-50 dark:hover:bg-white/5">Documents</a>
-    </div>
-
-    {# garde ce bloc seulement si 'volunteer_profile' existe réellement #}
-    {% if request.user.volunteer_profile and request.user.volunteer_profile.missing_documents %}
-      <div class="mt-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-900 dark:text-amber-200 p-3 text-xs">
-        ⚠️ Documents manquants : {{ request.user.volunteer_profile.missing_documents|join:", " }}
-      </div>
-    {% endif %}
-  </div>
-{% endif %}
-
-
-    {# 4) Don #}
-    <div class="group bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 hover:shadow-xl transition flex flex-col">
-      <div class="h-12 w-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mb-4">💙</div>
-      <h3 class="text-xl font-semibold text-slate-900 dark:text-white">Faire un don</h3>
-      <p class="mt-2 text-slate-600 dark:text-slate-300">Votre générosité finance directement nos actions.</p>
-      <a href="{% url 'core:coming_soon' %}" class="mt-4 inline-flex items-center gap-2 text-blue-700 dark:text-blue-300 hover:underline">
-        Donner maintenant
-      </a>
-    </div>
-
-  </div>
-</section>
+  {% include "partials/domaines.html" %}
+  {% include "partials/valeurs.html" %}
+  {% include "partials/membres.html" %}
 
   <!-- CTA -->
   <section class="bg-blue-600 dark:bg-blue-500 text-white py-16">

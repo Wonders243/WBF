@@ -91,6 +91,14 @@
                        loading="lazy" decoding="async">
                   <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
                 {% if href %}</a>{% else %}</div>{% endif %}
+              {% else %}
+                {% if href %}<a href="{{ href }}" class="block relative overflow-hidden rounded-t-xl card-media">{% else %}<div class="relative overflow-hidden rounded-t-xl card-media">{% endif %}
+                  <img src="{% static 'img/placeholder-16x9.jpg' %}"
+                       alt="Illustration indisponible"
+                       class="w-full h-full object-cover"
+                       loading="lazy" decoding="async">
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent"></div>
+                {% if href %}</a>{% else %}</div>{% endif %}
               {% endif %}
 
               <div class="p-3 sm:p-4">

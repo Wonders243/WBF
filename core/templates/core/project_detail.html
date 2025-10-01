@@ -91,6 +91,17 @@
                 <figcaption class="mt-2 text-center text-xs text-slate-500 dark:text-slate-400">{{ project.caption }}</figcaption>
               {% endif %}
             </figure>
+          {% else %}
+            <figure class="mb-6">
+              <div class="relative w-full rounded-lg overflow-hidden ring-1 ring-slate-200 dark:ring-slate-800 bg-slate-50 dark:bg-slate-900">
+                <img
+                  src="{% static 'img/placeholder-16x9.jpg' %}"
+                  alt="{% trans 'Illustration du projet indisponible' %}"
+                  class="block w-full h-auto max-h-[420px] object-contain"
+                  loading="lazy" decoding="async" width="1600" height="900"
+                  sizes="(min-width: 1024px) 740px, 100vw">
+              </div>
+            </figure>
           {% endif %}
 
           <div itemprop="description"
@@ -141,6 +152,10 @@
                     {% if p.logo %}
                       <img src="{{ p.logo.url }}" alt="{% blocktrans with n=p.name %}Logo {{ n }}{% endblocktrans %}"
                            class="h-10 w-10 object-contain rounded bg-white ring-1 ring-slate-200 dark:ring-slate-800"
+                           loading="lazy" decoding="async" width="64" height="64">
+                    {% else %}
+                      <img src="{% static 'img/avatar-placeholder.png' %}" alt="{% blocktrans with n=p.name %}Logo {{ n }}{% endblocktrans %}"
+                           class="h-10 w-10 object-cover rounded bg-white ring-1 ring-slate-200 dark:ring-slate-800"
                            loading="lazy" decoding="async" width="64" height="64">
                     {% endif %}
                     <div class="min-w-0">
@@ -237,6 +252,10 @@
               <a href="{% url 'core:project_detail' p.slug %}" class="block">
                 {% if p.image %}
                   <img src="{{ p.image.url }}" alt="{{ p.title }}"
+                       class="rounded-md w-full h-40 object-cover mb-3"
+                       loading="lazy" decoding="async" width="640" height="360">
+                {% else %}
+                  <img src="{% static 'img/placeholder-16x9.jpg' %}" alt="{% trans 'Illustration indisponible' %}"
                        class="rounded-md w-full h-40 object-cover mb-3"
                        loading="lazy" decoding="async" width="640" height="360">
                 {% endif %}

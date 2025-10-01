@@ -56,6 +56,14 @@
                 itemprop="image"
                 loading="eager" decoding="async" width="1600" height="900">
             </figure>
+          {% else %}
+            <figure>
+              <img
+                src="{% static 'img/placeholder-16x9.jpg' %}"
+                alt="{% trans 'Illustration indisponible' %}"
+                class="w-full max-h-[420px] object-cover"
+                loading="lazy" decoding="async" width="1600" height="900">
+            </figure>
           {% endif %}
 
           <div class="p-6 sm:p-7">

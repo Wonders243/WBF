@@ -78,3 +78,23 @@ def staff_counters(request):
         return {"staff_pending_applications": pending_apps}
     except Exception:
         return {}
+
+from urllib.parse import urlsplit, urlunsplit
+
+PREFERRED_SCHEME = "https"
+PREFERRED_HOST = "www.bamuwellbeing.org"
+
+def canonical(request):
+    # 1) découpe l'URL
+    parts = urlsplit(request.build_absolute_uri())
+    # 2) force scheme + host
+    scheme = PREFERRED_SCHEME
+    netloc = PREFERRED_HOST
+    # 3) enlève querystring + fragment
+    path = parts.path
+    # 4) normalise la home à "/"
+    if path in ("", "/index.html"):
+        path = "/"
+    # 5) reconstruit
+    canonical_abs = urlunsplit((scheme, netloc, path, "", ""))
+    return {"canonical_url": canonical_abs}

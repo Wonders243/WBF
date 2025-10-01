@@ -182,6 +182,7 @@ TEMPLATES = [
                 # Tes CP projet
                 "core.context_processors.flags",
                 "core.context_processors.volunteer_cta",
+                "core.context_processors.canonical",
                 "core.context_processors.latest_news",
                 "core.context_processors.staff_counters",
                 "notifications.context_processors.notifications_badge",

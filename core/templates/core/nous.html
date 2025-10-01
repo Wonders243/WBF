@@ -5,6 +5,15 @@
 
 {% block content %}
 
+  {# ───────── STYLE LÉGER (révélation) ───────── #}
+  <style>
+    .reveal { opacity: 0; transform: translateY(12px); transition: opacity .5s ease, transform .5s ease; }
+    .reveal.is-in { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+    }
+  </style>
+
   {# ───────── À PROPOS ───────── #}
   <section id="about" class="relative overflow-hidden bg-white dark:bg-slate-900 py-16">
     <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
@@ -59,27 +68,27 @@
     <div class="container mx-auto max-w-7xl px-4">
       <h2 class="text-3xl font-bold text-blue-700 dark:text-blue-300 mb-8">Nos valeurs</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <article class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10">
+        <article class="reveal bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10">
           <h3 class="text-xl font-semibold mb-2">Confidentialité</h3>
           <p class="text-slate-600 dark:text-slate-300">La discrétion est notre identité. Les données privées sont traitées de façon confidentielle, sauf consentement éclairé.</p>
         </article>
-        <article class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10">
+        <article class="reveal bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10">
           <h3 class="text-xl font-semibold mb-2">Christianisme</h3>
           <p class="text-slate-600 dark:text-slate-300">Nous sommes basés sur les valeurs chrétiennes.</p>
         </article>
-        <article class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10">
+        <article class="reveal bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10">
           <h3 class="text-xl font-semibold mb-2">Respect de la dignité humaine</h3>
           <p class="text-slate-600 dark:text-slate-300">Tout être humain est digne d’être pris à sa propre valeur.</p>
         </article>
-        <article class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10">
+        <article class="reveal bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10">
           <h3 class="text-xl font-semibold mb-2">Redevabilité</h3>
           <p class="text-slate-600 dark:text-slate-300">Transparence, explication des décisions, qualité des prestations, reddition de comptes à la communauté.</p>
         </article>
-        <article class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10">
+        <article class="reveal bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10">
           <h3 class="text-xl font-semibold mb-2">Intégrité</h3>
           <p class="text-slate-600 dark:text-slate-300">Gestion irréprochable de nos ressources.</p>
         </article>
-        <article class="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10">
+        <article class="reveal bg-white dark:bg-slate-900 p-6 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10">
           <h3 class="text-xl font-semibold mb-2">Inclusion</h3>
           <p class="text-slate-600 dark:text-slate-300">Nos interventions font participer toute catégorie de personnes.</p>
         </article>
@@ -87,151 +96,202 @@
     </div>
   </section>
 
-  {# ───────── GOUVERNANCE / MEMBRES (100% manuel) ───────── #}
-  <section id="membres" class="py-16 bg-slate-50 dark:bg-slate-950">
+  {# ───────── ÉQUIPE (DYNAMIQUE) ───────── #}
+  <section id="team" class="bg-slate-50 dark:bg-slate-950 py-16">
+    <div class="container mx-auto max-w-7xl px-4">
+      <h2 class="text-3xl font-bold text-blue-700 dark:text-blue-300 mb-8">Notre équipe</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {% for member in team %}
+          <article class="reveal group relative rounded-2xl bg-white dark:bg-slate-900 shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden transition hover:shadow-xl">
+            {% if member.image %}
+              <img src="{{ member.image.url }}"
+                   alt="{{ member.name }}"
+                   class="h-56 w-full object-cover transition duration-300 group-hover:scale-[1.01]"
+                   loading="lazy" decoding="async">
+            {% else %}
+              <img src="{% static 'img/placeholder-16x9.png' %}" alt="{{ member.name }}"
+                   class="h-56 w-full object-cover" loading="lazy" decoding="async">
+            {% endif %}
+            <div class="p-6 space-y-2">
+              <h3 class="text-xl font-semibold text-blue-700 dark:text-blue-300">{{ member.role }}</h3>
+              <p class="text-slate-700 dark:text-slate-300">
+                <span class="font-semibold">{{ member.name }}</span>{% if member.bio %} — {{ member.bio }}{% endif %}
+              </p>
+            </div>
+          </article>
+        {% empty %}
+          <p class="text-slate-500 dark:text-slate-400">L’équipe sera publiée prochainement.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  {# ───────── MEMBRES (MANUEL, PETITES IMAGES + INFOS COURTES) ───────── #}
+  <section id="membres" class="py-16 bg-white dark:bg-slate-900">
     <div class="container mx-auto max-w-7xl px-4">
       <h2 class="text-3xl font-bold text-blue-700 dark:text-blue-300 mb-8">Gouvernance — Membres</h2>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {# Cartes simples et manuelles — remplace les images si tu en as #}
-        <article class="rounded-2xl bg-white dark:bg-slate-900 shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
-          <img src="{% static 'img/placeholder-4x5.png' %}" alt="Ngoie wa Banza Marie José" class="h-56 w-full object-cover">
-          <div class="p-5">
-            <h3 class="text-lg font-semibold text-blue-700 dark:text-blue-300">Ngoie wa Banza Marie José</h3>
-            <p class="text-slate-700 dark:text-slate-300">Présidente</p>
-          </div>
-        </article>
+      <ul class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        {# Exemple : place tes vignettes 72/144px dans static/img/membres/ #}
+        <li class="reveal rounded-2xl bg-white dark:bg-slate-900 p-4 shadow ring-1 ring-black/5 dark:ring-white/10">
+          <img
+            src="{% static 'img/membres/marie-jose-72.jpg' %}"
+            srcset="{% static 'img/membres/marie-jose-72.jpg' %} 72w, {% static 'img/membres/marie-jose-144.jpg' %} 144w"
+            sizes="72px" width="72" height="72"
+            alt="Ngoie wa Banza Marie José"
+            class="mx-auto mb-3 h-18 w-18 rounded-full object-cover ring-1 ring-black/5 dark:ring-white/10"
+            loading="lazy" decoding="async" />
+          <p class="text-sm font-semibold text-center text-slate-900 dark:text-slate-100 leading-snug line-clamp-2">Ngoie wa Banza Marie José</p>
+          <p class="text-xs text-center text-slate-600 dark:text-slate-300 leading-tight">Présidente</p>
+        </li>
 
-        <article class="rounded-2xl bg-white dark:bg-slate-900 shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
-          <img src="{% static 'img/placeholder-4x5.png' %}" alt="Banza Nyembo" class="h-56 w-full object-cover">
-          <div class="p-5">
-            <h3 class="text-lg font-semibold text-blue-700 dark:text-blue-300">Banza Nyembo</h3>
-            <p class="text-slate-700 dark:text-slate-300">Vice-président</p>
-          </div>
-        </article>
+        <li class="reveal rounded-2xl bg-white dark:bg-slate-900 p-4 shadow ring-1 ring-black/5 dark:ring-white/10">
+          <img
+            src="{% static 'img/membres/banza-nyembo-72.jpg' %}"
+            srcset="{% static 'img/membres/banza-nyembo-72.jpg' %} 72w, {% static 'img/membres/banza-nyembo-144.jpg' %} 144w"
+            sizes="72px" width="72" height="72"
+            alt="Banza Nyembo"
+            class="mx-auto mb-3 h-18 w-18 rounded-full object-cover ring-1 ring-black/5 dark:ring-white/10"
+            loading="lazy" decoding="async" />
+          <p class="text-sm font-semibold text-center text-slate-900 dark:text-slate-100 leading-snug line-clamp-2">Banza Nyembo</p>
+          <p class="text-xs text-center text-slate-600 dark:text-slate-300 leading-tight">Vice-président</p>
+        </li>
 
-        <article class="rounded-2xl bg-white dark:bg-slate-900 shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
-          <img src="{% static 'img/placeholder-4x5.png' %}" alt="Patrizia Léone" class="h-56 w-full object-cover">
-          <div class="p-5">
-            <h3 class="text-lg font-semibold text-blue-700 dark:text-blue-300">Patrizia Léone</h3>
-            <p class="text-slate-700 dark:text-slate-300">Conseillère</p>
-          </div>
-        </article>
+        <li class="reveal rounded-2xl bg-white dark:bg-slate-900 p-4 shadow ring-1 ring-black/5 dark:ring-white/10">
+          <img
+            src="{% static 'img/membres/patrizia-leone-72.jpg' %}"
+            srcset="{% static 'img/membres/patrizia-leone-72.jpg' %} 72w, {% static 'img/membres/patrizia-leone-144.jpg' %} 144w"
+            sizes="72px" width="72" height="72"
+            alt="Patrizia Léone"
+            class="mx-auto mb-3 h-18 w-18 rounded-full object-cover ring-1 ring-black/5 dark:ring-white/10"
+            loading="lazy" decoding="async" />
+          <p class="text-sm font-semibold text-center text-slate-900 dark:text-slate-100 leading-snug line-clamp-2">Patrizia Léone</p>
+          <p class="text-xs text-center text-slate-600 dark:text-slate-300 leading-tight">Conseillère</p>
+        </li>
 
-        <article class="rounded-2xl bg-white dark:bg-slate-900 shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
-          <img src="{% static 'img/placeholder-4x5.png' %}" alt="Kyungu Banza Nathalie" class="h-56 w-full object-cover">
-          <div class="p-5">
-            <h3 class="text-lg font-semibold text-blue-700 dark:text-blue-300">Kyungu Banza Nathalie</h3>
-            <p class="text-slate-700 dark:text-slate-300">Directrice Générale</p>
-          </div>
-        </article>
+        <li class="reveal rounded-2xl bg-white dark:bg-slate-900 p-4 shadow ring-1 ring-black/5 dark:ring-white/10">
+          <img
+            src="{% static 'img/membres/kyungu-nathalie-72.jpg' %}"
+            srcset="{% static 'img/membres/kyungu-nathalie-72.jpg' %} 72w, {% static 'img/membres/kyungu-nathalie-144.jpg' %} 144w"
+            sizes="72px" width="72" height="72"
+            alt="Kyungu Banza Nathalie"
+            class="mx-auto mb-3 h-18 w-18 rounded-full object-cover ring-1 ring-black/5 dark:ring-white/10"
+            loading="lazy" decoding="async" />
+          <p class="text-sm font-semibold text-center text-slate-900 dark:text-slate-100 leading-snug line-clamp-2">Kyungu Banza Nathalie</p>
+          <p class="text-xs text-center text-slate-600 dark:text-slate-300 leading-tight">Directrice Générale</p>
+        </li>
 
-        <article class="rounded-2xl bg-white dark:bg-slate-900 shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
-          <img src="{% static 'img/placeholder-4x5.png' %}" alt="Heradi Mundumba" class="h-56 w-full object-cover">
-          <div class="p-5">
-            <h3 class="text-lg font-semibold text-blue-700 dark:text-blue-300">Heradi Mundumba</h3>
-            <p class="text-slate-700 dark:text-slate-300">Trésorier — Antenne Maniema</p>
-          </div>
-        </article>
+        <li class="reveal rounded-2xl bg-white dark:bg-slate-900 p-4 shadow ring-1 ring-black/5 dark:ring-white/10">
+          <img
+            src="{% static 'img/membres/heradi-mundumba-72.jpg' %}"
+            srcset="{% static 'img/membres/heradi-mundumba-72.jpg' %} 72w, {% static 'img/membres/heradi-mundumba-144.jpg' %} 144w"
+            sizes="72px" width="72" height="72"
+            alt="Heradi Mundumba"
+            class="mx-auto mb-3 h-18 w-18 rounded-full object-cover ring-1 ring-black/5 dark:ring-white/10"
+            loading="lazy" decoding="async" />
+          <p class="text-sm font-semibold text-center text-slate-900 dark:text-slate-100 leading-snug line-clamp-2">Heradi Mundumba</p>
+          <p class="text-xs text-center text-slate-600 dark:text-slate-300 leading-tight">Trésorier — Antenne Maniema</p>
+        </li>
 
-        <article class="rounded-2xl bg-white dark:bg-slate-900 shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
-          <img src="{% static 'img/placeholder-4x5.png' %}" alt="Dr Motema Jaspe" class="h-56 w-full object-cover">
-          <div class="p-5">
-            <h3 class="text-lg font-semibold text-blue-700 dark:text-blue-300">Dr Motema Jaspe</h3>
-            <p class="text-slate-700 dark:text-slate-300">Secrétaire / Rapporteur</p>
-          </div>
-        </article>
+        <li class="reveal rounded-2xl bg-white dark:bg-slate-900 p-4 shadow ring-1 ring-black/5 dark:ring-white/10">
+          <img
+            src="{% static 'img/membres/motema-jaspe-72.jpg' %}"
+            srcset="{% static 'img/membres/motema-jaspe-72.jpg' %} 72w, {% static 'img/membres/motema-jaspe-144.jpg' %} 144w"
+            sizes="72px" width="72" height="72"
+            alt="Dr Motema Jaspe"
+            class="mx-auto mb-3 h-18 w-18 rounded-full object-cover ring-1 ring-black/5 dark:ring-white/10"
+            loading="lazy" decoding="async" />
+          <p class="text-sm font-semibold text-center text-slate-900 dark:text-slate-100 leading-snug line-clamp-2">Dr Motema Jaspe</p>
+          <p class="text-xs text-center text-slate-600 dark:text-slate-300 leading-tight">Secrétaire / Rapporteur</p>
+        </li>
 
-        <article class="rounded-2xl bg-white dark:bg-slate-900 shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
-          <img src="{% static 'img/placeholder-4x5.png' %}" alt="Djamila Mundumba" class="h-56 w-full object-cover">
-          <div class="p-5">
-            <h3 class="text-lg font-semibold text-blue-700 dark:text-blue-300">Djamila Mundumba</h3>
-            <p class="text-slate-700 dark:text-slate-300">Membre — Antenne Kindu</p>
-          </div>
-        </article>
+        <li class="reveal rounded-2xl bg-white dark:bg-slate-900 p-4 shadow ring-1 ring-black/5 dark:ring-white/10">
+          <img
+            src="{% static 'img/membres/djamila-mundumba-72.jpg' %}"
+            srcset="{% static 'img/membres/djamila-mundumba-72.jpg' %} 72w, {% static 'img/membres/djamila-mundumba-144.jpg' %} 144w"
+            sizes="72px" width="72" height="72"
+            alt="Djamila Mundumba"
+            class="mx-auto mb-3 h-18 w-18 rounded-full object-cover ring-1 ring-black/5 dark:ring-white/10"
+            loading="lazy" decoding="async" />
+          <p class="text-sm font-semibold text-center text-slate-900 dark:text-slate-100 leading-snug line-clamp-2">Djamila Mundumba</p>
+          <p class="text-xs text-center text-slate-600 dark:text-slate-300 leading-tight">Membre — Antenne Kindu</p>
+        </li>
 
-        <article class="rounded-2xl bg-white dark:bg-slate-900 shadow ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
-          <img src="{% static 'img/placeholder-4x5.png' %}" alt="Feza Masumo Alice" class="h-56 w-full object-cover">
-          <div class="p-5">
-            <h3 class="text-lg font-semibold text-blue-700 dark:text-blue-300">Feza Masumo Alice</h3>
-            <p class="text-slate-700 dark:text-slate-300">Conseillère — Antenne Kindu</p>
-          </div>
-        </article>
-      </div>
+        <li class="reveal rounded-2xl bg-white dark:bg-slate-900 p-4 shadow ring-1 ring-black/5 dark:ring-white/10">
+          <img
+            src="{% static 'img/membres/feza-masumo-alice-72.jpg' %}"
+            srcset="{% static 'img/membres/feza-masumo-alice-72.jpg' %} 72w, {% static 'img/membres/feza-masumo-alice-144.jpg' %} 144w"
+            sizes="72px" width="72" height="72"
+            alt="Feza Masumo Alice"
+            class="mx-auto mb-3 h-18 w-18 rounded-full object-cover ring-1 ring-black/5 dark:ring-white/10"
+            loading="lazy" decoding="async" />
+          <p class="text-sm font-semibold text-center text-slate-900 dark:text-slate-100 leading-snug line-clamp-2">Feza Masumo Alice</p>
+          <p class="text-xs text-center text-slate-600 dark:text-slate-300 leading-tight">Conseillère — Antenne Kindu</p>
+        </li>
+      </ul>
 
-      {# Tableau récap si tu préfères #}
-      <div class="mt-8 overflow-x-auto rounded-2xl ring-1 ring-black/5 dark:ring-white/10">
-        <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
-          <thead class="bg-slate-50 dark:bg-slate-950">
-            <tr>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">#</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Nom</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Fonction</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900">
-            <tr><td class="px-4 py-3">1</td><td class="px-4 py-3">Ngoie wa Banza Marie José</td><td class="px-4 py-3">Présidente</td></tr>
-            <tr><td class="px-4 py-3">2</td><td class="px-4 py-3">Banza Nyembo</td><td class="px-4 py-3">Vice-président</td></tr>
-            <tr><td class="px-4 py-3">3</td><td class="px-4 py-3">Patrizia Léone</td><td class="px-4 py-3">Conseillère</td></tr>
-            <tr><td class="px-4 py-3">4</td><td class="px-4 py-3">Kyungu Banza Nathalie</td><td class="px-4 py-3">Directrice Générale</td></tr>
-            <tr><td class="px-4 py-3">5</td><td class="px-4 py-3">Heradi Mundumba</td><td class="px-4 py-3">Trésorier — Antenne Maniema</td></tr>
-            <tr><td class="px-4 py-3">6</td><td class="px-4 py-3">Dr Motema Jaspe</td><td class="px-4 py-3">Secrétaire / Rapporteur</td></tr>
-            <tr><td class="px-4 py-3">7</td><td class="px-4 py-3">Djamila Mundumba</td><td class="px-4 py-3">Membre — Antenne Kindu</td></tr>
-            <tr><td class="px-4 py-3">8</td><td class="px-4 py-3">Feza Masumo Alice</td><td class="px-4 py-3">Conseillère — Antenne Kindu</td></tr>
-          </tbody>
-        </table>
-      </div>
+      <p class="mt-4 text-xs text-slate-500 dark:text-slate-400 text-center">
+        Images mini (72–144px) pour limiter la consommation de données. Remplace les fichiers <code>static/img/membres/*</code> par tes vignettes optimisées (WebP/JPEG).
+      </p>
     </div>
   </section>
 
-  {# ───────── PARTENAIRES (100% manuel) ───────── #}
-  <section id="partners" class="bg-white dark:bg-slate-900 py-16">
+  {# ───────── PARTENAIRES (DYNAMIQUE) ───────── #}
+  <section id="partners" class="bg-slate-50 dark:bg-slate-950 py-16">
     <div class="container mx-auto max-w-7xl px-4">
       <h2 class="text-3xl font-bold text-blue-700 dark:text-blue-300 mb-8">Nos partenaires</h2>
+
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 items-center">
-        {# Remplace les src par tes logos #}
-        <div class="flex justify-center items-center h-32 rounded-2xl bg-slate-50 dark:bg-slate-800/40 ring-1 ring-black/5 dark:ring-white/10 shadow-sm">
-          <img src="{% static 'img/partners/partner1.png' %}" alt="Partenaire 1" class="max-h-20 object-contain grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition">
-        </div>
-        <div class="flex justify-center items-center h-32 rounded-2xl bg-slate-50 dark:bg-slate-800/40 ring-1 ring-black/5 dark:ring-white/10 shadow-sm">
-          <img src="{% static 'img/partners/partner2.png' %}" alt="Partenaire 2" class="max-h-20 object-contain grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition">
-        </div>
-        <div class="flex justify-center items-center h-32 rounded-2xl bg-slate-50 dark:bg-slate-800/40 ring-1 ring-black/5 dark:ring-white/10 shadow-sm">
-          <img src="{% static 'img/partners/partner3.png' %}" alt="Partenaire 3" class="max-h-20 object-contain grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition">
-        </div>
-        <div class="flex justify-center items-center h-32 rounded-2xl bg-slate-50 dark:bg-slate-800/40 ring-1 ring-black/5 dark:ring-white/10 shadow-sm">
-          <img src="{% static 'img/partners/partner4.png' %}" alt="Partenaire 4" class="max-h-20 object-contain grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition">
-        </div>
+        {% for partenaire in partners %}
+          <div class="reveal flex justify-center items-center h-32 rounded-2xl bg-white dark:bg-slate-800/40 ring-1 ring-black/5 dark:ring-white/10 shadow-sm transition hover:shadow-lg">
+            {% if partenaire.logo %}
+              <img src="{{ partenaire.logo.url }}" alt="{{ partenaire.name }}"
+                   class="max-h-20 object-contain grayscale opacity-80 transition duration-300 hover:grayscale-0 hover:opacity-100"
+                   loading="lazy" decoding="async">
+            {% else %}
+              <span class="text-slate-700 dark:text-slate-200 font-medium">{{ partenaire.name }}</span>
+            {% endif %}
+          </div>
+        {% empty %}
+          <p class="text-slate-500 dark:text-slate-400">Les logos de nos partenaires arrivent bientôt.</p>
+        {% endfor %}
       </div>
     </div>
   </section>
 
-  {# ───────── TÉMOIGNAGES (manuel) + CONTACT (optionnel) ───────── #}
-  <section id="testimonials-contact" class="bg-slate-50 dark:bg-slate-950 py-16">
+  {# ───────── TÉMOIGNAGES (DYNAMIQUE) + CONTACT (DYNAMIQUE) ───────── #}
+  <section id="testimonials-contact" class="bg-white dark:bg-slate-900 py-16">
     <div class="container mx-auto max-w-7xl px-4">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        {# Témoignages manuels #}
-        <aside class="lg:col-span-1 rounded-2xl bg-white dark:bg-slate-900 shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+        {# Témoignages dynamiques #}
+        <aside class="reveal lg:col-span-1 rounded-2xl bg-white dark:bg-slate-900 shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
           <h2 class="text-3xl font-bold text-blue-700 dark:text-blue-300 mb-6 text-center">Témoignages</h2>
-          <div id="testi-carousel" class="relative overflow-hidden h-80" role="region" aria-roledescription="carousel" aria-label="Témoignages">
-            {# 3 slides statiques #}
-            <div class="t-slide absolute inset-0 opacity-0 transition-opacity duration-500 flex flex-col items-center justify-center text-center px-6">
-              <img src="{% static 'img/anonyme.png' %}" alt="Anonyme" class="mb-4 h-20 w-20 rounded-full object-cover ring-2 ring-blue-200 dark:ring-blue-800">
-              <p class="text-slate-700 dark:text-slate-300 mb-3 italic">“Grâce à BWF, j’ai retrouvé un vrai soutien psychologique.”</p>
-              <p class="font-semibold text-blue-700 dark:text-blue-300">— Anonyme</p>
-            </div>
-            <div class="t-slide absolute inset-0 opacity-0 transition-opacity duration-500 flex flex-col items-center justify-center text-center px-6">
-              <img src="{% static 'img/anonyme.png' %}" alt="M." class="mb-4 h-20 w-20 rounded-full object-cover ring-2 ring-blue-200 dark:ring-blue-800">
-              <p class="text-slate-700 dark:text-slate-300 mb-3 italic">“Les ateliers m’ont aidé à reprendre confiance.”</p>
-              <p class="font-semibold text-blue-700 dark:text-blue-300">— M.</p>
-            </div>
-            <div class="t-slide absolute inset-0 opacity-0 transition-opacity duration-500 flex flex-col items-center justify-center text-center px-6">
-              <img src="{% static 'img/anonyme.png' %}" alt="Famille N." class="mb-4 h-20 w-20 rounded-full object-cover ring-2 ring-blue-200 dark:ring-blue-800">
-              <p class="text-slate-700 dark:text-slate-300 mb-3 italic">“Accompagnement bienveillant pour toute la famille.”</p>
-              <p class="font-semibold text-blue-700 dark:text-blue-300">— Famille N.</p>
-            </div>
+
+          <div id="testi-carousel"
+               class="relative overflow-hidden h-80"
+               role="region" aria-roledescription="carousel" aria-label="Témoignages">
+            {% if testimonials %}
+              {% for t in testimonials %}
+                <div class="t-slide absolute inset-0 opacity-0 transition-opacity duration-500 flex flex-col items-center justify-center text-center px-6"
+                     role="group" aria-roledescription="slide" aria-label="{{ forloop.counter }} / {{ testimonials|length }}">
+                  {% if t.image %}
+                    <img src="{{ t.image.url }}" alt="{{ t.author }}" class="mb-4 h-20 w-20 rounded-full object-cover ring-2 ring-blue-200 dark:ring-blue-800" loading="lazy" decoding="async">
+                  {% else %}
+                    <img src="{% static 'img/anonyme.png' %}" alt="{{ t.author }}" class="mb-4 h-20 w-20 rounded-full object-cover ring-2 ring-blue-200 dark:ring-blue-800" loading="lazy" decoding="async">
+                  {% endif %}
+                  <p class="text-slate-700 dark:text-slate-300 mb-3 italic">“{{ t.content }}”</p>
+                  <p class="font-semibold text-blue-700 dark:text-blue-300">— {{ t.author }}</p>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="flex items-center justify-center h-full text-slate-500 dark:text-slate-400">
+                Aucun témoignage pour le moment.
+              </div>
+            {% endif %}
           </div>
+
           <div class="mt-4 flex items-center justify-between">
             <button id="testi-prev" class="p-2 rounded-full bg-white dark:bg-slate-800 shadow ring-1 ring-black/10 dark:ring-white/10 hover:bg-slate-50 dark:hover:bg-slate-700" aria-label="Précédent">‹</button>
             <button id="testi-next" class="p-2 rounded-full bg-white dark:bg-slate-800 shadow ring-1 ring-black/10 dark:ring-white/10 hover:bg-slate-50 dark:hover:bg-slate-700" aria-label="Suivant">›</button>
@@ -239,7 +299,7 @@
         </aside>
 
         {# Contact (garde si ta vue fournit `form`) #}
-        <section class="lg:col-span-2 rounded-2xl bg-white dark:bg-slate-900 shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
+        <section class="reveal lg:col-span-2 rounded-2xl bg-white dark:bg-slate-900 shadow ring-1 ring-black/5 dark:ring-white/10 p-6">
           <h2 class="text-3xl font-bold text-blue-700 dark:text-blue-300 mb-6 text-center">Contactez-nous</h2>
 
           <form action="{% url 'core:contact' %}" method="post" enctype="multipart/form-data" class="space-y-6" novalidate>
@@ -270,7 +330,7 @@
             </div>
 
             <div>
-              <label for "{{ form.message.id_for_label }}" class="block font-medium text-slate-700 dark:text-slate-200">Message</label>
+              <label for="{{ form.message.id_for_label }}" class="block font-medium text-slate-700 dark:text-slate-200">Message</label>
               {{ form.message|add_class:"mt-1 w-full min-h-32 rounded-xl border border-slate-300 bg-white/90 px-3 py-2.5 shadow-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 dark:bg-slate-900/40 dark:border-white/10 dark:focus:ring-blue-500/20" }}
               {% if form.message.errors %}<p class="text-sm text-red-600 mt-1">{{ form.message.errors.0 }}</p>{% endif %}
             </div>
@@ -286,9 +346,26 @@
     </div>
   </section>
 
-  {# ───── JS : carrousel témoignages (accessible) ───── #}
+  {# ───── JS : animation légère + carrousel témoignages ───── #}
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // Révélation légère (optimisée batterie/données)
+      const els = document.querySelectorAll('.reveal');
+      if (!('IntersectionObserver' in window) || !els.length) {
+        els.forEach(el => el.classList.add('is-in'));
+      } else {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-in');
+              io.unobserve(entry.target);
+            }
+          });
+        }, { rootMargin: '0px 0px -10% 0px', threshold: 0.15 });
+        els.forEach(el => io.observe(el));
+      }
+
+      // Carrousel Témoignages (faible consommation)
       const root = document.getElementById('testi-carousel');
       const slides = root ? Array.from(root.querySelectorAll('.t-slide')) : [];
       const prev = document.getElementById('testi-prev');
@@ -335,4 +412,5 @@
       }
     });
   </script>
+
 {% endblock %}

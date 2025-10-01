@@ -6,6 +6,7 @@ from core.models import City
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from .models import Volunteer, HoursEntry, Availability, VolunteerSkill, Skill
 from staff.models import Mission, MissionSignup, VolunteerApplication  # VolunteerApplication utilisé ailleurs
@@ -416,6 +417,7 @@ class HoursEntryForm(forms.ModelForm):
 # ====================== Allauth: reset + signup (terms) ======================
 
 from allauth.account.forms import ResetPasswordForm, SignupForm
+from allauth.socialaccount.forms import SignupForm as SocialSignupFormBase
 from legal.models import LegalDocument, LegalAcceptance
 
 INPUT_CLS = (
@@ -436,39 +438,113 @@ class StyledResetPasswordForm(ResetPasswordForm):
         })
 
 
-class TermsSignupForm(SignupForm):
+class LegalAcceptanceMixin:
+    legal_keys = ("terms", "privacy")
+    legal_locale = "fr"
+
+    def __init__(self, *args, **kwargs):
+        self._legal_docs_cache = None
+        super().__init__(*args, **kwargs)
+
+    def _current_legal_documents(self):
+        if self._legal_docs_cache is not None:
+            return self._legal_docs_cache
+
+        docs = []
+        missing = []
+        for key in self.legal_keys:
+            try:
+                document = LegalDocument.objects.get(key=key, locale=self.legal_locale)
+            except LegalDocument.DoesNotExist:
+                missing.append(key)
+                continue
+            version = document.current_version()
+            if not version:
+                missing.append(key)
+                continue
+            docs.append((document, version))
+
+        if missing:
+            raise forms.ValidationError(
+                _("Les documents légaux requis sont indisponibles. Merci de réessayer plus tard."),
+                code="legal_unavailable",
+            )
+
+        self._legal_docs_cache = docs
+        return docs
+
+    def _record_legal_acceptance(self, user, request):
+        if not user or request is None:
+            return
+
+        try:
+            docs = self._current_legal_documents()
+        except forms.ValidationError:
+            return
+
+        xff = request.META.get("HTTP_X_FORWARDED_FOR", "") or ""
+        ip = xff.split(",")[0].strip() if xff else (request.META.get("REMOTE_ADDR") or None)
+        ua = (request.META.get("HTTP_USER_AGENT", "") or "")[:1024]
+
+        for document, version in docs:
+            LegalAcceptance.objects.get_or_create(
+                user=user,
+                version=version,
+                defaults={
+                    "document": document,
+                    "ip": ip,
+                    "user_agent": ua,
+                },
+            )
+
+
+class TermsSignupForm(LegalAcceptanceMixin, SignupForm):
     accept_terms = forms.BooleanField(
-        label="J’accepte les conditions d’utilisation et la politique de confidentialité",
+        label=_("J'accepte les conditions d'utilisation et la politique de confidentialite"),
         required=True,
+        error_messages={
+            "required": _("Vous devez accepter les conditions d'utilisation et la politique de confidentialite."),
+        },
     )
+
+    def clean_accept_terms(self):
+        accepted = self.cleaned_data.get("accept_terms")
+        if not accepted:
+            raise forms.ValidationError(
+                _("Vous devez accepter les conditions d'utilisation et la politique de confidentialite."),
+                code="required",
+            )
+        self._current_legal_documents()
+        return accepted
 
     def save(self, request):
         user = super().save(request)
+        self._record_legal_acceptance(user, request)
+        return user
 
-        # Persister l’acceptation légale (Terms + Privacy)
-        accepted = bool(self.cleaned_data.get("accept_terms"))
-        if accepted and request is not None:
-            xff = request.META.get("HTTP_X_FORWARDED_FOR", "")
-            ip = (xff.split(",")[0].strip() if xff else request.META.get("REMOTE_ADDR")) or None
-            ua = request.META.get("HTTP_USER_AGENT", "")
 
-            for key in ("terms", "privacy"):
-                try:
-                    doc = LegalDocument.objects.get(key=key, locale="fr")
-                except LegalDocument.DoesNotExist:
-                    continue
-                ver = doc.current_version()
-                if not ver:
-                    continue
-                LegalAcceptance.objects.get_or_create(
-                    user=user,
-                    version=ver,
-                    defaults={
-                        "document": ver.document,
-                        "ip": ip,
-                        "user_agent": ua[:1024],
-                    },
-                )
+class TermsSocialSignupForm(LegalAcceptanceMixin, SocialSignupFormBase):
+    accept_terms = forms.BooleanField(
+        label=_("J'accepte les conditions d'utilisation et la politique de confidentialite"),
+        required=True,
+        error_messages={
+            "required": _("Vous devez accepter les conditions d'utilisation et la politique de confidentialite."),
+        },
+    )
+
+    def clean_accept_terms(self):
+        accepted = self.cleaned_data.get("accept_terms")
+        if not accepted:
+            raise forms.ValidationError(
+                _("Vous devez accepter les conditions d'utilisation et la politique de confidentialite."),
+                code="required",
+            )
+        self._current_legal_documents()
+        return accepted
+
+    def save(self, request, sociallogin):
+        user = super().save(request, sociallogin)
+        self._record_legal_acceptance(user, request)
         return user
 
 # ====================== Wizard d’inscription bénévole (exemple) ======================

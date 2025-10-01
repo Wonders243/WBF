@@ -78,6 +78,9 @@ ACCOUNT_FORMS = {
     "reset_password": "accounts.forms.StyledResetPasswordForm",
     "signup": "accounts.forms.TermsSignupForm",
 }
+SOCIALACCOUNT_FORMS = {
+    "signup": "accounts.forms.TermsSocialSignupForm",
+}
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_EMAIL_VERIFICATION = os.getenv("ACCOUNT_EMAIL_VERIFICATION", "none")
@@ -250,6 +253,8 @@ SESSION_SAVE_EVERY_REQUEST = False  # cookie pas regénéré à chaque hit
 SECURE_SSL_REDIRECT = USE_HTTPS
 SESSION_COOKIE_SECURE = USE_HTTPS
 CSRF_COOKIE_SECURE = USE_HTTPS
+SESSION_COOKIE_SAMESITE = os.getenv("DJANGO_SESSION_COOKIE_SAMESITE", "Lax")
+CSRF_COOKIE_SAMESITE = os.getenv("DJANGO_CSRF_COOKIE_SAMESITE", "Lax")
 
 # HSTS (activé si HTTPS)
 SECURE_HSTS_SECONDS = int(os.getenv("DJANGO_SECURE_HSTS_SECONDS", "31536000")) if USE_HTTPS else 0

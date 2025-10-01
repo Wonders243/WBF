@@ -45,6 +45,27 @@
     </div>
     {% endif %}
 
+    {% if form.accept_terms %}
+    <div class="rounded-lg border border-slate-200 bg-white/80 px-3 py-3 text-sm leading-5 dark:bg-white/10 dark:border-white/10">
+      <label class="flex items-start gap-3">
+        <input type="checkbox" name="accept_terms" id="{{ form.accept_terms.id_for_label }}"
+               class="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+               {% if form.accept_terms.value %}checked{% endif %} required>
+        <span class="text-slate-700 dark:text-slate-200">
+          {% url 'legal:terms' as terms_url %}
+          {% url 'legal:privacy' as privacy_url %}
+          {% blocktrans trimmed with terms_url=terms_url privacy_url=privacy_url %}
+            J’accepte les <a href="{{ terms_url }}" class="text-blue-700 dark:text-blue-300 underline">conditions d’utilisation</a>
+            et la <a href="{{ privacy_url }}" class="text-blue-700 dark:text-blue-300 underline">politique de confidentialité</a>.
+          {% endblocktrans %}
+        </span>
+      </label>
+      {% if form.accept_terms.errors %}
+        <p class="mt-2 text-xs text-red-600">{{ form.accept_terms.errors|striptags }}</p>
+      {% endif %}
+    </div>
+    {% endif %}
+
     <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 font-semibold text-white shadow hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60">
       {% trans "Valider" %}
     </button>

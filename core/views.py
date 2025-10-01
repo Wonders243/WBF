@@ -3,9 +3,8 @@ from datetime import date
 
 from django.contrib import messages
 from django.db.models import Q
-from django.forms import ModelForm, Textarea, NumberInput
+from django.forms import ModelForm, Textarea
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
 from django.views.generic import DetailView, ListView
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
@@ -27,7 +26,6 @@ from .models import (
     Event,
     Testimonial,
     News,
-    Donation,
     ContactMessage,
 )
 
@@ -39,16 +37,6 @@ class ContactForm(ModelForm):
         model = ContactMessage
         fields = ["name", "email", "subject", "message"]
         widgets = {"message": Textarea(attrs={"rows": 5})}
-
-
-class DonationForm(ModelForm):
-    class Meta:
-        model = Donation
-        fields = ["donor_name", "amount", "message"]
-        widgets = {
-            "amount": NumberInput(attrs={"step": "0.01", "min": "1"}),
-            "message": Textarea(attrs={"rows": 4}),
-        }
 
 
 # -------------------------
@@ -206,106 +194,23 @@ def contact(request):
 # -------------------------
 
 
+
+def donation_create(request):
+    """Affiche une page statique le temps de sélectionner un prestataire de paiement."""
+    context = {
+        "support_email": getattr(settings, "SUPPORT_EMAIL", ""),
+        "support_phone": getattr(settings, "SUPPORT_PHONE", ""),
+        "support_whatsapp": getattr(settings, "SUPPORT_WHATSAPP", ""),
+    }
+    return render(request, "core/donation_form.html", context)
+
+
+
 def donation_success(request):
     return render(request, "core/donation_success.html")
 
 
-from .forms import DonationForm
-from .models import PaymentTransaction
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
-import uuid
 
-def _method_to_payment_options(method: str) -> str:
-    mapping = {
-        "card": "card",
-        "mpesa": "mpesa",
-        "mm_ghana": "mobilemoneyghana",
-        "mm_uganda": "mobilemoneyuganda",
-        "mm_zambia": "mobilemoneyzambia",
-        "mm_franco": "mobilemoneyfranco",
-        "bank_ng": "banktransfer",
-        "ussd_ng": "ussd",
-    }
-    return mapping.get(method, "card")
-
-
-def _is_currency_method_compatible(currency: str, method: str) -> bool:
-    c = currency.upper()
-    m = method
-    if m == "mpesa":
-        return c in {"KES", "TZS"}
-    if m == "mm_ghana":
-        return c == "GHS"
-    if m == "mm_uganda":
-        return c == "UGX"
-    if m == "mm_zambia":
-        return c == "ZMW"
-    if m == "mm_franco":
-        return c in {"XAF", "XOF"}
-    if m in {"bank_ng", "ussd_ng"}:
-        return c == "NGN"
-    # card: widely supported among selected currencies
-    return c in {"KES","TZS","UGX","GHS","ZMW","XAF","XOF","NGN","USD"}
-
-
-def donation_create(request):
-    """Démarre un paiement de don via Flutterwave (Mobile Money inclus)."""
-    quick_amounts = [10, 20, 50, 100]
-    if request.method == "POST":
-        form = DonationForm(request.POST)
-        currency = (request.POST.get("currency") or "USD").upper()
-        method = (request.POST.get("method") or "card").strip()
-        if form.is_valid():
-            # Vérifier la configuration Flutterwave
-            if not getattr(settings, "FLW_SECRET_KEY", ""):
-                messages.error(request, "Paiement indisponible: configuration Flutterwave manquante (FLW_SECRET_KEY).")
-                return render(request, "core/donation_form.html", {"form": form, "quick_amounts": quick_amounts})
-
-            data = form.cleaned_data
-            amount = data["amount"]
-            donor_name = data.get("donor_name") or ""
-            message = data.get("message") or ""
-
-            # Mode RDC uniquement: restreindre à USD + carte (en attendant l’agrégateur RDC)
-            if currency != "USD" or method != "card":
-                messages.error(request, "Pour l’instant, seuls les paiements par carte en USD sont disponibles en RDC.")
-                return render(request, "core/donation_form.html", {"form": form, "quick_amounts": quick_amounts})
-
-            tx_ref = f"DON-{uuid.uuid4().hex[:12]}"
-            return_url = request.build_absolute_uri(reverse("core:don_return"))
-
-            p = PaymentTransaction.objects.create(
-                provider="flutterwave",
-                tx_ref=tx_ref,
-                status=PaymentTransaction.Status.INITIATED,
-                amount=amount,
-                currency=currency,
-                donor_name=donor_name,
-                message=message,
-                return_url=return_url,
-            )
-
-            try:
-                from .payments.flutterwave import create_payment_link
-                link = create_payment_link(
-                    tx_ref=tx_ref,
-                    amount=amount,
-                    currency=currency,
-                    redirect_url=return_url,
-                    customer_name=donor_name,
-                    customer_email=(request.user.email if getattr(request, "user", None) and request.user.is_authenticated else ""),
-                    payment_options=_method_to_payment_options("card"),
-                )
-                return redirect(link)
-            except Exception as e:
-                messages.error(request, f"Paiement indisponible: {e}")
-                p.status = PaymentTransaction.Status.FAILED
-                p.save(update_fields=["status", "updated_at"])
-                return redirect("core:don")
-    else:
-        form = DonationForm()
-    return render(request, "core/donation_form.html", {"form": form, "quick_amounts": quick_amounts})
 # -------------------------
 # Candidature bénévolat (publique)
 # -------------------------
@@ -333,104 +238,9 @@ class ProjectDetailView(DetailView):
     template_name = "core/project_detail.html"
     context_object_name = "project"
 
-
-# -------------------------
-# Paiements (Flutterwave)
-# -------------------------
-def don_return(request):
-    status = (request.GET.get("status") or "").lower()
-    tx_ref = request.GET.get("tx_ref") or ""
-    tx_id = request.GET.get("transaction_id") or ""
-
-    if not tx_ref:
-        return HttpResponseBadRequest("Missing tx_ref")
-
-    p = PaymentTransaction.objects.filter(tx_ref=tx_ref).first()
-    if not p:
-        return HttpResponseBadRequest("Unknown transaction")
-
-    if status == "cancelled":
-        p.status = PaymentTransaction.Status.CANCELLED
-        p.save(update_fields=["status", "updated_at"])
-        messages.info(request, "Paiement annulé.")
-        return redirect("core:don")
-
-    if not tx_id:
-        messages.error(request, "Retour paiement invalide.")
-        return redirect("core:don")
-
-    try:
-        from .payments.flutterwave import verify_transaction
-        res = verify_transaction(tx_id)
-        ok = res.get("status") == "success" and res.get("data", {}).get("status") == "successful"
-        amount_ok = str(res.get("data", {}).get("amount")) == str(p.amount)
-        currency_ok = (res.get("data", {}).get("currency") or "").upper() == p.currency.upper()
-        if ok and amount_ok and currency_ok:
-            if not p.donation_id:
-                d = Donation.objects.create(donor_name=p.donor_name or None, amount=p.amount, message=p.message or None)
-                p.donation = d
-            p.provider_tx_id = str(res.get("data", {}).get("id"))
-            p.status = PaymentTransaction.Status.SUCCESS
-            p.save(update_fields=["provider_tx_id", "status", "donation", "updated_at"])
-            return redirect("core:don_success")
-        else:
-            p.status = PaymentTransaction.Status.FAILED
-            p.save(update_fields=["status", "updated_at"])
-            messages.error(request, "Le paiement n’a pas été validé.")
-            return redirect("core:don")
-    except Exception as e:
-        messages.error(request, f"Vérification impossible: {e}")
-        return redirect("core:don")
-
-
-@csrf_exempt
-def flutterwave_webhook(request):
-    expected = getattr(settings, "FLW_WEBHOOK_SECRET", "")
-    got = request.headers.get("verif-hash") or request.META.get("HTTP_VERIF_HASH", "")
-    if not expected or got != expected:
-        return HttpResponseForbidden("Invalid signature")
-
-    try:
-        import json
-        payload = json.loads(request.body.decode("utf-8"))
-    except Exception:
-        return HttpResponseBadRequest("Invalid payload")
-
-    data = payload.get("data", {})
-    tx_ref = data.get("tx_ref") or data.get("txRef")
-    status = (data.get("status") or "").lower()
-    tx_id = data.get("id")
-
-    if not tx_ref:
-        return HttpResponse("ok")
-
-    p = PaymentTransaction.objects.filter(tx_ref=tx_ref).first()
-    if not p:
-        return HttpResponse("ok")
-
-    p.webhook_seen = True
-    if status == "successful":
-        try:
-            from .payments.flutterwave import verify_transaction
-            res = verify_transaction(tx_id)
-            ok = res.get("status") == "success" and res.get("data", {}).get("status") == "successful"
-            if ok and not p.donation_id:
-                d = Donation.objects.create(donor_name=p.donor_name or None, amount=p.amount, message=p.message or None)
-                p.donation = d
-            p.provider_tx_id = str(tx_id)
-            p.status = PaymentTransaction.Status.SUCCESS
-        except Exception:
-            p.status = PaymentTransaction.Status.PENDING
-    elif status in {"failed", "cancelled"}:
-        p.status = PaymentTransaction.Status.FAILED if status == "failed" else PaymentTransaction.Status.CANCELLED
-    p.save()
-    return HttpResponse("ok")
-
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx["other_projects"] = (
-            Project.objects.exclude(pk=self.object.pk).order_by("-id")[:3]
-        )
+        ctx["other_projects"] = Project.objects.exclude(pk=self.object.pk).order_by("-id")[:3]
         return ctx
 
 

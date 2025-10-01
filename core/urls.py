@@ -24,7 +24,6 @@ urlpatterns = [
     # --- Dons ---
     path("don/", views.donation_create, name="don"),
     path("don/success/", views.donation_success, name="don_success"),
-    path("don/return/", views.don_return, name="don_return"),
 
     # --- contact ---
     path("contact/", views.contact, name="contact"),
@@ -37,7 +36,6 @@ urlpatterns += [
     path("team/complete/<str:token>/", views.team_member_complete, name="team_complete"),
     path("bientot/", views.coming_soon, name="coming_soon"),
     # Paiements (webhook Flutterwave)
-    path("payments/flutterwave/webhook/", views.flutterwave_webhook, name="flw_webhook"),
 ]
 
 from .views_services import service_education_orphelins, service_sante, service_soutien_psychologique

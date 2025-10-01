@@ -1,108 +1,160 @@
 {% load static %}
 {% if latest_news %}
-<section aria-label="Actualités" class="w-full max-w-none mx-auto mb-6 sm:mb-8">
-  <div class="relative rounded-xl bg-gradient-to-r from-blue-600/10 via-cyan-500/10 to-violet-500/10 dark:from-blue-400/10 dark:via-cyan-400/10 dark:to-violet-400/10 ring-1 ring-black/5 dark:ring-white/10 p-3 sm:p-4">
+<section id="latest-news"
+         class="news-collapsible w-full max-w-none mx-auto mb-6 sm:mb-8"
+         data-collapsed="false"
+         aria-label="Actualités">
+  <style>
+    /* ====== animations légères + états ====== */
+    #latest-news .news-shell {
+      transition: box-shadow .25s ease, transform .25s ease, opacity .25s ease;
+      will-change: transform, opacity;
+    }
+    #latest-news[data-collapsed="true"] .news-body {
+      height: 0; opacity: 0; padding-top: 0; padding-bottom: 0;
+      overflow: hidden; pointer-events: none;
+    }
+    #latest-news[data-collapsed="true"] .news-shell {
+      opacity: .92;
+    }
+    #latest-news .news-header { cursor: default; }
+    #latest-news .toggle-btn[aria-expanded="false"] .lbl-on { display: none; }
+    #latest-news .toggle-btn[aria-expanded="true"]  .lbl-off{ display: none; }
 
-    <div class="flex items-center justify-between mb-2 sm:mb-3">
+    /* hover: un léger lift */
+    #latest-news:hover .news-shell { transform: translateY(-1px); }
+
+    /* Réduction des animations si demandé */
+    @media (prefers-reduced-motion: reduce) {
+      #latest-news .news-shell { transition: none !important; }
+      #latest-news .news-body   { transition: none !important; }
+    }
+
+    /* scrollbar masquée pour la liste horizontale */
+    #latest-news [data-viewport] ul { scrollbar-width: none; }
+    #latest-news [data-viewport] ul::-webkit-scrollbar { display: none; }
+
+    /* Sécurité responsive : cartes ne débordent jamais */
+    #latest-news .card-media { aspect-ratio: 16/9; }
+  </style>
+
+  <div class="news-shell relative rounded-xl bg-gradient-to-r from-blue-600/10 via-cyan-500/10 to-violet-500/10 dark:from-blue-400/10 dark:via-cyan-400/10 dark:to-violet-400/10 ring-1 ring-black/5 dark:ring-white/10 p-3 sm:p-4">
+    <!-- Bande de fondu latérale (anti-texte coupé) -->
+    <div aria-hidden="true" class="pointer-events-none absolute inset-y-3 sm:inset-y-4 left-3 sm:left-4 w-8 sm:w-10 bg-gradient-to-r from-white/80 dark:from-slate-950/80 to-transparent rounded-l-xl"></div>
+    <div aria-hidden="true" class="pointer-events-none absolute inset-y-3 sm:inset-y-4 right-3 sm:right-4 w-8 sm:w-10 bg-gradient-to-l from-white/80 dark:from-slate-950/80 to-transparent rounded-r-xl"></div>
+
+    <!-- Header -->
+    <div class="news-header flex items-center justify-between mb-2 sm:mb-3">
       <h2 class="text-sm sm:text-base font-semibold font-brand h-tight text-blue-900 dark:text-blue-100 inline-flex items-center gap-2">
         <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 5a2 2 0 012-2h8l6 6v10a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm10 1.5V9a2 2 0 002 2h2.5L14 6.5z"/></svg>
         Actualités
       </h2>
 
-      <div class="hidden sm:flex items-center gap-1.5">
-        <button type="button" data-prev
-                class="p-1.5 rounded-md bg-white/70 dark:bg-slate-900/40 ring-1 ring-black/5 dark:ring-white/10 hover:bg-white dark:hover:bg-slate-900"
-                aria-label="Précédent">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-        </button>
-        <button type="button" data-next
-                class="p-1.5 rounded-md bg-white/70 dark:bg-slate-900/40 ring-1 ring-black/5 dark:ring-white/10 hover:bg-white dark:hover:bg-slate-900"
-                aria-label="Suivant">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
+      <div class="flex items-center gap-2">
+        <!-- Navigation (desktop) -->
+        <div class="hidden sm:flex items-center gap-1.5">
+          <button type="button" data-prev
+                  class="p-1.5 rounded-md bg-white/70 dark:bg-slate-900/40 ring-1 ring-black/5 dark:ring-white/10 hover:bg-white dark:hover:bg-slate-900"
+                  aria-label="Précédent">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+          </button>
+          <button type="button" data-next
+                  class="p-1.5 rounded-md bg-white/70 dark:bg-slate-900/40 ring-1 ring-black/5 dark:ring-white/10 hover:bg-white dark:hover:bg-slate-900"
+                  aria-label="Suivant">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
+          </button>
+        </div>
+
+        <!-- Toggle collapse -->
+        <button type="button"
+                class="toggle-btn inline-flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-semibold bg-white/70 dark:bg-slate-900/40 ring-1 ring-black/5 dark:ring-white/10 hover:bg-white dark:hover:bg-slate-900"
+                aria-expanded="true" aria-controls="news-body" data-toggle>
+          <span class="lbl-off">Masquer</span>
+          <span class="lbl-on">Afficher</span>
         </button>
       </div>
     </div>
 
-    <div aria-hidden="true" class="pointer-events-none absolute inset-y-3 sm:inset-y-4 left-3 sm:left-4 w-8 sm:w-10 bg-gradient-to-r from-white/80 dark:from-slate-950/80 to-transparent rounded-l-xl"></div>
-    <div aria-hidden="true" class="pointer-events-none absolute inset-y-3 sm:inset-y-4 right-3 sm:right-4 w-8 sm:w-10 bg-gradient-to-l from-white/80 dark:from-slate-950/80 to-transparent rounded-r-xl"></div>
+    <!-- Corps (carrousel) -->
+    <div id="news-body" class="news-body transition-[height,opacity,padding] duration-300 ease-out">
+      <div class="overflow-x-auto scroll-smooth snap-x snap-mandatory" data-viewport tabindex="0" aria-label="Carrousel des actualités">
+        <ul class="flex items-stretch gap-3 pr-1 pl-1 md:pr-0 md:pl-0">
+          {% for n in latest_news %}
+          {% with href=n.get_absolute_url|default:'' %}
+          <li class="snap-center shrink-0 w-[86%] sm:w-[60%] md:w-[48%] lg:w-[32%]">
+            <article class="group h-full rounded-xl bg-white/90 dark:bg-slate-900/60 ring-1 ring-black/5 dark:ring-white/10 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+              {% if n.image %}
+                {% if href %}<a href="{{ href }}" class="block relative overflow-hidden rounded-t-xl card-media">{% else %}<div class="relative overflow-hidden rounded-t-xl card-media">{% endif %}
+                  <img src="{{ n.image.url }}"
+                       alt="Illustration - {{ n.title|striptags }}"
+                       class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                       loading="lazy" decoding="async">
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
+                {% if href %}</a>{% else %}</div>{% endif %}
+              {% endif %}
 
-    <div class="overflow-x-auto scroll-smooth snap-x snap-mandatory" data-viewport tabindex="0" aria-label="Carrousel des actualités">
-      <ul class="flex items-stretch gap-3 pr-1 pl-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:pr-0 md:pl-0">
-        {% for n in latest_news %}
-        {% with href=n.get_absolute_url|default:'' %}
-        <li class="snap-center shrink-0 w-[85%] sm:w-[60%] md:w-[48%] lg:w-[32%]">
-          <article class="group h-full rounded-xl bg-white/90 dark:bg-slate-900/60 ring-1 ring-black/5 dark:ring-white/10 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
-            {% if n.image %}
-              {% if href %}<a href="{{ href }}" class="block relative h-40 sm:h-44 overflow-hidden rounded-t-xl">{% else %}<div class="relative h-40 sm:h-44 overflow-hidden rounded-t-xl">{% endif %}
-                <img src="{{ n.image.url }}" alt="Illustration - {{ n.title|striptags }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
-              {% if href %}</a>{% else %}</div>{% endif %}
-            {% endif %}
+              <div class="p-3 sm:p-4">
+                <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400">
+                  {% if n.date %}<time datetime="{{ n.date|date:'Y-m-d' }}">{{ n.date|date:'j M Y' }}</time>{% endif %}
+                </p>
+                <h3 class="mt-1 text-[.98rem] sm:text-[1.05rem] font-extrabold text-slate-900 dark:text-white leading-snug line-clamp-2">
+                  {% if href %}<a href="{{ href }}" class="hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/60 rounded">{% endif %}
+                    {{ n.title }}
+                  {% if href %}</a>{% endif %}
+                </h3>
+                <p class="mt-2 text-xs sm:text-sm text-slate-700 dark:text-slate-200 line-clamp-3">
+                  {{ n.content|striptags|truncatechars:160 }}
+                </p>
 
-            <div class="p-3 sm:p-4">
-              <p class="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400">
-                {% if n.date %}<time datetime="{{ n.date|date:'Y-m-d' }}">{{ n.date|date:'j M Y' }}</time>{% endif %}
-              </p>
-              <h3 class="mt-1 text-[.98rem] sm:text-[1.05rem] font-extrabold text-slate-900 dark:text-white leading-snug line-clamp-2">
-                {% if href %}<a href="{{ href }}" class="hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/60 rounded">{% endif %}
-                  {{ n.title }}
-                {% if href %}</a>{% endif %}
-              </h3>
-              <p class="mt-2 text-xs sm:text-sm text-slate-700 dark:text-slate-200 line-clamp-3">
-                {{ n.content|striptags|truncatechars:160 }}
-              </p>
-
-              <div class="mt-3 flex items-center justify-between">
-                {% if href %}
-                <a href="{{ href }}" class="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/60 rounded">
-                  Lire
-                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </a>
-                {% endif %}
+                <div class="mt-3 flex items-center justify-between">
+                  {% if href %}
+                  <a href="{{ href }}" class="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-blue-700 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/60 rounded">
+                    Lire
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </a>
+                  {% endif %}
+                </div>
               </div>
-            </div>
-          </article>
-        </li>
-        {% endwith %}
-        {% endfor %}
-      </ul>
-    </div>
+            </article>
+          </li>
+          {% endwith %}
+          {% endfor %}
+        </ul>
+      </div>
 
-    <div class="mt-2 flex sm:hidden justify-end gap-1.5">
-      <button type="button" data-prev class="p-1.5 rounded-md bg-white/70 dark:bg-slate-900/40 ring-1 ring-black/5 dark:ring-white/10 hover:bg-white dark:hover:bg-slate-900" aria-label="Précédent">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-      </button>
-      <button type="button" data-next class="p-1.5 rounded-md bg-white/70 dark:bg-slate-900/40 ring-1 ring-black/5 dark:ring-white/10 hover:bg-white dark:hover:bg-slate-900" aria-label="Suivant">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
-      </button>
+      <!-- Nav (mobile) -->
+      <div class="mt-2 flex sm:hidden justify-end gap-1.5">
+        <button type="button" data-prev class="p-1.5 rounded-md bg-white/70 dark:bg-slate-900/40 ring-1 ring-black/5 dark:ring-white/10 hover:bg-white dark:hover:bg-slate-900" aria-label="Précédent">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        </button>
+        <button type="button" data-next class="p-1.5 rounded-md bg-white/70 dark:bg-slate-900/40 ring-1 ring-black/5 dark:ring-white/10 hover:bg-white dark:hover:bg-slate-900" aria-label="Suivant">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
+        </button>
+      </div>
     </div>
   </div>
 
   <script>
   (function(){
-    const wrap = document.currentScript.closest('section') || document.querySelector('[data-viewport]')?.parentElement;
-    if (!wrap) return;
-    const viewport = wrap.querySelector('[data-viewport]');
-    if (!viewport) return;
+    const root = document.getElementById('latest-news');
+    const shell = root?.querySelector('.news-shell');
+    const body  = root?.querySelector('#news-body');
+    const toggle = root?.querySelector('[data-toggle]');
+    const viewport = root?.querySelector('[data-viewport]');
+    if (!root || !shell || !body || !toggle || !viewport) return;
 
-    const prevBtns = [...wrap.querySelectorAll('[data-prev]')];
-    const nextBtns = [...wrap.querySelectorAll('[data-next]')];
-
+    // ===== Carrousel défilement =====
+    const prevBtns = [...root.querySelectorAll('[data-prev]')];
+    const nextBtns = [...root.querySelectorAll('[data-next]')];
     function step(){ return Math.max(240, Math.floor(viewport.clientWidth * 0.9)); }
     function next(){ viewport.scrollBy({left: step(), behavior: 'smooth'}); }
     function prev(){ viewport.scrollBy({left: -step(), behavior: 'smooth'}); }
-
     prevBtns.forEach(b => b.addEventListener('click', prev));
     nextBtns.forEach(b => b.addEventListener('click', next));
-
-    let timer = null;
-    function start(){ stop(); timer = setInterval(next, 6000); }
-    function stop(){ if (timer) { clearInterval(timer); timer = null; } }
-    start();
-    wrap.addEventListener('mouseenter', stop);
-    wrap.addEventListener('mouseleave', start);
-    wrap.addEventListener('focusin', stop);
-    wrap.addEventListener('focusout', start);
+    viewport.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); prev(); }
+    }, {passive:false});
 
     function updateButtons(){
       const atStart = viewport.scrollLeft <= 2;
@@ -114,12 +166,51 @@
     window.addEventListener('resize', updateButtons, {passive:true});
     updateButtons();
 
-    viewport.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
-      if (e.key === 'ArrowLeft')  { e.preventDefault(); prev(); }
+    // ===== Auto-hide / re-show =====
+    const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    const KEY = 'news-collapsed-session';
+    const saved = sessionStorage.getItem(KEY);
+    if (saved === '1') setCollapsed(true); // respect choix session
+
+    let timer = null;
+    function startAuto(){ stopAuto(); if (!prefersReduced) timer = setInterval(()=> setCollapsed(true), 8000); }
+    function stopAuto(){ if (timer) { clearInterval(timer); timer = null; } }
+
+    function setCollapsed(state){
+      root.setAttribute('data-collapsed', state ? 'true' : 'false');
+      toggle.setAttribute('aria-expanded', state ? 'false' : 'true');
+      sessionStorage.setItem(KEY, state ? '1' : '0');
+      // Fix hauteur animée (transition height)
+      if (!state) {
+        // expand: auto->px pour transition
+        body.style.height = 'auto';
+        const h = body.clientHeight + 'px';
+        body.style.height = '0px';
+        body.offsetHeight; // reflow
+        body.style.height = h;
+        setTimeout(()=>{ body.style.height='auto'; }, 300);
+      } else {
+        body.style.height = body.clientHeight + 'px';
+        body.offsetHeight;
+        body.style.height = '0px';
+      }
+    }
+
+    toggle.addEventListener('click', () => {
+      const nowCollapsed = root.getAttribute('data-collapsed') === 'true';
+      setCollapsed(!nowCollapsed);
+      if (!nowCollapsed) stopAuto(); else startAuto();
     });
+
+    // Réapparition au survol / focus
+    root.addEventListener('mouseenter', () => { setCollapsed(false); stopAuto(); });
+    root.addEventListener('mouseleave', () => { startAuto(); });
+    root.addEventListener('focusin',  () => { setCollapsed(false); stopAuto(); });
+    root.addEventListener('focusout', () => { startAuto(); });
+
+    // Démarrage
+    setTimeout(startAuto, 1200); // laisse le temps de lire au premier affichage
   })();
   </script>
 </section>
 {% endif %}
-

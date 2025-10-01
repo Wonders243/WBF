@@ -1,13 +1,7 @@
-from django.urls import path, include
+from django.urls import path
 from . import views
 
 from django.views.generic import TemplateView
-
-from django.contrib.sitemaps.views import sitemap
-from core.sitemaps import StaticViewSitemap, EventSitemap
-sitemaps = {"static": StaticViewSitemap, "events": EventSitemap}
-
-
 
 app_name = "core"
 
@@ -44,8 +38,6 @@ urlpatterns += [
     path("bientot/", views.coming_soon, name="coming_soon"),
     # Paiements (webhook Flutterwave)
     path("payments/flutterwave/webhook/", views.flutterwave_webhook, name="flw_webhook"),
-    path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
-
 ]
 
 from .views_services import service_education_orphelins, service_sante, service_soutien_psychologique
@@ -56,7 +48,7 @@ urlpatterns += [
     path("services/soutien-psychologique/", service_soutien_psychologique, name="service_psy"),
 ]
 
-from django.views.generic import TemplateView
+
 urlpatterns += [
     path("robots.txt", TemplateView.as_view(
         template_name="robots.txt",

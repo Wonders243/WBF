@@ -27,9 +27,7 @@
 </style>
 
 <!-- ====== HERO ====== -->
-<!-- ===== Hero amélioré ===== -->
 <section id="hero" class="relative isolate overflow-hidden">
-  {# Image responsive, zone "text-safe", et masques #}
   <picture>
     <source media="(min-width:1280px)" srcset="{% static 'img/cover-hero-21x9-textsafe.webp' %}">
     <source media="(min-width:640px)"  srcset="{% static 'img/cover-hero-16x9.webp' %}">
@@ -40,51 +38,50 @@
       loading="eager" fetchpriority="high" decoding="async">
   </picture>
 
-  {# Voile général + bande de lisibilité à gauche #}
+  <!-- voile global + bande gauche (plus forte en mobile) -->
   <div aria-hidden="true" class="absolute inset-0 -z-10">
     <div class="absolute inset-0 bg-black/45 sm:bg-black/30 mix-blend-multiply"></div>
     <div class="absolute inset-y-0 left-0 right-[28%] lg:right-[42%]
-                bg-gradient-to-r from-black/75 via-black/55 to-transparent
+                bg-gradient-to-r from-black/80 via-black/55 to-transparent
                 sm:from-black/60 sm:via-black/45"></div>
   </div>
 
-  {# Décor doux (grille) — masqué en mobile pour économiser #}
-  <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10 hidden sm:block">
-    <div class="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-white/5 blur-3xl"></div>
-    <div class="absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-blue-400/10 blur-3xl"></div>
-  </div>
-
   <div class="container mx-auto px-4">
+    <!-- ratio solide pour éviter les sauts + zone text-safe -->
     <div class="min-h-[64vh] md:min-h-[72vh] lg:min-h-[80vh] flex items-center">
-      <div class="max-w-xl md:max-w-2xl lg:max-w-3xl text-white">
-        {# Badge #}
+      <div class="max-w-[44rem] md:max-w-[50rem] text-white">
         <div class="reveal inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 ring-1 ring-white/20 backdrop-blur">
-          <span class="text-xs font-semibold tracking-wide">Fondation BWF</span>
+          <span class="text-xs font-semibold">Fondation BWF</span>
           <span class="text-[10px] opacity-80">Santé mentale • Inclusion</span>
         </div>
 
-        <h1 class="reveal mt-4 text-3xl sm:text-5xl lg:text-6xl font-extrabold leading-tight drop-shadow">
+        <h1 class="reveal mt-3 text-balance font-extrabold drop-shadow
+                   text-[2rem] leading-[1.1]
+                   sm:text-5xl sm:leading-[1.1]
+                   lg:text-6xl">
           Ton bien-être, notre priorité.
         </h1>
 
-        <p class="reveal mt-3 sm:mt-5 text-[15px] sm:text-lg md:text-xl text-white/90 leading-relaxed">
+        <p class="reveal mt-3 sm:mt-5 text-white/90 leading-relaxed
+                  text-[15px] sm:text-lg md:text-xl">
           Des actions concrètes en protection, santé mentale et inclusion sociale
           pour améliorer la vie des personnes vulnérables, avec transparence et impact mesurable.
         </p>
 
-        {# CTAs #}
         <div class="reveal mt-6 flex flex-col xs:flex-row gap-2.5 sm:gap-4 xs:items-center">
           <a href="{% url 'core:nous' %}"
              class="inline-flex items-center justify-center gap-2 rounded-xl bg-white text-blue-700 font-semibold px-4 py-2 sm:px-6 sm:py-3 shadow hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
             Découvrir la mission
           </a>
           <a href="#actions"
-             class="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 sm:px-6 sm:py-3 font-semibold text-white ring-1 ring-white/40 hover:bg-white/10">
+             class="inline-flex items-center justify-center gap-2 rounded-xl font-semibold
+                    px-4 py-2 sm:px-6 sm:py-3 ring-1 ring-white/55 text-white
+                    bg-white/10 hover:bg-white/15 backdrop-blur-[2px]">
             Voir nos actions
           </a>
         </div>
 
-        {# Mini statistiques (facultatif, pas d’images) #}
+        <!-- mini stats (restent visibles mais sobres) -->
         <dl class="reveal mt-6 grid grid-cols-3 gap-3 max-w-md">
           <div class="rounded-lg bg-white/10 p-3 ring-1 ring-white/15 text-center">
             <dt class="text-[11px] uppercase tracking-wide text-white/85">Bénéficiaires</dt>
@@ -103,9 +100,31 @@
     </div>
   </div>
 
-  {# Onde décorative en bas (évite coupures visuelles) #}
+  <!-- fondu bas pour éviter coupure visuelle -->
   <div aria-hidden="true" class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white/90 to-transparent dark:from-slate-950/95"></div>
 </section>
+
+<style>
+  /* apparitions légères */
+  .reveal{opacity:0;transform:translateY(12px);transition:opacity .45s ease,transform .45s ease}
+  .reveal.is-in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){
+    .reveal{opacity:1!important;transform:none!important;transition:none!important}
+  }
+  /* meilleure coupure de lignes du titre si navigateur supporte */
+  h1.text-balance{text-wrap:balance}
+</style>
+<script>
+  document.addEventListener('DOMContentLoaded',()=>{
+    const els=document.querySelectorAll('#hero .reveal');
+    if(!('IntersectionObserver'in window)){els.forEach(e=>e.classList.add('is-in'));return;}
+    const io=new IntersectionObserver((entries)=>{
+      entries.forEach(en=>{if(en.isIntersecting){en.target.classList.add('is-in');io.unobserve(en.target);}});
+    },{threshold:.15,rootMargin:'0px 0px -10% 0px'});
+    els.forEach(e=>io.observe(e));
+  });
+</script>
+
 
 {# ===== Styles d'animation (ultra léger) ===== #}
 <style>

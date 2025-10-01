@@ -4,6 +4,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% comment %} Canonical absolue sans querystring {% endcomment %}
+  <link rel="canonical" href="{{ canonical_url|default:request.build_absolute_uri|cut:request.META.QUERY_STRING|slice:':-1' }}">
   <title>Politique de confidentialité — B-W-F</title>
   <link rel="stylesheet" href="{% static 'css/dist/styles.css' %}">
   <meta name="color-scheme" content="light dark">

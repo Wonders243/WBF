@@ -9,8 +9,8 @@
   {% block meta %}
   <meta name="description" content="{% block meta_description %}Bamu Wellbeing Foundation : santé mentale, inclusion sociale et actions de terrain.{% endblock %}">
   <meta name="robots" content="index, follow">
-  <link rel="canonical"
-      href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  {% comment %} Canonical absolue sans querystring {% endcomment %}
+  <link rel="canonical" href="{{ canonical_url|default:request.build_absolute_uri|cut:request.META.QUERY_STRING|slice:':-1' }}">
   <meta name="author" content="Bamu Wellbeing Foundation">
 
   <link rel="icon" href="{% static 'img/favicon.ico' %}" sizes="any">
@@ -271,6 +271,8 @@
   </aside>
 </header>
 
+{% include "partials/legal_notice.html" %}
+
 <!-- MAIN -->
 <main id="site-main" class="flex-1 w-full max-w-none mx-auto px-2 sm:px-3 pb-10"
       style="padding-top: calc(var(--header-h) + env(safe-area-inset-top));">
@@ -322,8 +324,9 @@
         <ul class="space-y-1.5 text-sm">
           <li><a href="{% url 'legal:privacy' %}" class="hover:underline">Politique de confidentialité</a></li>
           <li><a href="{% url 'legal:terms' %}" class="hover:underline">Conditions d’utilisation</a></li>
-          <li><a href="{% url 'legal:cookies' %}" class="hover:underline">Politique cookies</a></li>
+           <li><a href="{% url 'legal:cookies' %}" class="hover:underline">Politique cookies</a></li>
           <li><a href="{% url 'legal:imprint' %}" class="hover:underline">Mentions légales</a></li>
+          <li><button type="button" data-cookie-manage class="hover:underline text-left">Paramétrer mes cookies</button></li>
         </ul>
       </div>
     </div>
@@ -463,7 +466,10 @@
   setTimeout(setHeaderOffset, 300);
   setTimeout(setHeaderOffset, 800);
 })();
+
 </script>
+{% include "partials/cookie_banner.html" %}
+
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -489,4 +495,3 @@
 
 </body>
 </html>
-

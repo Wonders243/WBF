@@ -27,133 +27,103 @@
 </style>
 
 <!-- ====== HERO ====== -->
-<section id="hero" class="relative isolate overflow-hidden">
-  <picture>
-    <source media="(min-width:1280px)" srcset="{% static 'img/cover-hero-21x9-textsafe.webp' %}">
-    <source media="(min-width:640px)"  srcset="{% static 'img/cover-hero-16x9.webp' %}">
-    <img
-      src="{% static 'img/cover-mobile-4x5.webp' %}"
-      alt="Responsable de la fondation entourée d’enfants — mission psychosociale"
-      class="absolute inset-0 -z-10 h-full w-full object-cover object-[60%_50%]"
-      loading="eager" fetchpriority="high" decoding="async">
-  </picture>
-
-  <!-- voile global + bande gauche (plus forte en mobile) -->
-  <div aria-hidden="true" class="absolute inset-0 -z-10">
-    <div class="absolute inset-0 bg-black/45 sm:bg-black/30 mix-blend-multiply"></div>
-    <div class="absolute inset-y-0 left-0 right-[28%] lg:right-[42%]
-                bg-gradient-to-r from-black/80 via-black/55 to-transparent
-                sm:from-black/60 sm:via-black/45"></div>
-  </div>
-
+{# === HERO SPLIT (texte ↔ image) === #}
+<section id="hero" class="relative bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
   <div class="container mx-auto px-4">
-    <!-- ratio solide pour éviter les sauts + zone text-safe -->
-    <div class="min-h-[64vh] md:min-h-[72vh] lg:min-h-[80vh] flex items-center">
-      <div class="max-w-[44rem] md:max-w-[50rem] text-white">
-        <div class="reveal inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 ring-1 ring-white/20 backdrop-blur">
-          <span class="text-xs font-semibold">Fondation BWF</span>
-          <span class="text-[10px] opacity-80">Santé mentale • Inclusion</span>
+    <div class="grid md:grid-cols-2 gap-6 lg:gap-10 items-center py-10 md:py-14 lg:py-16">
+
+      {# ---- Colonne TEXTE ---- #}
+      <div class="{% if hero_flip %}md:order-2{% else %}md:order-1{% endif %}">
+        <div class="reveal mx-auto max-w-2xl">
+          <div class="inline-flex items-center gap-2 rounded-full bg-blue-600/10 text-blue-700 dark:text-blue-200 px-3 py-1 ring-1 ring-blue-600/20 dark:ring-blue-400/20">
+            <span class="text-xs font-semibold">Fondation BWF</span>
+            <span class="text-[10px] opacity-80">Santé mentale • Inclusion</span>
+          </div>
+
+          <h1 class="mt-4 text-3xl sm:text-5xl lg:text-6xl font-extrabold leading-tight text-slate-900 dark:text-white">
+            Ton bien-être, notre priorité.
+          </h1>
+
+          <p class="mt-4 text-[15px] sm:text-lg md:text-xl text-slate-700 dark:text-slate-300 leading-relaxed">
+            Des actions concrètes en protection, santé mentale et inclusion sociale pour améliorer la vie des personnes vulnérables — avec transparence et impact mesurable.
+          </p>
+
+          <div class="mt-6 flex flex-col xs:flex-row gap-2.5 sm:gap-4 xs:items-center">
+            <a href="{% url 'core:nous' %}"
+               class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 text-white font-semibold px-4 py-2 sm:px-6 sm:py-3 shadow hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600/60">
+              Découvrir la mission
+            </a>
+            <a href="#actions"
+               class="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 sm:px-6 sm:py-3 font-semibold text-blue-700 dark:text-blue-300 ring-1 ring-blue-600/30 dark:ring-blue-300/30 hover:bg-blue-50/60 dark:hover:bg-white/5">
+              Voir nos actions
+            </a>
+          </div>
+
+          {# mini stats (sobres) #}
+          <dl class="mt-6 grid grid-cols-3 gap-3 max-w-md">
+            <div class="rounded-lg bg-slate-100 dark:bg-slate-800/50 p-3 ring-1 ring-black/5 dark:ring-white/10 text-center">
+              <dt class="text-[11px] uppercase tracking-wide text-slate-600 dark:text-slate-300">Bénéficiaires</dt>
+              <dd class="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white">1 200+</dd>
+            </div>
+            <div class="rounded-lg bg-slate-100 dark:bg-slate-800/50 p-3 ring-1 ring-black/5 dark:ring-white/10 text-center">
+              <dt class="text-[11px] uppercase tracking-wide text-slate-600 dark:text-slate-300">Projets</dt>
+              <dd class="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white">18</dd>
+            </div>
+            <div class="rounded-lg bg-slate-100 dark:bg-slate-800/50 p-3 ring-1 ring-black/5 dark:ring-white/10 text-center">
+              <dt class="text-[11px] uppercase tracking-wide text-slate-600 dark:text-slate-300">Antenne</dt>
+              <dd class="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white">Kindu</dd>
+            </div>
+          </dl>
         </div>
-
-        <h1 class="reveal mt-3 text-balance font-extrabold drop-shadow
-                   text-[2rem] leading-[1.1]
-                   sm:text-5xl sm:leading-[1.1]
-                   lg:text-6xl">
-          Ton bien-être, notre priorité.
-        </h1>
-
-        <p class="reveal mt-3 sm:mt-5 text-white/90 leading-relaxed
-                  text-[15px] sm:text-lg md:text-xl">
-          Des actions concrètes en protection, santé mentale et inclusion sociale
-          pour améliorer la vie des personnes vulnérables, avec transparence et impact mesurable.
-        </p>
-
-        <div class="reveal mt-6 flex flex-col xs:flex-row gap-2.5 sm:gap-4 xs:items-center">
-          <a href="{% url 'core:nous' %}"
-             class="inline-flex items-center justify-center gap-2 rounded-xl bg-white text-blue-700 font-semibold px-4 py-2 sm:px-6 sm:py-3 shadow hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
-            Découvrir la mission
-          </a>
-          <a href="#actions"
-             class="inline-flex items-center justify-center gap-2 rounded-xl font-semibold
-                    px-4 py-2 sm:px-6 sm:py-3 ring-1 ring-white/55 text-white
-                    bg-white/10 hover:bg-white/15 backdrop-blur-[2px]">
-            Voir nos actions
-          </a>
-        </div>
-
-        <!-- mini stats (restent visibles mais sobres) -->
-        <dl class="reveal mt-6 grid grid-cols-3 gap-3 max-w-md">
-          <div class="rounded-lg bg-white/10 p-3 ring-1 ring-white/15 text-center">
-            <dt class="text-[11px] uppercase tracking-wide text-white/85">Bénéficiaires</dt>
-            <dd class="text-lg sm:text-2xl font-bold">1 200+</dd>
-          </div>
-          <div class="rounded-lg bg-white/10 p-3 ring-1 ring-white/15 text-center">
-            <dt class="text-[11px] uppercase tracking-wide text-white/85">Projets</dt>
-            <dd class="text-lg sm:text-2xl font-bold">18</dd>
-          </div>
-          <div class="rounded-lg bg-white/10 p-3 ring-1 ring-white/15 text-center">
-            <dt class="text-[11px] uppercase tracking-wide text-white/85">Antenne</dt>
-            <dd class="text-lg sm:text-2xl font-bold">Kindu</dd>
-          </div>
-        </dl>
       </div>
+
+      {# ---- Colonne IMAGE ---- #}
+      <div class="{% if hero_flip %}md:order-1{% else %}md:order-2{% endif %}">
+        <div class="reveal relative rounded-2xl overflow-hidden ring-1 ring-black/5 dark:ring-white/10 bg-slate-200 dark:bg-slate-800">
+          {# ratio sûr pour éviter tout saut / chevauchement #}
+          <div class="aspect-[16/10] md:aspect-auto md:h-[64vh] lg:h-[70vh]">
+            <picture>
+              <source media="(min-width:1280px)" srcset="{% static 'img/cover-hero-21x9-textsafe.webp' %}">
+              <source media="(min-width:640px)"  srcset="{% static 'img/cover-hero-16x9.webp' %}">
+              <img
+                src="{% static 'img/cover-mobile-4x5.webp' %}"
+                alt="Responsable de la fondation entourée d’enfants — mission psychosociale"
+                class="h-full w-full object-cover object-[60%_50%]"
+                loading="eager" fetchpriority="high" decoding="async">
+            </picture>
+            {# léger voile pour lisibilité si texte passe au-dessus sur mobile #}
+            <div aria-hidden="true" class="absolute inset-0 md:hidden bg-gradient-to-t from-black/35 via-transparent to-transparent"></div>
+          </div>
+
+          {# petite déco : badge coin #}
+          <div class="hidden sm:block pointer-events-none absolute top-3 right-3 rounded-full bg-white/70 dark:bg-slate-900/50 px-2 py-1 text-[10px] font-semibold ring-1 ring-black/10 dark:ring-white/10">
+            BWF
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
-
-  <!-- fondu bas pour éviter coupure visuelle -->
-  <div aria-hidden="true" class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white/90 to-transparent dark:from-slate-950/95"></div>
 </section>
 
+{# === Animations légères === #}
 <style>
-  /* apparitions légères */
-  .reveal{opacity:0;transform:translateY(12px);transition:opacity .45s ease,transform .45s ease}
+  .reveal{opacity:0;transform:translateY(12px);transition:opacity .45s ease,transform .45s ease;will-change:opacity,transform}
   .reveal.is-in{opacity:1;transform:none}
-  @media (prefers-reduced-motion:reduce){
-    .reveal{opacity:1!important;transform:none!important;transition:none!important}
-  }
-  /* meilleure coupure de lignes du titre si navigateur supporte */
-  h1.text-balance{text-wrap:balance}
+  @media (prefers-reduced-motion:reduce){.reveal{opacity:1!important;transform:none!important;transition:none!important}}
 </style>
 <script>
   document.addEventListener('DOMContentLoaded',()=>{
     const els=document.querySelectorAll('#hero .reveal');
     if(!('IntersectionObserver'in window)){els.forEach(e=>e.classList.add('is-in'));return;}
     const io=new IntersectionObserver((entries)=>{
-      entries.forEach(en=>{if(en.isIntersecting){en.target.classList.add('is-in');io.unobserve(en.target);}});
+      entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('is-in'); io.unobserve(en.target); }});
     },{threshold:.15,rootMargin:'0px 0px -10% 0px'});
     els.forEach(e=>io.observe(e));
   });
 </script>
 
 
-{# ===== Styles d'animation (ultra léger) ===== #}
-<style>
-  .reveal { opacity: 0; transform: translateY(12px); transition: opacity .5s ease, transform .5s ease; }
-  .reveal.is-in { opacity: 1; transform: none; }
-  @media (prefers-reduced-motion: reduce) {
-    .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
-  }
-</style>
-
-{# ===== Script d’apparition progressive (économe) ===== #}
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const els = document.querySelectorAll('#hero .reveal');
-    if (!('IntersectionObserver' in window)) {
-      els.forEach(el => el.classList.add('is-in'));
-      return;
-    }
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-in');
-          io.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
-    els.forEach(el => io.observe(el));
-  });
-</script>
 
 
 <!-- ====== ÉVÉNEMENTS + ENGAGEMENTS ====== -->

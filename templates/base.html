@@ -13,8 +13,8 @@
   <link rel="canonical" href="{{ canonical_url|default:request.build_absolute_uri|cut:request.META.QUERY_STRING|slice:':-1' }}">
   <meta name="author" content="Bamu Wellbeing Foundation">
 
-  <link rel="icon" href="{% static 'img/favicon.ico' %}" sizes="any">
-  <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}">
+  <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}" sizes="any">
+  <link rel="shortcut icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
 
 
   <!-- Open Graph -->
@@ -492,3 +492,4 @@
 
 </body>
 </html>
+

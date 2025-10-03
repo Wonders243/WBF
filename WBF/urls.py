@@ -8,8 +8,9 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import HttpResponseRedirect
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
 from accounts.views import post_login_redirect
 
 # SEO: sitemap.xml
@@ -35,6 +36,8 @@ def _legacy_media_redirect(request, prefix: str, path: str):
 
 
 urlpatterns = [
+    path("favicon.ico", RedirectView.as_view(url=staticfiles_storage.url("img/favicon.ico"), permanent=True)),
+
     # Admin
     path("admin/", admin.site.urls),
 
